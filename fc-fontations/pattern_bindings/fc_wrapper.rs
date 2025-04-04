@@ -22,7 +22,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
- use fc_fontations_bindgen::fcint::{
+use fc_fontations_bindgen::fcint::{
     FcPattern, FcPatternCreate, FcPatternDestroy, FcRange, FcRangeCopy, FcRangeCreateDouble,
     FcRangeDestroy,
 };

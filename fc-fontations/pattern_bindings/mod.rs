@@ -22,7 +22,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
- extern crate fc_fontations_bindgen;
+extern crate fc_fontations_bindgen;
 
 mod fc_wrapper;
 
@@ -46,6 +46,18 @@ pub enum PatternValue {
     Range(FcRangeWrapper),
 }
 
+impl From<CString> for PatternValue {
+    fn from(item: CString) -> Self {
+        PatternValue::String(item)
+    }
+}
+
+impl From<bool> for PatternValue {
+    fn from(item: bool) -> Self {
+        PatternValue::Boolean(item)
+    }
+}
+
 #[derive(Debug)]
 pub struct PatternElement {
     object_id: i32,
@@ -54,7 +66,7 @@ pub struct PatternElement {
 
 impl PatternElement {
     #[allow(unused)]
-    fn new(object_id: i32, value: PatternValue) -> Self {
+    pub fn new(object_id: i32, value: PatternValue) -> Self {
         Self { object_id, value }
     }
 }

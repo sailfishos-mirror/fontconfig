@@ -19,7 +19,7 @@
     #   -Dbar=disabled
   before_script:
     # Make sure meson is up to date, so we don't need to rebuild the image with each release
-    - pip3 install -U meson certifi tomli requests
+    - pip3 install -U meson==1.6.1 certifi tomli requests
     # Test Rust availability. As of 11/25/2024, according to
     # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/ci/docker/windows/Dockerfile
     # Rust 1.82 is already installed.
@@ -72,7 +72,7 @@ meson vs2019 x86:
   before_script:
     - pip3 install --upgrade pip
     # Make sure meson is up to date
-    - pip3 install -U meson
+    - pip3 install -U meson==1.6.1
     # For Python < 3.11 we need tomli for Rust build support
     - pip3 install -U tomli
     # Need to install certificates for python

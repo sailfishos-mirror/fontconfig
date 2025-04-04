@@ -1,11 +1,15 @@
 project('fontconfig', 'c',
   version: '2.16.2',
-  meson_version : '>= 1.6.0',
+  meson_version : '>= 1.6.1',
   default_options: [
     'c_std=c11,c99',
     'buildtype=debugoptimized',
+  'bytemuck-1-rs:feature-derive=true',
+  'bytemuck-1-rs:feature-min_const_generics=true',
+  'read-fonts-0.23-rs:feature-experimental_traverse=true',
   ]
 )
+
 
 fs = import('fs')
 
@@ -493,6 +497,7 @@ ft_alias_headers = custom_target('ft_alias_headers',
 
 tools_man_pages = []
 
+
 # Do not reorder
 subdir('fc-case')
 subdir('fc-lang')
@@ -500,7 +505,40 @@ subdir('src')
 
 if get_option('fontations').enabled()
   subdir('fc-fontations')
+  lib_fontconfig_link_with_libs += [fc_fontations]
 endif
+
+if get_option('default_library') in ['both', 'shared']
+  libfontconfig = both_libraries('fontconfig',
+    lib_fontconfig_sources,
+    c_shared_args: win_export_args,
+    soversion: soversion,
+    version: libversion,
+    darwin_versions: osxversion,
+    kwargs: lib_fontconfig_kwargs)
+  libfontconfig_internal = libfontconfig.get_static_lib()
+else
+  libfontconfig = static_library('fontconfig', lib_fontconfig_sources, kwargs: lib_fontconfig_kwargs)
+  libfontconfig_internal = libfontconfig
+endif
+
+fontconfig_dep = declare_dependency(link_with: libfontconfig,
+  include_directories: incbase,
+  dependencies: deps,
+)
+
+pkgmod.generate(libfontconfig,
+  description: 'Font configuration and customization library',
+  filebase: 'fontconfig',
+  name: 'Fontconfig',
+  requires_private: ['freetype2 ' + freetype_req],
+  version: fc_version,
+  variables: [
+    'sysconfdir=@0@'.format(join_paths(prefix, get_option('sysconfdir'))),
+    'localstatedir=@0@'.format(join_paths(prefix, get_option('localstatedir'))),
+    'confdir=@0@'.format(fc_baseconfigdir),
+    'cachedir=@0@'.format(fc_cachedir),
+  ])
 
 if not get_option('tools').disabled()
   subdir('fc-cache')
