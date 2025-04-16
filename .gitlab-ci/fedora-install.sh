@@ -27,3 +27,5 @@ unzip android-ndk-r28-linux.zip
 ln -sf android-ndk-r28 ndk
 rm android-ndk-r28-linux.zip
 popd
+
+python3 build-aux/fetch-testfonts.py --target-dir /testfonts
