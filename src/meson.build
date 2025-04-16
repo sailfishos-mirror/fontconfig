@@ -48,6 +48,7 @@ fc_sources = files([
 ])
 
 
+
 fcobjshash_h = cc.preprocess('fcobjshash.gperf.h', include_directories: incbase)
 fcobjshash_gperf = custom_target(
   input: fcobjshash_h,
@@ -62,13 +63,10 @@ fcobjshash_h = custom_target('fcobjshash.h',
   command: [gperf, '--pic', '-m', '100', '@INPUT@', '--output-file', '@OUTPUT@']
 )
 
-lib_fontconfig_link_with_libs =  [pattern_lib]
-
-
 lib_fontconfig_sources = [fc_sources, alias_headers, ft_alias_headers, fclang_h, fccase_h, fcobjshash_h, fcstdint_h]
 lib_fontconfig_kwargs = {
   'include_directories': incbase,
   'dependencies': [deps, math_dep],
-  'link_with': lib_fontconfig_link_with_libs,
+  'link_with': [pattern_lib],
 }
 

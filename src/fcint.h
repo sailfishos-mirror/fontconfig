@@ -46,6 +46,10 @@
 #include <fontconfig/fontconfig.h>
 #include <fontconfig/fcprivate.h>
 
+#if ENABLE_FONTATIONS
+#  include <fontconfig/fcfontations.h>
+#endif
+
 #include <stddef.h>
 #include <sys/stat.h>
 #include <sys/types.h>

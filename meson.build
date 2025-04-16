@@ -479,9 +479,17 @@ fcstdint_h = fs.copyfile('src/fcstdint.h.in', 'fcstdint.h')
 
 makealias = files('src/makealias.py')[0]
 
+
+
+
+alias_input_headers = ['fontconfig/fontconfig.h', 'src/fcdeprecate.h', 'fontconfig/fcprivate.h']
+if get_option('fontations').enabled()
+  alias_input_headers += ['fontconfig/fcfontations.h']
+endif
+
 alias_headers = custom_target('alias_headers',
                               output: ['fcalias.h', 'fcaliastail.h'],
-                              input: ['fontconfig/fontconfig.h', 'src/fcdeprecate.h', 'fontconfig/fcprivate.h'],
+                              input: alias_input_headers,
                               command: [python3, makealias, join_paths(meson.current_source_dir(), 'src'), '@OUTPUT@', '@INPUT@'],
                              )
 
@@ -501,7 +509,8 @@ subdir('src')
 
 if get_option('fontations').enabled()
   subdir('fc-fontations')
-  lib_fontconfig_link_with_libs += [fc_fontations]
+  lib_fontconfig_kwargs = lib_fontconfig_kwargs + {
+    'link_with' : lib_fontconfig_kwargs['link_with'] + [fc_fontations, fontations_query_lib]}
 endif
 
 libfontconfig = library('fontconfig',

@@ -29,6 +29,7 @@ doc_funcs_fncs = [
   'fcdircache',
   'fcfile',
   'fcfontset',
+  'fcfontations',
   'fcformat',
   'fcfreetype',
   'fcinit',

@@ -90,6 +90,7 @@ DOC_FUNCS_FNCS =		\
 	fcfontset.fncs		\
 	fcformat.fncs		\
 	fcfreetype.fncs		\
+	fcfontations.fncs	\
 	fcinit.fncs		\
 	fclangset.fncs		\
 	fcmatrix.fncs		\

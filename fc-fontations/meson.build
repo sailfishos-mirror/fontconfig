@@ -38,16 +38,22 @@ if (fontations.enabled())
     rust_abi : 'rust',
   )
 
+  fontations_query_lib = static_library(
+    'fc_fontations_query',
+    include_directories : [ '../', '../fontconfig' ],
+    sources: ['../src/fcfontations.c', fcstdint_h, alias_headers],
+  )
+
   fc_fontations = static_library(
     'fc_fontations',
     sources: ['mod.rs'],
-    link_with: [bindgen_lib, pattern_lib],
+    link_with: [bindgen_lib, pattern_lib, fontations_query_lib],
     rust_abi: 'c',
     dependencies: [
       dependency('skrifa-0.30-rs'),
       dependency('read-fonts-0.28-rs'),
       dependency('font-types-0.8-rs'),
-      dependency('libc-0.2-rs')
+      dependency('libc-0.2-rs'),
     ],
     install: true,
 
