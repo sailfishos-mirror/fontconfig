@@ -1067,10 +1067,16 @@ FcPatternGetBool (const FcPattern *p, const char *object, int id, FcBool *b)
 FcResult
 FcPatternGetCharSet (const FcPattern *p, const char *object, int id, FcCharSet **c)
 {
+    return FcPatternObjectGetCharSet (p, FcObjectFromName (object), id, c);
+}
+
+FcResult
+FcPatternObjectGetCharSet (const FcPattern *p, FcObject object, int id, FcCharSet **c)
+{
     FcValue  v;
     FcResult r;
 
-    r = FcPatternGet (p, object, id, &v);
+    r = FcPatternObjectGet (p, object, id, &v);
     if (r != FcResultMatch)
 	return r;
     if (v.type != FcTypeCharSet)
@@ -1097,10 +1103,16 @@ FcPatternGetFTFace (const FcPattern *p, const char *object, int id, FT_Face *f)
 FcResult
 FcPatternGetLangSet (const FcPattern *p, const char *object, int id, FcLangSet **ls)
 {
+    return FcPatternObjectGetLangSet (p, FcObjectFromName (object), id, ls);
+}
+
+FcResult
+FcPatternObjectGetLangSet (const FcPattern *p, FcObject object, int id, FcLangSet **ls)
+{
     FcValue  v;
     FcResult r;
 
-    r = FcPatternGet (p, object, id, &v);
+    r = FcPatternObjectGet (p, object, id, &v);
     if (r != FcResultMatch)
 	return r;
     if (v.type != FcTypeLangSet)
