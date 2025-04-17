@@ -18,6 +18,8 @@ enable_install=1
 disable_check=0
 clean_build=1
 cross=0
+subproject=0
+subprojectname=""
 buildsys="meson"
 type="shared"
 arch=""
@@ -27,6 +29,7 @@ export MAKE=${MAKE:-make}
 export BUILD_ID=${BUILD_ID:-fontconfig-$$}
 export PREFIX=${PREFIX:-$MyPWD/prefix}
 export BUILDDIR=${BUILDDIR:-$MyPWD/build}
+export CI_PROJECT_URL=${CI_PROJECT_URL:-https://gitlab.freedesktop.org/fontconfig/fontconfig}
 
 if [ "x$FC_DISTRO_NAME" = "x" ]; then
     . /etc/os-release || :
@@ -39,7 +42,7 @@ if [ "x$FC_DISTRO_NAME" = "x" ]; then
     sleep 3
 fi
 
-while getopts a:cCe:d:hINs:t:X: OPT
+while getopts a:cCe:d:hINs:St:X: OPT
 do
     case $OPT in
         'a') arch=$OPTARG ;;
@@ -50,6 +53,7 @@ do
         'I') enable_install=0 ;;
         'N') clean_build=0 ;;
         's') buildsys=$OPTARG ;;
+        'S') subproject=1 ;;
         't') type=$OPTARG ;;
         'X') backend=$OPTARG ;;
         'h')
@@ -65,7 +69,6 @@ case x"$FC_BUILD_PLATFORM" in
 esac
 
 env
-r=0
 
 clean_exit() {
     rc=$?
@@ -80,6 +83,10 @@ clean_exit() {
 trap clean_exit INT TERM ABRT EXIT
 
 if [ x"$buildsys" == "xautotools" ]; then
+    if [ $subproject -eq 1 ]; then
+        echo "Subproject build not supported in autotools"
+        exit 1
+    fi
     for i in "${enable[@]}"; do
         buildopt+=(--enable-$i)
     done
@@ -159,16 +166,38 @@ elif [ x"$buildsys" == "xmeson" ]; then
             fi
         fi
     done
+    if [ $subproject -eq 1 ]; then
+        buildopt+=(--force-fallback-for=fontconfig)
+        if [ -d fc-ci-meson-subproject ]; then
+            rm -rf fc-ci-meson-subproject
+        fi
+        TASK="git clone"
+        git clone https://gitlab.freedesktop.org/fontconfig/fc-ci-meson-subproject.git
+        cd fc-ci-meson-subproject
+        pushd subprojects
+        git clone ${CI_PROJECT_URL}.git
+        if [ "x$CI_COMMIT_REF_NAME" != "x" ]; then
+            pushd fontconfig
+            git fetch origin merge-requests/$CI_MERGE_REQUEST_IID/head:$CI_COMMIT_REF_NAME
+            git switch $CI_COMMIT_REF_NAME
+            popd
+        else
+            # use main branch instead
+            :
+        fi
+        popd
+        subprojectname="fontconfig:"
+    fi
     TASK=
     for i in "${disable[@]}"; do
-        buildopt+=(-D$i=disabled)
+        buildopt+=(-D${subprojectname}$i=disabled)
     done
     case x"$backend" in
         'xexpat')
-            buildopt+=(-Dxml-backend=expat)
+            buildopt+=(-D${subprojectname}xml-backend=expat)
             ;;
         'xlibxml2')
-            buildopt+=(-Dxml-backend=libxml2)
+            buildopt+=(-D${subprojectname}xml-backend=libxml2)
             ;;
     esac
     if [ $cross -eq 1 -a -n "$arch" ]; then
@@ -178,14 +207,18 @@ elif [ x"$buildsys" == "xmeson" ]; then
             echo "No $FC_DISTRO_NAME-cross.sh available"
             exit 1
         fi
-        . .gitlab-ci/$FC_DISTRO_NAME-cross.sh
+        if [ $subproject -eq 1 ]; then
+            . subprojects/fontconfig/.gitlab-ci/$FC_DISTRO_NAME-cross.sh
+        else
+            . .gitlab-ci/$FC_DISTRO_NAME-cross.sh
+        fi
     fi
     buildopt+=(--default-library=$type)
     if [ $clean_build -eq 1 ]; then
         rm -rf $BUILDDIR || :
     fi
     TASK="meson setup"
-    meson setup --prefix="$PREFIX" -Dnls=enabled -Dcache-build=disabled -Diconv=enabled ${buildopt[*]} "$BUILDDIR" 2>&1 | tee /tmp/fc-build.log
+    meson setup --prefix="$PREFIX" -D${subprojectname}nls=enabled -D${subprojectname}cache-build=disabled -D${subprojectname}iconv=enabled ${buildopt[*]} "$BUILDDIR" 2>&1 | tee /tmp/fc-build.log
     TASK="meson compile"
     meson compile -v -C "$BUILDDIR" 2>&1 | tee -a /tmp/fc-build.log
     if [ $disable_check -eq 0 ]; then
@@ -202,4 +235,4 @@ elif [ x"$buildsys" == "xmeson" ]; then
     fi
 fi
 TASK=
-exit $r
+exit 0

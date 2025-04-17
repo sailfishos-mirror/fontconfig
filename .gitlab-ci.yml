@@ -42,8 +42,8 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  FEDORA_TAG:    '2025-03-26.1-061a0cd0d4b5'
-  FREEBSD_TAG:   '2025-03-26.1-1f1b3be21da5'
+  FEDORA_TAG:    '2025-04-17.1-a21ccc3b8989'
+  FREEBSD_TAG:   '2025-04-17.1-c694c9922fb9'
 
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
   FREEBSD_EXEC:  'bash .gitlab-ci/freebsd-install.sh'
@@ -311,6 +311,7 @@ clang-format:
       [ $FC_BUILD_DISTCHECK -eq 1 ] && buildopt+=(-c)
       [ $FC_BUILD_NO_INSTALL -eq 1 ] && buildopt+=(-I)
       [ $FC_BUILD_NO_CHECK -eq 1 ] && buildopt+=(-C)
+      [ $FC_BUILD_SUBPROJECT -eq 1 ] && buildopt+=(-S)
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
@@ -322,6 +323,7 @@ clang-format:
     FC_BUILD_DISTCHECK: 0
     FC_BUILD_NO_INSTALL: 0
     FC_BUILD_NO_CHECK: 0
+    FC_BUILD_SUBPROJECT: 0
 
 .fc_artifacts:
   artifacts:
@@ -425,7 +427,7 @@ t_fedora:rawhide:meson shared libxml2:
   needs:
     - 'fedora:rawhide@container-prep'
 
-t_fedora:rawhide:meson shared libxml2:upload:
+upload_asset:t_fedora:rawhide:meson shared libxml2:
   needs:
     - t_fedora:rawhide:meson shared libxml2
   extends:
@@ -434,6 +436,24 @@ t_fedora:rawhide:meson shared libxml2:upload:
   variables:
     FDO_DISTRIBUTION_VERSION: 'rawhide'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+
+
+t_fedora:rawhide:subproject_build:
+  extends:
+    - .build@template
+    - .fdo.distribution-image@fedora
+    - .fc_artifacts
+  variables:
+    FC_DISTRO_NAME: fedora
+    FDO_DISTRIBUTION_VERSION: 'rawhide'
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+    FC_BUILDSYS: meson
+    FC_BUILD_TYPE: shared
+    FC_XML_BACKEND: libxml2
+    FC_BUILD_SUBPROJECT: 1
+  needs:
+    - 'fedora:rawhide@container-prep'
+
 
 
 t_fedora:rawhide:autotools static expat:
@@ -677,6 +697,9 @@ t_fedora:41:meson shared libxml2:
 
 
 
+
+
+
 t_fedora:40:autotools shared expat:
   extends:
     - .build@template
@@ -744,6 +767,9 @@ t_fedora:40:meson shared libxml2:
     FC_BUILD_DISTCHECK: 1
   needs:
     - 'fedora:40@container-prep'
+
+
+
 
 
 
