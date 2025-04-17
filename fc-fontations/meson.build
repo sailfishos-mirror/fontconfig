@@ -41,12 +41,16 @@ if (fontations.enabled())
   fc_fontations = static_library(
     'fc_fontations',
     sources: ['mod.rs'],
-    link_with: [bindgen_lib, libfontconfig],
+    link_with: [bindgen_lib, pattern_lib],
     rust_abi: 'c',
     dependencies: [
       dependency('libc-0.2-rs'),
+      dependency('read-fonts-0.23-rs'),
+      dependency('skrifa-0.24-rs'),
+      dependency('libc-0.2-rs')
 
     ],
+    install: true,
 
   )
 

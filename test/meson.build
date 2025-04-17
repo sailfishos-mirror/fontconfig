@@ -29,6 +29,10 @@ if host_machine.system() != 'windows'
   endif
 endif
 
+link_with_libs = [libfontconfig_internal]
+if get_option('fontations').enabled()
+  link_with_libs += [fc_fontations]
+endif
 
 foreach test_data : tests + tests_not_parallel
   fname = test_data[0]
@@ -37,10 +41,11 @@ foreach test_data : tests + tests_not_parallel
   extra_deps = opts.get('dependencies', [])
 
   test_name = fname.split('.')[0].underscorify()
+
   exe = executable(test_name, fname,
     c_args: c_args + extra_c_args,
     include_directories: incbase,
-    link_with: [libfontconfig_internal],
+    link_with: link_with_libs,
     dependencies: extra_deps,
   )
 
