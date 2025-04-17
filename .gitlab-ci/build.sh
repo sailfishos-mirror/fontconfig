@@ -139,7 +139,7 @@ if [ x"$buildsys" == "xautotools" ]; then
     fi
 elif [ x"$buildsys" == "xmeson" ]; then
     TASK="pip install"
-    pip install meson==1.6.1
+    pip install meson>=1.6.1
 #   tomli not required for Python >= 3.11
     pip install tomli
     pip install pytest pytest-tap requests

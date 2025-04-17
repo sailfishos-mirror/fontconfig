@@ -4,9 +4,6 @@ project('fontconfig', 'c',
   default_options: [
     'c_std=c11,c99',
     'buildtype=debugoptimized',
-  'bytemuck-1-rs:feature-derive=true',
-  'bytemuck-1-rs:feature-min_const_generics=true',
-  'read-fonts-0.23-rs:feature-experimental_traverse=true',
   ]
 )
 
@@ -84,7 +81,6 @@ fontations = get_option('fontations')
 if (fontations.enabled())
   conf.set('ENABLE_FONTATIONS', 1)
   add_languages(['rust'], native: false, required : true)
-
 endif
 
 pkgmod = import('pkgconfig')
