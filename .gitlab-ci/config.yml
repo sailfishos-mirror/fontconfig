@@ -1,4 +1,4 @@
-.default_tag: &default_tag "2025-03-26.1"
+.default_tag: &default_tag "2025-04-17.1"
 
 distributions:
   - name: fedora
@@ -33,6 +33,13 @@ distributions:
           FC_BUILD_TYPE: shared
           FC_XML_BACKEND: libxml2
           FC_BUILD_DISTCHECK: 1
+      - name: "subproject_build"
+        build_only: "rawhide"
+        variables:
+          FC_BUILDSYS: meson
+          FC_BUILD_TYPE: shared
+          FC_XML_BACKEND: libxml2
+          FC_BUILD_SUBPROJECT: 1
       - name: "autotools static expat"
         build_only: "rawhide"
         variables:

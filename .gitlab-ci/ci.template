@@ -273,6 +273,7 @@ clang-format:
       [ $FC_BUILD_DISTCHECK -eq 1 ] && buildopt+=(-c)
       [ $FC_BUILD_NO_INSTALL -eq 1 ] && buildopt+=(-I)
       [ $FC_BUILD_NO_CHECK -eq 1 ] && buildopt+=(-C)
+      [ $FC_BUILD_SUBPROJECT -eq 1 ] && buildopt+=(-S)
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
@@ -284,6 +285,7 @@ clang-format:
     FC_BUILD_DISTCHECK: 0
     FC_BUILD_NO_INSTALL: 0
     FC_BUILD_NO_CHECK: 0
+    FC_BUILD_SUBPROJECT: 0
 
 .fc_artifacts:
   artifacts:
@@ -347,7 +349,7 @@ t_{{distro.name}}:{{version}}:{{build.name}}:
 {% endif %}
 
 {% if 'upload' in build and build.upload == version %}
-t_{{distro.name}}:{{version}}:{{build.name}}:upload:
+upload_asset:t_{{distro.name}}:{{version}}:{{build.name}}:
   needs:
     - t_{{distro.name}}:{{version}}:{{build.name}}
   extends:
