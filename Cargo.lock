@@ -44,24 +44,24 @@ dependencies = [
 
 [[package]]
 name = "font-types"
-version = "0.7.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3971f9a5ca983419cdc386941ba3b9e1feba01a0ab888adf78739feb2798492"
+checksum = "1fa6a5e5a77b5f3f7f9e32879f484aa5b3632ddfbe568a16266c904a6f32cdaf"
 dependencies = [
  "bytemuck",
 ]
 
 [[package]]
 name = "libc"
-version = "0.2.171"
+version = "0.2.172"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c19937216e9d3aa9956d9bb8dfc0b0c8beb6058fc4f7a4dc4d850edf86a237d6"
+checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.94"
+version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
+checksum = "02b3e5e68a3a1a02aad3ec490a98007cbc13c37cbe84a3cd7b8e406d76e7f778"
 dependencies = [
  "unicode-ident",
 ]
@@ -77,9 +77,9 @@ dependencies = [
 
 [[package]]
 name = "read-fonts"
-version = "0.23.2"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a252609f83421102bf1b7f08936f5a24e4f9568256e2015fbd027790caf3dcb"
+checksum = "600e807b48ac55bad68a8cb75cc3c7739f139b9248f7e003e01e080f589b5288"
 dependencies = [
  "bytemuck",
  "font-types",
@@ -87,9 +87,9 @@ dependencies = [
 
 [[package]]
 name = "skrifa"
-version = "0.24.1"
+version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69a99d1c6428e12bcf538d34fd4b78a4e6a4556db29f319a1cecfc33f466e64c"
+checksum = "6fa1e5622e4f7b98877e8a19890efddcac1230cec6198bd9de91ec0e00010dc8"
 dependencies = [
  "bytemuck",
  "read-fonts",
