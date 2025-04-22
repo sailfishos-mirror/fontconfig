@@ -44,9 +44,9 @@ if (fontations.enabled())
     link_with: [bindgen_lib, pattern_lib],
     rust_abi: 'c',
     dependencies: [
-      dependency('skrifa-0.24-rs'),
-      dependency('read-fonts-0.23-rs'),
-      dependency('font-types-0.7-rs'),
+      dependency('skrifa-0.30-rs'),
+      dependency('read-fonts-0.28-rs'),
+      dependency('font-types-0.8-rs'),
       dependency('libc-0.2-rs')
     ],
     install: true,
