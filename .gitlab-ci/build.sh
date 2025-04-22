@@ -30,6 +30,7 @@ export BUILD_ID=${BUILD_ID:-fontconfig-$$}
 export PREFIX=${PREFIX:-$MyPWD/prefix}
 export BUILDDIR=${BUILDDIR:-$MyPWD/build}
 export CI_PROJECT_URL=${CI_PROJECT_URL:-https://gitlab.freedesktop.org/fontconfig/fontconfig}
+export CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME:-main}
 
 if [ "x$FC_DISTRO_NAME" = "x" ]; then
     . /etc/os-release || :
@@ -176,7 +177,7 @@ elif [ x"$buildsys" == "xmeson" ]; then
         cd fc-ci-meson-subproject
         pushd subprojects
         git clone ${CI_PROJECT_URL}.git
-        if [ "x$CI_COMMIT_REF_NAME" != "x" ]; then
+        if [ -n "$CI_MERGE_REQUEST_IID" ]; then
             pushd fontconfig
             git fetch origin merge-requests/$CI_MERGE_REQUEST_IID/head:$CI_COMMIT_REF_NAME
             git switch $CI_COMMIT_REF_NAME
