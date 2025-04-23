@@ -604,6 +604,7 @@ summary({
   'Documentation': (doc_targets.length() > 0 ? doc_targets : false),
   'NLS': not opt_nls.disabled(),
   'Tests': not get_option('tests').disabled(),
+  'Pytest': pytest.found(),
   'Tools': not get_option('tools').disabled(),
   'iconv': found_iconv == 1,
   'XML backend': xmltype,
