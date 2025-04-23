@@ -1,3 +1,17 @@
+fetch_test_fonts = custom_target(
+  'fetch_test_fonts',
+  output: 'testfonts',
+  command: [
+    python3,
+    join_paths(meson.project_source_root(), 'build-aux', 'fetch-testfonts.py'),
+    '--target-dir',
+    '@BUILD_ROOT@/testfonts',
+    '--try-symlink',
+  ],
+  build_by_default: false,
+  build_always_stale: true,
+)
+
 tests = [
   ['test-bz89617.c', {'c_args': ['-DSRCDIR="@0@"'.format(meson.current_source_dir())]}],
   ['test-bz131804.c'],
@@ -59,7 +73,7 @@ endforeach
 
 if get_option('fontations').enabled()
   rust = import('rust')
-  rust.test('fc_fontations_rust_tests', fc_fontations, link_with: [fc_fontations, libfontconfig_internal])
+  rust.test('fc_fontations_rust_tests', fc_fontations, link_with: [fc_fontations, libfontconfig_internal], depends: fetch_test_fonts)
 endif
 
 fs = import('fs')
@@ -78,9 +92,10 @@ if host_machine.system() != 'windows'
   if pytest.found()
     test('pytest', pytest, args: ['--tap'],
          workdir: meson.current_source_dir(),
-         env: ['builddir=@0@'.format(meson.current_build_dir())],
+         env: ['builddir=@0@'.format(meson.project_build_root())],
          protocol: 'tap',
-         timeout: 600)
+         timeout: 600,
+         depends: fetch_test_fonts)
   endif
 endif
 
