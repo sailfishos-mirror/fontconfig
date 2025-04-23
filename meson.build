@@ -431,7 +431,7 @@ endif
 gperf = find_program('gperf', required: false)
 gperf_len_type = ''
 
-if gperf.found()
+if gperf.found() and get_option('wrap_mode') != 'forcefallback'
   gperf_test_format = '''
   #include <string.h>
   const char * in_word_set(const char *, @0@);
