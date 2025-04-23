@@ -9,7 +9,7 @@ if (fontations.enabled())
     include_directories : [ '../' ],
     args : [
       '--merge-extern-blocks',
-      '--allowlist-item=(FcCharSet.*|FC_(SLANT|WEIGHT|WIDTH)_.*|FcFontSet(Add|Create|Destroy).*|FcLangSet(Destroy|Copy)|FcWeightFromOpenType.*)',
+      '--allowlist-item=(FcCharSet.*|FC_(SLANT|WEIGHT|WIDTH)_.*|FcFontSet(Add|Create|Destroy).*|FcLangSet(Create|Destroy|Copy|Add|HasLang)|FcWeightFromOpenType.*)',
       '--raw-line=#![allow(nonstandard_style,unused)]',
       '--raw-line= ',
       '--raw-line=pub mod fcint;',

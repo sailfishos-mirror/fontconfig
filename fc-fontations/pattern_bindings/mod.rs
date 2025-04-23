@@ -30,11 +30,12 @@ use std::ffi::CString;
 use std::fmt::Debug;
 
 use fc_fontations_bindgen::fcint::{
-    FcPattern, FcPatternObjectAddBool, FcPatternObjectAddDouble, FcPatternObjectAddInteger,
-    FcPatternObjectAddRange, FcPatternObjectAddString, FC_FAMILY_OBJECT,
+    FcPattern, FcPatternObjectAddBool, FcPatternObjectAddCharSet, FcPatternObjectAddDouble,
+    FcPatternObjectAddInteger, FcPatternObjectAddLangSet, FcPatternObjectAddRange,
+    FcPatternObjectAddString, FC_FAMILY_OBJECT,
 };
 
-use self::fc_wrapper::{FcPatternWrapper, FcRangeWrapper};
+use self::fc_wrapper::{FcCharSetWrapper, FcLangSetWrapper, FcPatternWrapper, FcRangeWrapper};
 
 #[allow(unused)]
 #[derive(Debug)]
@@ -44,6 +45,8 @@ pub enum PatternValue {
     Integer(i32),
     Double(f64),
     Range(FcRangeWrapper),
+    LangSet(FcLangSetWrapper),
+    CharSet(FcCharSetWrapper),
 }
 
 impl From<CString> for PatternValue {
@@ -97,6 +100,12 @@ impl PatternElement {
             },
             PatternValue::Range(value) => unsafe {
                 FcPatternObjectAddRange(pattern, self.object_id, value.into_raw())
+            },
+            PatternValue::CharSet(value) => unsafe {
+                FcPatternObjectAddCharSet(pattern, self.object_id, value.into_raw())
+            },
+            PatternValue::LangSet(value) => unsafe {
+                FcPatternObjectAddLangSet(pattern, self.object_id, value.into_raw())
             },
         } == 1;
         if pattern_add_success {
@@ -154,11 +163,21 @@ impl FcPatternBuilder {
 mod test {
     use std::ffi::CString;
 
-    use super::{FcPatternBuilder, FcRangeWrapper, PatternElement, PatternValue};
-    use fc_fontations_bindgen::fcint::{
-        FcPatternObjectGetBool, FcPatternObjectGetDouble, FcPatternObjectGetInteger,
-        FcPatternObjectGetRange, FcPatternObjectGetString, FcRange, FC_COLOR_OBJECT,
-        FC_FAMILY_OBJECT, FC_SLANT_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
+    use crate::pattern_bindings::fc_wrapper::FcLangSetWrapper;
+
+    use super::{
+        fc_wrapper::FcCharSetWrapper, FcPatternBuilder, FcRangeWrapper, PatternElement,
+        PatternValue,
+    };
+    use fc_fontations_bindgen::{
+        fcint::{
+            FcPatternObjectGetBool, FcPatternObjectGetCharSet, FcPatternObjectGetDouble,
+            FcPatternObjectGetInteger, FcPatternObjectGetLangSet, FcPatternObjectGetRange,
+            FcPatternObjectGetString, FcRange, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
+            FC_FAMILY_OBJECT, FC_LANG_OBJECT, FC_SLANT_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
+        },
+        FcCharSet, FcCharSetAddChar, FcCharSetHasChar, FcLangSet, FcLangSetAdd, FcLangSetHasLang,
+        _FcLangResult_FcLangEqual,
     };
 
     #[test]
@@ -187,6 +206,28 @@ mod test {
         pattern_builder.append_element(PatternElement::new(
             FC_FAMILY_OBJECT as i32,
             PatternValue::String(CString::new("TestFont").unwrap()),
+        ));
+
+        let test_charset = FcCharSetWrapper::new().unwrap();
+        const BIANG: u32 = 0x30EDE;
+        unsafe {
+            assert!(FcCharSetAddChar(test_charset.as_ptr(), BIANG) != 0);
+        }
+
+        pattern_builder.append_element(PatternElement::new(
+            FC_CHARSET_OBJECT as i32,
+            PatternValue::CharSet(test_charset),
+        ));
+
+        let test_langset = FcLangSetWrapper::new().unwrap();
+        const LANG_EN: &[u8] = b"en\0";
+        unsafe {
+            assert!(FcLangSetAdd(test_langset.as_ptr(), LANG_EN.as_ptr()) != 0);
+        }
+
+        pattern_builder.append_element(PatternElement::new(
+            FC_LANG_OBJECT as i32,
+            PatternValue::LangSet(test_langset),
         ));
 
         let pattern = pattern_builder.create_fc_pattern().unwrap();
@@ -260,6 +301,31 @@ mod test {
                     .to_str()
                     .unwrap(),
                 "TestFont"
+            );
+
+            // Verify CharSet.
+            let mut retrieved_charset: *mut FcCharSet = std::mem::zeroed();
+            let get_result = FcPatternObjectGetCharSet(
+                fontconfig_pattern,
+                FC_CHARSET_OBJECT as i32,
+                0,
+                &mut retrieved_charset,
+            );
+            assert_eq!(get_result, 0);
+            assert_eq!(FcCharSetHasChar(retrieved_charset, BIANG), 1);
+
+            // Verify LangSet.
+            let mut retrieved_langset: *mut FcLangSet = std::mem::zeroed();
+            let get_result = FcPatternObjectGetLangSet(
+                fontconfig_pattern,
+                FC_LANG_OBJECT as i32,
+                0,
+                &mut retrieved_langset,
+            );
+            assert_eq!(get_result, 0);
+            assert_eq!(
+                FcLangSetHasLang(retrieved_langset, LANG_EN.as_ptr()),
+                _FcLangResult_FcLangEqual
             );
         }
     }

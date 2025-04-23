@@ -22,9 +22,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-use fc_fontations_bindgen::fcint::{
-    FcPattern, FcPatternCreate, FcPatternDestroy, FcRange, FcRangeCopy, FcRangeCreateDouble,
-    FcRangeDestroy,
+use fc_fontations_bindgen::{
+    fcint::{
+        FcCharSet, FcCharSetCreate, FcCharSetDestroy, FcLangSet, FcPattern, FcPatternCreate,
+        FcPatternDestroy, FcRange, FcRangeCopy, FcRangeCreateDouble, FcRangeDestroy,
+    },
+    FcLangSetCreate, FcLangSetDestroy,
 };
 
 macro_rules! wrap_fc_object {
@@ -118,6 +121,52 @@ impl FcPatternWrapper {
             } else {
                 Some(Self { inner: ptr })
             }
+        }
+    }
+}
+
+wrap_fc_object! {
+    FcCharSetWrapper,
+    FcCharSet,
+    FcCharSetDestroy
+}
+
+impl FcCharSetWrapper {
+    #[allow(unused)]
+    pub fn new() -> Option<Self> {
+        let created_charset: *mut FcCharSet;
+        unsafe {
+            created_charset = FcCharSetCreate();
+        }
+        if created_charset.is_null() {
+            None
+        } else {
+            Some(Self {
+                inner: created_charset,
+            })
+        }
+    }
+}
+
+wrap_fc_object! {
+    FcLangSetWrapper,
+    FcLangSet,
+    FcLangSetDestroy
+}
+
+impl FcLangSetWrapper {
+    #[allow(unused)]
+    pub fn new() -> Option<Self> {
+        let created_langset: *mut FcLangSet;
+        unsafe {
+            created_langset = FcLangSetCreate();
+        }
+        if created_langset.is_null() {
+            None
+        } else {
+            Some(Self {
+                inner: created_langset,
+            })
         }
     }
 }
