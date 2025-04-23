@@ -3,7 +3,7 @@
 # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml#L18
 .build meson windows:
   image: "registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2024-11-12.0-main"
-  stage: "test"
+  stage: "distro"
   tags:
     - "docker"
     - "windows"
@@ -57,7 +57,7 @@ meson vs2019 x86:
 # Skip that configuration for now.
 
 .meson macos test:
-  stage: "test"
+  stage: "distro"
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-ci.yml
   # As of 2024-11-21, this is a Mac OS 15 Sequia image on Apple silicon.
   image: "registry.freedesktop.org/gstreamer/gstreamer/macos-arm64/15-sequoia:2024-10-28.0"

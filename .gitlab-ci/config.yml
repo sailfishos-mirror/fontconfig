@@ -1,4 +1,63 @@
-.default_tag: &default_tag "2025-04-17.1"
+.default_tag: &default_tag "2025-04-23.1"
+
+build_patterns:
+  - name: "autotools shared expat"
+    variables:
+      FC_BUILDSYS: autotools
+      FC_BUILD_TYPE: shared
+      FC_XML_BACKEND: expat
+  - name: "autotools shared libxml2"
+    variables:
+      FC_BUILDSYS: autotools
+      FC_BUILD_TYPE: shared
+      FC_XML_BACKEND: libxml2
+  - name: "autotools static expat"
+    variables:
+      FC_BUILDSYS: autotools
+      FC_BUILD_TYPE: static
+      FC_XML_BACKEND: expat
+  - name: "autotools static libxml2"
+    variables:
+      FC_BUILDSYS: autotools
+      FC_BUILD_TYPE: static
+      FC_XML_BACKEND: libxml2
+  - name: "meson shared expat"
+    variables:
+      FC_BUILDSYS: meson
+      FC_BUILD_TYPE: shared
+      FC_XML_BACKEND: expat
+  - name: "meson shared libxml2"
+    variables:
+      FC_BUILDSYS: meson
+      FC_BUILD_TYPE: shared
+      FC_XML_BACKEND: libxml2
+  - name: "meson static expat"
+    variables:
+      FC_BUILDSYS: meson
+      FC_BUILD_TYPE: static
+      FC_XML_BACKEND: expat
+  - name: "meson static libxml2"
+    variables:
+      FC_BUILDSYS: meson
+      FC_BUILD_TYPE: static
+      FC_XML_BACKEND: libxml2
+  - name: "meson static fontations"
+    variables:
+      FC_BUILDSYS: meson
+      FC_BUILD_TYPE: static
+      FC_BUILD_ENABLED: "fontations"
+
+test_patterns:
+  - name: "subproject-build shared"
+    variables:
+      FC_BUILDSYS: meson
+      FC_BUILD_TYPE: shared
+      FC_BUILD_SUBPROJECT: 1
+  - name: "subproject-build static"
+    variables:
+      FC_BUILDSYS: meson
+      FC_BUILD_TYPE: static
+      FC_BUILD_SUBPROJECT: 1
 
 distributions:
   - name: fedora
@@ -10,86 +69,29 @@ distributions:
       - "41"
       - "40"
     builds:
-      - name: "autotools shared expat"
-        variables:
-          FC_BUILDSYS: autotools
-          FC_BUILD_TYPE: shared
-          FC_XML_BACKEND: expat
-      - name: "autotools shared libxml2"
-        variables:
-          FC_BUILDSYS: autotools
-          FC_BUILD_TYPE: shared
-          FC_XML_BACKEND: libxml2
-          FC_BUILD_DISTCHECK: 1
-      - name: "meson shared expat"
-        variables:
-          FC_BUILDSYS: meson
-          FC_BUILD_TYPE: shared
-          FC_XML_BACKEND: expat
-      - name: "meson shared libxml2"
+      - name: "standard build"
         upload: "rawhide"
+        doc: "rawhide"
         variables:
           FC_BUILDSYS: meson
           FC_BUILD_TYPE: shared
           FC_XML_BACKEND: libxml2
           FC_BUILD_DISTCHECK: 1
-      - name: "subproject_build"
-        build_only: "rawhide"
-        variables:
-          FC_BUILDSYS: meson
-          FC_BUILD_TYPE: shared
-          FC_XML_BACKEND: libxml2
-          FC_BUILD_SUBPROJECT: 1
-      - name: "autotools static expat"
-        build_only: "rawhide"
-        variables:
-          FC_BUILDSYS: autotools
-          FC_BUILD_TYPE: static
-          FC_XML_BACKEND: expat
-      - name: "autotools static libxml2"
-        build_only: "rawhide"
-        variables:
-          FC_BUILDSYS: autotools
-          FC_BUILD_TYPE: static
-          FC_XML_BACKEND: libxml2
-      - name: "meson static expat"
-        build_only: "rawhide"
+  - name: fedora
+    tag: *default_tag
+    base_type: fedora
+    qemu_based: false
+    versions:
+      - "rawhide"
+    builds:
+      - name: "MinGW"
         variables:
           FC_BUILDSYS: meson
           FC_BUILD_TYPE: static
-          FC_XML_BACKEND: expat
-      - name: "meson static libxml2"
-        build_only: "rawhide"
-        variables:
-          FC_BUILDSYS: meson
-          FC_BUILD_TYPE: static
-          FC_XML_BACKEND: libxml2
-      - name: "mingw autotools static libxml2"
-        build_only: "rawhide"
-        variables:
-          FC_BUILDSYS: autotools
-          FC_BUILD_TYPE: static
-          FC_XML_BACKEND: libxml2
-          FC_BUILD_PLATFORM: mingw
-          FC_BUILD_ARCH: x86_64-mingw32
-      - name: "mingw meson static expat"
-        build_only: "rawhide"
-        variables:
-          FC_BUILDSYS: meson
-          FC_BUILD_TYPE: static
-          FC_XML_BACKEND: expat
           FC_BUILD_PLATFORM: mingw
           FC_BUILD_ARCH: linux-mingw-w64-64bit
           FC_BUILD_NO_INSTALL: 1
-      - name: "meson static libxml2 fontations"
-        build_only: "rawhide"
-        variables:
-          FC_BUILDSYS: meson
-          FC_BUILD_TYPE: static
-          FC_XML_BACKEND: libxml2
-          FC_BUILD_ENABLED: "fontations"
       - name: "android aarch64"
-        build_only: "rawhide"
         variables:
           FC_BUILDSYS: meson
           FC_BUILD_TYPE: shared
@@ -106,27 +108,7 @@ distributions:
     versions:
       - "14.1"
     builds:
-      - name: "autotools shared expat"
-        variables:
-          FC_BUILDSYS: autotools
-          FC_BUILD_TYPE: shared
-          FC_XML_BACKEND: expat
-          MAKE: gmake
-          FC_BUILD_NO_CHECK: 1  # FIXME: There is GNU-specific parameter issue in touch command.
-      - name: "autotools shared libxml2"
-        variables:
-          FC_BUILDSYS: autotools
-          FC_BUILD_TYPE: shared
-          FC_XML_BACKEND: libxml2
-          MAKE: gmake
-          FC_BUILD_NO_CHECK: 1
-      - name: "meson shared expat"
-        variables:
-          FC_BUILDSYS: meson
-          FC_BUILD_TYPE: shared
-          FC_XML_BACKEND: expat
-          FC_BUILD_NO_CHECK: 1
-      - name: "meson shared libxml2"
+      - name: "standard build"
         variables:
           FC_BUILDSYS: meson
           FC_BUILD_TYPE: shared
