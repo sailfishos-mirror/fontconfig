@@ -92,9 +92,10 @@ if host_machine.system() != 'windows'
   if pytest.found()
     test('pytest', pytest, args: ['--tap'],
          workdir: meson.current_source_dir(),
-         env: ['builddir=@0@'.format(meson.current_build_dir())],
+         env: ['builddir=@0@'.format(meson.project_build_root())],
          protocol: 'tap',
-         timeout: 600)
+         timeout: 600,
+         depends: fetch_test_fonts)
   endif
 endif
 
