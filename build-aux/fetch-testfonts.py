@@ -30,6 +30,7 @@ SOURCE_FILES = (
     "ko-nanumfonts-3.20.tar.bz2",
 )
 SOURCES = [URL_TEMPLATE % source for source in SOURCE_FILES]
+SOURCES += ["https://github.com/googlefonts/roboto-flex/releases/download/3.100/roboto-flex-fonts.zip"]
 
 CONTAINER_DOWNLOAD_DIR = "/testfonts"
 
@@ -41,6 +42,7 @@ notofonts-20250214.tar.xz      cb0f9edc030e07eca58b799c607d000dfde588911d8e228fc
 robotofonts-2.132.tar.bz2      087c6f0708fe71f71a056f70fdbd5a85f4d2ce916670a98bd4be10b168abe16a
 lohitfonts-cros-2.5.5.tar.bz2  ce0ce2a5098c8ffc52327cc030576df7f5328ad9fd8a3289e2476990ad133ff1
 ko-nanumfonts-3.20.tar.bz2     59f9b6d7fcf63ca2bea7156ad66c784a1f0601d47be1b11237e17733d7112832
+roboto-flex-fonts.zip          02e0f5db84e69f254958434269d83aa6057b06f3c2a21042bb81b1afe1a0c8c6
 """
 
 STAMP_FILE = ".stamp"
@@ -74,6 +76,8 @@ def extract_archive(filepath, target_dir):
     logger.info(f"Extracting {filepath} to {target_dir}")
     if filename.endswith((".tar.bz2", ".tar.gz", ".tar.xz")):
         subprocess.run(["tar", "xf", filepath, "-C", target_dir], check=True)
+    elif filename.endswith(".zip"):
+        shutil.unpack_archive(filepath, target_dir)
     else:
         raise ValueError(f"Unsupported archive type: {filename}")
 

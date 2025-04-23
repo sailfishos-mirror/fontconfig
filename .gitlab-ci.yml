@@ -43,8 +43,8 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  FEDORA_TAG:    '2025-04-23.1-21487182ca34'
-  FREEBSD_TAG:   '2025-04-23.1-1c3182609f3d'
+  FEDORA_TAG:    '2025-04-23.1-36c045e261d1'
+  FREEBSD_TAG:   '2025-04-23.1-61a4c35ef3b2'
 
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
   FREEBSD_EXEC:  'bash .gitlab-ci/freebsd-install.sh'
