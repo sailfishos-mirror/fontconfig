@@ -504,18 +504,23 @@ if get_option('fontations').enabled()
   lib_fontconfig_link_with_libs += [fc_fontations]
 endif
 
-if get_option('default_library') in ['both', 'shared']
-  libfontconfig = both_libraries('fontconfig',
-    lib_fontconfig_sources,
-    c_shared_args: win_export_args,
-    soversion: soversion,
-    version: libversion,
-    darwin_versions: osxversion,
-    kwargs: lib_fontconfig_kwargs)
+libfontconfig = library('fontconfig',
+  lib_fontconfig_sources,
+  c_shared_args: win_export_args,
+  soversion: soversion,
+  version: libversion,
+  darwin_versions: osxversion,
+  install: true,
+  kwargs: lib_fontconfig_kwargs)
+
+if get_option('default_library') == 'both'
   libfontconfig_internal = libfontconfig.get_static_lib()
-else
-  libfontconfig = static_library('fontconfig', lib_fontconfig_sources, kwargs: lib_fontconfig_kwargs)
+elif get_option('default_library') == 'static'
   libfontconfig_internal = libfontconfig
+else
+  libfontconfig_internal = static_library('fontconfig',
+    lib_fontconfig_sources,
+    kwargs: lib_fontconfig_kwargs)
 endif
 
 fontconfig_dep = declare_dependency(link_with: libfontconfig,

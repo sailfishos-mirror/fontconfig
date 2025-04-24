@@ -70,6 +70,5 @@ lib_fontconfig_kwargs = {
   'include_directories': incbase,
   'dependencies': [deps, math_dep],
   'link_with': lib_fontconfig_link_with_libs,
-  'install': true,
 }
 
