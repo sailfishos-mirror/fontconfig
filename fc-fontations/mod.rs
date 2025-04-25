@@ -22,17 +22,17 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+mod foundries;
 mod names;
 mod pattern_bindings;
-mod foundries;
 
 use foundries::make_foundry;
 use names::add_names;
 
 use fc_fontations_bindgen::{
     fcint::{
-        FC_COLOR_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FOUNDRY_OBJECT,
-        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
+        FC_COLOR_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT,
+        FC_FOUNDRY_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
@@ -186,6 +186,18 @@ fn build_patterns_for_font(
     pattern.append_element(PatternElement::new(
         FC_FOUNDRY_OBJECT as i32,
         foundry_string.into(),
+    ));
+
+    let version = font
+        .head()
+        .ok()
+        .map(|head| head.font_revision())
+        .unwrap_or_default()
+        .to_bits();
+
+    pattern.append_element(PatternElement::new(
+        FC_FONTVERSION_OBJECT as i32,
+        version.into(),
     ));
 
     pattern
