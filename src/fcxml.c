@@ -3246,6 +3246,8 @@ FcConfigParseAndLoadFromMemoryInternal (FcConfig      *config,
     size_t         buflen;
 #endif
 
+    FcInitDebug();
+
     if (!buffer)
 	return FcFalse;
     len = strlen ((const char *)buffer);
