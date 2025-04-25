@@ -564,7 +564,7 @@ FcCompareFamilies (FcPattern     *pat,
 	}
     }
     if (FcDebug() & FC_DBG_MATCHV) {
-	printf ("%s: %g ", FcObjectName (FC_FAMILY_OBJECT), strong_value);
+	printf ("%s: %g (%g) ", FcObjectName (FC_FAMILY_OBJECT), strong_value, weak_value);
 	FcValueListPrint (v1orig);
 	printf (", ");
 	FcValueListPrint (v2orig);
@@ -1107,7 +1107,7 @@ FcFontSetSortDestroy (FcFontSet *fs)
 }
 
 FcFontSet *
-FcFontSetSort (FcConfig   *config FC_UNUSED,
+FcFontSetSort (FcConfig   *config,
                FcFontSet **sets,
                int         nsets,
                FcPattern  *p,
@@ -1186,6 +1186,13 @@ FcFontSetSort (FcConfig   *config FC_UNUSED,
 	    newp->pattern = s->fonts[f];
 	    if (!FcCompare (p, newp->pattern, newp->score, result, &data))
 		goto bail1;
+	    /* TODO: Should we check a FcPattern in FcFontSet?
+	     * This way may not work if someone has own list of application fonts
+	     * That said, just to reduce the cost for lookup so far.
+             */
+	    if (config->prefer_app_fonts && s != config->fonts[FcSetApplication]) {
+		newp->score[PRI_ORDER] += 1000;
+	    }
 	    if (FcDebug() & FC_DBG_MATCHV) {
 		printf ("Score");
 		for (i = 0; i < PRI_END; i++) {
@@ -1260,12 +1267,13 @@ FcFontSetSort (FcConfig   *config FC_UNUSED,
 
     free (nodes);
 
-    if (FcDebug() & FC_DBG_MATCH) {
-	printf ("First font ");
-	FcPatternPrint (ret->fonts[0]);
-    }
-    if (ret->nfont > 0)
+    if (ret->nfont > 0) {
 	*result = FcResultMatch;
+	if (FcDebug() & FC_DBG_MATCH) {
+	    printf ("First font ");
+	    FcPatternPrint (ret->fonts[0]);
+	}
+    }
 
     return ret;
 

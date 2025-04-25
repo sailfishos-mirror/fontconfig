@@ -2776,6 +2776,18 @@ FcConfigAppFontClear (FcConfig *config)
     FcConfigDestroy (config);
 }
 
+void
+FcConfigPreferAppFont (FcConfig *config, FcBool flag)
+{
+    config = FcConfigReference (config);
+    if (!config)
+	return;
+
+    config->prefer_app_fonts = flag;
+
+    FcConfigDestroy (config);
+}
+
 /*
  * Manage filename-based font source selectors
  */

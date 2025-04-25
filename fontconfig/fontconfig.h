@@ -485,6 +485,9 @@ FcConfigAppFontAddDir (FcConfig      *config,
 FcPublic void
 FcConfigAppFontClear (FcConfig *config);
 
+FcPublic void
+FcConfigPreferAppFont (FcConfig *config, FcBool flag);
+
 FcPublic FcBool
 FcConfigSubstituteWithPat (FcConfig   *config,
                            FcPattern  *p,

@@ -613,6 +613,9 @@ struct _FcConfig {
     FcFilterFontSetFunc filter_func;       /* A predicate function to filter out config->fonts */
     FcDestroyFunc       destroy_data_func; /* A callback function to destroy config->filter_data */
     void               *filter_data;       /* An user data to be used for filter_func */
+
+    FcBool prefer_app_fonts; /* Whether FcSetApplication has a priority than
+                                FcSetSystem for lookup */
 };
 
 typedef struct _FcFileTime {

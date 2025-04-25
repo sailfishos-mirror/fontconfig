@@ -544,3 +544,13 @@ in configuration file. This function tries to match 'pat' with them and
 return FcFalse if 'pat' is rejected, otherwise FcTrue.
 @SINCE@		2.15.1
 @@
+
+@RET@       void
+@FUNC@      FcConfigPreferAppFont
+@TYPE1@     FcConfig *          @ARG1@      config
+@TYPE2@     FcBool%             @ARG2@      flag
+@DESC@
+Set 'flag' to change the priority of Application fonts. default behavior is turned off
+for backward compatibility.
+@SINCE@     2.17.0
+@@
