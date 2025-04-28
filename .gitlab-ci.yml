@@ -43,8 +43,8 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  FEDORA_TAG:    '2025-04-23.1-7916b3c469ca'
-  FREEBSD_TAG:   '2025-04-23.1-58fbfb327c45'
+  FEDORA_TAG:    '2025-04-30.1-f55ea04ce447'
+  FREEBSD_TAG:   '2025-04-30.1-2e18059bfc52'
 
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
   FREEBSD_EXEC:  'bash .gitlab-ci/freebsd-install.sh'
@@ -318,6 +318,7 @@ freebsd:14.1@container-clean:
       - build*/fontconfig*/_build
       - build*/meson-logs/*
       - build*/meson-dist/*
+      - prefix*
 
 .upload:
   rules:
@@ -480,6 +481,19 @@ build-meson static fontations:
 #                                     #
 #######################################
 
+.test_hook@template:
+  script:
+    - export PREFIX="$(echo $(pwd)/prefix-*)"
+    - |
+      if [ -n "$FC_TEST_EXEC" -a -f ".gitlab-ci/test-${FC_TEST_EXEC}.sh" ]; then
+        sh ".gitlab-ci/test-${FC_TEST_EXEC}.sh"
+      else
+        echo "*** No test script found"
+        exit 1
+      fi
+  variables:
+    FC_TEST_EXEC: ""
+
 clang-format:
   stage: test
   extends:
@@ -507,6 +521,7 @@ subproject-build shared:
     FC_DISTRO_NAME: fedora
     FDO_DISTRIBUTION_VERSION: rawhide
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+    FC_TEST_EXEC: subproject-build shared
     FC_BUILDSYS: meson
     FC_BUILD_TYPE: shared
     FC_BUILD_SUBPROJECT: 1
@@ -522,11 +537,40 @@ subproject-build static:
     FC_DISTRO_NAME: fedora
     FDO_DISTRIBUTION_VERSION: rawhide
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+    FC_TEST_EXEC: subproject-build static
     FC_BUILDSYS: meson
     FC_BUILD_TYPE: static
     FC_BUILD_SUBPROJECT: 1
   needs:
     - fedora:rawhide@container-prep
+meson-install-shared:
+  stage: test
+  extends:
+    - .test_hook@template
+    - .fdo.distribution-image@fedora
+    - .fc_artifacts
+  variables:
+    FC_DISTRO_NAME: fedora
+    FDO_DISTRIBUTION_VERSION: rawhide
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+    FC_TEST_EXEC: meson-install-shared
+  needs:
+    - fedora:rawhide@container-prep
+    - build-meson shared libxml2
+meson-install-static:
+  stage: test
+  extends:
+    - .test_hook@template
+    - .fdo.distribution-image@fedora
+    - .fc_artifacts
+  variables:
+    FC_DISTRO_NAME: fedora
+    FDO_DISTRIBUTION_VERSION: rawhide
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+    FC_TEST_EXEC: meson-install-static
+  needs:
+    - fedora:rawhide@container-prep
+    - build-meson static libxml2
 
 #######################################
 #                                     #
