@@ -24,6 +24,7 @@ buildsys="meson"
 type="shared"
 arch=""
 buildopt=()
+optimization=""
 SRCDIR=$MyPWD
 export MAKE=${MAKE:-make}
 export BUILD_ID=${BUILD_ID:-fontconfig-$$}
@@ -43,7 +44,7 @@ if [ "x$FC_DISTRO_NAME" = "x" ]; then
     sleep 3
 fi
 
-while getopts a:cCe:d:hINs:St:X: OPT
+while getopts a:cCe:d:hINO:s:St:X: OPT
 do
     case $OPT in
         'a') arch=$OPTARG ;;
@@ -53,6 +54,7 @@ do
         'd') disable+=($OPTARG) ;;
         'I') enable_install=0 ;;
         'N') clean_build=0 ;;
+        'O') optimization=$OPTARG ;;
         's') buildsys=$OPTARG ;;
         'S') subproject=1 ;;
         't') type=$OPTARG ;;
@@ -190,6 +192,9 @@ elif [ x"$buildsys" == "xmeson" ]; then
         subprojectname="fontconfig:"
     fi
     TASK=
+    if [ -n "$optimization" ]; then
+        buildopt+=(--optimization=$optimization)
+    fi
     for i in "${disable[@]}"; do
         buildopt+=(-D${subprojectname}$i=disabled)
     done
