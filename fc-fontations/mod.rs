@@ -22,10 +22,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+mod attributes;
 mod foundries;
 mod names;
 mod pattern_bindings;
 
+use attributes::append_style_elements;
 use foundries::make_foundry;
 use names::add_names;
 
@@ -78,6 +80,18 @@ pub unsafe extern "C" fn add_patterns_to_fontset(
     }
 
     1
+}
+
+/// Used for controlling FontConfig's behavior per font instance.
+///
+/// We add one pattern for the default instance, one for each named instance,
+/// and one for using the font as a variable font, with ranges of values where applicable.
+#[derive(Copy, Clone)]
+#[allow(dead_code)]
+enum InstanceMode {
+    Default,
+    Named(i32),
+    Variable,
 }
 
 fn fonts_and_indices(
@@ -136,7 +150,7 @@ fn has_hint(font_ref: &FontRef) -> bool {
 fn build_patterns_for_font(
     font: &FontRef,
     _: *const libc::c_char,
-    _: Option<i32>,
+    ttc_index: Option<i32>,
 ) -> Vec<*mut FcPattern> {
     let mut pattern = FcPatternBuilder::new();
 
@@ -199,6 +213,9 @@ fn build_patterns_for_font(
         FC_FONTVERSION_OBJECT as i32,
         version.into(),
     ));
+
+    // TODO: Handle variable instance and named instances.
+    append_style_elements(font, InstanceMode::Default, ttc_index, &mut pattern);
 
     pattern
         .create_fc_pattern()

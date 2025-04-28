@@ -55,15 +55,21 @@ impl From<CString> for PatternValue {
     }
 }
 
+impl From<i32> for PatternValue {
+    fn from(item: i32) -> Self {
+        PatternValue::Integer(item)
+    }
+}
+
 impl From<bool> for PatternValue {
     fn from(item: bool) -> Self {
         PatternValue::Boolean(item)
     }
 }
 
-impl From<i32> for PatternValue {
-    fn from(item: i32) -> Self {
-        PatternValue::Integer(item)
+impl From<f64> for PatternValue {
+    fn from(item: f64) -> Self {
+        PatternValue::Double(item)
     }
 }
 
