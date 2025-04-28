@@ -77,7 +77,13 @@ FcFileScanFontConfig (FcFontSet     *set,
 	fflush (stdout);
     }
 
-    if (!FcFreeTypeQueryAll (file, -1, NULL, NULL, set))
+    unsigned int (*query_function) (const FcChar8 *, unsigned int, FcBlanks *, int *, FcFontSet *) = FcFreeTypeQueryAll;
+#if ENABLE_FONTATIONS
+    if (getenv ("FC_FONTATIONS") != NULL) {
+	query_function = FcFontationsQueryAll;
+    }
+#endif
+    if (!query_function (file, -1, NULL, NULL, set))
 	return FcFalse;
 
     if (FcDebug() & FC_DBG_SCAN)

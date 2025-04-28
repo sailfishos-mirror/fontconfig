@@ -73,7 +73,7 @@ endforeach
 
 if get_option('fontations').enabled()
   rust = import('rust')
-  rust.test('fc_fontations_rust_tests', fc_fontations, link_with: [fc_fontations, libfontconfig_internal], depends: fetch_test_fonts)
+  rust.test('fc_fontations_rust_tests', fc_fontations, link_with: [libfontconfig_internal], depends: fetch_test_fonts)
 endif
 
 fs = import('fs')
