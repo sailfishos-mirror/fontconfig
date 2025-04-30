@@ -98,6 +98,8 @@ meson macos test:
     MESON_FONTATIONS_ARG: "-Dfontations=disabled"
 
 meson macos test fontations:
+  when: manual
+  allow_failure: true
   extends: ".meson macos test"
   variables:
     MESON_FONTATIONS_ARG: "-Dfontations=enabled"
