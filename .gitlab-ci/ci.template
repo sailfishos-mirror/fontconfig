@@ -281,6 +281,7 @@ check-ci-script:
       - build*/fontconfig*/_build
       - build*/meson-logs/*
       - build*/meson-dist/*
+      - prefix*
 
 .upload:
   rules:
@@ -330,6 +331,19 @@ build-{{build.name}}:
 #                                     #
 #######################################
 
+.test_hook@template:
+  script:
+    - export PREFIX="$(echo $(pwd)/prefix-*)"
+    - |
+      if [ -n "$FC_TEST_EXEC" -a -f ".gitlab-ci/test-${FC_TEST_EXEC}.sh" ]; then
+        sh ".gitlab-ci/test-${FC_TEST_EXEC}.sh"
+      else
+        echo "*** No test script found"
+        exit 1
+      fi
+  variables:
+    FC_TEST_EXEC: ""
+
 clang-format:
   stage: test
   extends:
@@ -351,13 +365,18 @@ clang-format:
 {{test.name}}:
   stage: test
   extends:
+    {% if 'parent' in test %}
+    - .test_hook@template
+    {% else %}
     - .build@template
+    {% endif %}
     - .fdo.distribution-image@fedora
     - .fc_artifacts
   variables:
     FC_DISTRO_NAME: fedora
     FDO_DISTRIBUTION_VERSION: rawhide
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+    FC_TEST_EXEC: {{test.name}}
     {# Where we have extra_variables defined, add them to the list #}
     {% if test.variables is defined %}
     {% for key, value in test.variables.items() %}
@@ -366,6 +385,9 @@ clang-format:
     {% endif %}
   needs:
     - fedora:rawhide@container-prep
+    {% if 'parent' in test %}
+    - build-{{test.parent}}
+    {% endif %}
 {% endfor %}
 
 #######################################
