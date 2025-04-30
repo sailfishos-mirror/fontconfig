@@ -43,8 +43,8 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  FEDORA_TAG:    '2025-04-30.1-f55ea04ce447'
-  FREEBSD_TAG:   '2025-04-30.1-2e18059bfc52'
+  FEDORA_TAG:    '2025-04-30.1-1e6ed32d8678'
+  FREEBSD_TAG:   '2025-04-30.1-b401dfb43b5f'
 
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
   FREEBSD_EXEC:  'bash .gitlab-ci/freebsd-install.sh'
@@ -458,8 +458,6 @@ build-meson static libxml2:
   needs:
     - fedora:rawhide@container-prep
 build-meson static fontations:
-  when: manual
-  allow_failure: true
   stage: build
   extends:
     - .build@template

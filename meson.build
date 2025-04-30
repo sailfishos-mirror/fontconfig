@@ -4,6 +4,7 @@ project('fontconfig', 'c',
   default_options: [
     'c_std=c11,c99',
     'buildtype=debugoptimized',
+    'rust_std=2021',
   ]
 )
 

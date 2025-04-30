@@ -302,10 +302,6 @@ check-ci-script:
 
 {% for build in build_patterns %}
 build-{{build.name}}:
-  {% if 'disable_build' in build and build.disable_build == 1 %}
-  when: manual
-  allow_failure: true
-  {% endif %}
   stage: build
   extends:
     - .build@template

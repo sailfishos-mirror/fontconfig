@@ -27,7 +27,7 @@ if (fontations.enabled())
       '--blocklist-type=(FcCharSet|FcLangSet)',
       '--raw-line=#![allow(nonstandard_style,unused)]',
       '--raw-line= ',
-      '--raw-line=pub use FcCharSet; pub use FcLangSet;',
+      '--raw-line=pub use crate::FcCharSet; pub use crate::FcLangSet;',
     ],
     c_args : ['-DBINDGEN_IGNORE_VISIBILITY=1'],
   )
