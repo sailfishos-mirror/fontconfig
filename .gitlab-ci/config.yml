@@ -42,7 +42,6 @@ build_patterns:
       FC_BUILD_TYPE: static
       FC_XML_BACKEND: libxml2
   - name: "meson static fontations"
-    disable_build: 1
     variables:
       FC_BUILDSYS: meson
       FC_BUILD_TYPE: static
