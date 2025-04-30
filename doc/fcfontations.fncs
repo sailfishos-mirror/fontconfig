@@ -35,7 +35,7 @@
 @PURPOSE@       compute all patterns from font file (and index)
 @DESC@
 UNSTABLE feature. Constructs patterns found in 'file'. Currently pattern is incomplete
-compared to FcFreeTypeQueryAll().
+compared to FcFreeTypeQueryAll() and may deviate from what FreeType indexing produces.
 Not supported yet, but will follow: If id is -1, then all patterns found
 in 'file' are added to 'set'.
 Otherwise, this function works exactly like FcFreeTypeQueryAll()/FcFreeTypeQuery().

@@ -2,8 +2,8 @@ extern crate fc_fontations_bindgen;
 
 use fc_fontations_bindgen::{
     fcint::{
-        FC_INDEX_OBJECT, FC_NAMED_INSTANCE_OBJECT, FC_SLANT_OBJECT, FC_VARIABLE_OBJECT,
-        FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
+        FC_INDEX_OBJECT, FC_NAMED_INSTANCE_OBJECT, FC_SIZE_OBJECT, FC_SLANT_OBJECT,
+        FC_VARIABLE_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
     },
     FcWeightFromOpenTypeDouble, FC_SLANT_ITALIC, FC_SLANT_OBLIQUE, FC_SLANT_ROMAN, FC_WEIGHT_BLACK,
     FC_WEIGHT_BOLD, FC_WEIGHT_EXTRABOLD, FC_WEIGHT_EXTRALIGHT, FC_WEIGHT_LIGHT, FC_WEIGHT_MEDIUM,
@@ -13,13 +13,13 @@ use fc_fontations_bindgen::{
 };
 
 use crate::{
-    pattern_bindings::{FcPatternBuilder, PatternElement},
+    pattern_bindings::{fc_wrapper::FcRangeWrapper, FcPatternBuilder, PatternElement},
     InstanceMode,
 };
 use read_fonts::TableProvider;
 use skrifa::{
     attribute::{Attributes, Stretch, Style, Weight},
-    FontRef,
+    AxisCollection, FontRef, MetadataProvider, NamedInstance, Tag,
 };
 
 fn fc_weight(skrifa_weight: Weight) -> f64 {
@@ -92,19 +92,36 @@ fn fc_width_from_os2(font_ref: &FontRef) -> Option<f64> {
     Some(converted as f64)
 }
 
-struct AttributesToPattern {
+struct AttributesToPattern<'a> {
     weight_from_os2: Option<f64>,
     width_from_os2: Option<f64>,
     attributes: Attributes,
+    axes: AxisCollection<'a>,
+    named_instance: Option<NamedInstance<'a>>,
 }
 
-impl AttributesToPattern {
-    fn new(font: &FontRef) -> Self {
+impl<'a> AttributesToPattern<'a> {
+    fn new(font: &'a FontRef, instance_mode: &InstanceMode) -> Self {
+        let named_instance = match instance_mode {
+            InstanceMode::Named(index) => font.named_instances().get(*index as usize),
+            _ => None,
+        };
         Self {
             weight_from_os2: fc_weight_from_os2(font),
             width_from_os2: fc_width_from_os2(font),
             attributes: Attributes::new(font),
+            axes: font.axes(),
+            named_instance,
         }
+    }
+
+    fn user_coord_for_tag(&self, tag: Tag) -> Option<f64> {
+        let mut axis_coords = self
+            .axes
+            .iter()
+            .map(|axis| axis.tag())
+            .zip(self.named_instance.clone()?.user_coords());
+        Some(axis_coords.find(|item| item.0 == tag)?.1 as f64)
     }
 
     fn static_weight(&self) -> PatternElement {
@@ -137,6 +154,89 @@ impl AttributesToPattern {
             (fc_slant(self.attributes.style) as i32).into(),
         )
     }
+
+    fn instance_weight(&self) -> Option<PatternElement> {
+        let named_instance_weight = self.user_coord_for_tag(Tag::new(b"wght"))?;
+        unsafe {
+            Some(PatternElement::new(
+                FC_WEIGHT_OBJECT as i32,
+                FcWeightFromOpenTypeDouble(named_instance_weight).into(),
+            ))
+        }
+    }
+
+    fn instance_width(&self) -> Option<PatternElement> {
+        let named_instance_weight = self.user_coord_for_tag(Tag::new(b"wdth"))?;
+
+        Some(PatternElement::new(
+            FC_WIDTH_OBJECT as i32,
+            named_instance_weight.into(),
+        ))
+    }
+
+    fn instance_slant(&self) -> Option<PatternElement> {
+        let named_instance_slant = self.user_coord_for_tag(Tag::new(b"slnt"))?;
+        if named_instance_slant < 0.0 {
+            Some(PatternElement::new(
+                FC_SLANT_OBJECT as i32,
+                (FC_SLANT_ITALIC as i32).into(),
+            ))
+        } else {
+            Some(PatternElement::new(
+                FC_SLANT_OBJECT as i32,
+                (FC_SLANT_ROMAN as i32).into(),
+            ))
+        }
+    }
+
+    fn instance_size(&self) -> Option<PatternElement> {
+        let named_instance_size = self.user_coord_for_tag(Tag::new(b"opsz"))?;
+
+        Some(PatternElement::new(
+            FC_SIZE_OBJECT as i32,
+            named_instance_size.into(),
+        ))
+    }
+
+    fn default_size(&self) -> Option<PatternElement> {
+        self.axes.get_by_tag(Tag::new(b"opsz")).map(|opsz_axis| {
+            PatternElement::new(
+                FC_SIZE_OBJECT as i32,
+                (opsz_axis.default_value() as f64).into(),
+            )
+        })
+    }
+
+    fn variable_weight(&self) -> Option<PatternElement> {
+        let weight_axis = self.axes.get_by_tag(Tag::new(b"wght"))?;
+        unsafe {
+            Some(PatternElement::new(
+                FC_WEIGHT_OBJECT as i32,
+                FcRangeWrapper::new(
+                    FcWeightFromOpenTypeDouble(weight_axis.min_value() as f64),
+                    FcWeightFromOpenTypeDouble(weight_axis.max_value() as f64),
+                )?
+                .into(),
+            ))
+        }
+    }
+
+    fn variable_width(&self) -> Option<PatternElement> {
+        let width_axis = self.axes.get_by_tag(Tag::new(b"wdth"))?;
+        Some(PatternElement::new(
+            FC_WIDTH_OBJECT as i32,
+            FcRangeWrapper::new(width_axis.min_value() as f64, width_axis.max_value() as f64)?
+                .into(),
+        ))
+    }
+
+    fn variable_opsz(&self) -> Option<PatternElement> {
+        let opsz_axis = self.axes.get_by_tag(Tag::new(b"opsz"))?;
+        Some(PatternElement::new(
+            FC_SIZE_OBJECT as i32,
+            FcRangeWrapper::new(opsz_axis.min_value() as f64, opsz_axis.max_value() as f64)?.into(),
+        ))
+    }
 }
 
 pub fn append_style_elements(
@@ -149,7 +249,7 @@ pub fn append_style_elements(
     // but falls back to flags if those are not found. So far, I haven't identified test fonts
     // for which the WWS code path would trigger.
 
-    let attributes_converter = AttributesToPattern::new(font);
+    let attributes_converter = AttributesToPattern::new(font, &instance_mode);
 
     match instance_mode {
         InstanceMode::Default => {
@@ -168,9 +268,60 @@ pub fn append_style_elements(
                 false.into(),
             ));
         }
-        _ => {
-            // TODO: Variable and named instances not implemented yet.
-            unreachable!()
+        InstanceMode::Variable => {
+            if let Some(weight_to_add) = attributes_converter
+                .variable_weight()
+                .or(Some(attributes_converter.static_weight()))
+            {
+                pattern.append_element(weight_to_add);
+            }
+            if let Some(width_to_add) = attributes_converter
+                .variable_width()
+                .or(Some(attributes_converter.static_width()))
+            {
+                pattern.append_element(width_to_add);
+            }
+            if let Some(size) = attributes_converter.variable_opsz() {
+                pattern.append_element(size);
+            }
+            pattern.append_element(PatternElement::new(FC_VARIABLE_OBJECT as i32, true.into()));
+
+            // TODO: Check if this should have a zero ttc index if not part of a collection.
+            pattern.append_element(PatternElement::new(
+                FC_INDEX_OBJECT as i32,
+                ttc_index.unwrap_or_default().into(),
+            ));
+            pattern.append_element(PatternElement::new(
+                FC_NAMED_INSTANCE_OBJECT as i32,
+                false.into(),
+            ));
+            pattern.append_element(attributes_converter.static_slant());
+        }
+        InstanceMode::Named(index) => {
+            if let Some(weight) = attributes_converter.instance_weight() {
+                pattern.append_element(weight);
+            }
+            if let Some(width) = attributes_converter.instance_width() {
+                pattern.append_element(width);
+            }
+            pattern.append_element(PatternElement::new(FC_VARIABLE_OBJECT as i32, false.into()));
+            pattern.append_element(PatternElement::new(
+                FC_INDEX_OBJECT as i32,
+                (ttc_index.unwrap_or_default() + ((index + 1) << 16)).into(),
+            ));
+            if let Some(size_element) = attributes_converter
+                .instance_size()
+                .or(attributes_converter.default_size())
+            {
+                pattern.append_element(size_element);
+            };
+            if let Some(slant_element) = attributes_converter.instance_slant() {
+                pattern.append_element(slant_element);
+            }
+            pattern.append_element(PatternElement::new(
+                FC_NAMED_INSTANCE_OBJECT as i32,
+                true.into(),
+            ));
         }
     }
 }

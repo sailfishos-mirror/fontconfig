@@ -24,7 +24,7 @@
 
 extern crate fc_fontations_bindgen;
 
-mod fc_wrapper;
+pub mod fc_wrapper;
 
 use std::ffi::CString;
 use std::fmt::Debug;
@@ -35,10 +35,10 @@ use fc_fontations_bindgen::fcint::{
     FcPatternObjectAddString, FC_FAMILY_OBJECT,
 };
 
-use self::fc_wrapper::{FcCharSetWrapper, FcLangSetWrapper, FcPatternWrapper, FcRangeWrapper};
+use fc_wrapper::{FcCharSetWrapper, FcLangSetWrapper, FcPatternWrapper, FcRangeWrapper};
 
 #[allow(unused)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum PatternValue {
     String(CString),
     Boolean(bool),
@@ -73,7 +73,13 @@ impl From<f64> for PatternValue {
     }
 }
 
-#[derive(Debug)]
+impl From<FcRangeWrapper> for PatternValue {
+    fn from(item: FcRangeWrapper) -> Self {
+        PatternValue::Range(item)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct PatternElement {
     object_id: i32,
     value: PatternValue,
@@ -127,7 +133,7 @@ impl PatternElement {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct FcPatternBuilder {
     elements: Vec<PatternElement>,
 }

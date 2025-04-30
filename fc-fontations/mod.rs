@@ -24,6 +24,7 @@
 
 mod attributes;
 mod foundries;
+mod instance_enumerate;
 mod names;
 mod pattern_bindings;
 
@@ -33,8 +34,8 @@ use names::add_names;
 
 use fc_fontations_bindgen::{
     fcint::{
-        FC_COLOR_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT,
-        FC_FOUNDRY_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
+        FC_COLOR_OBJECT, FC_DECORATIVE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT,
+        FC_FONT_HAS_HINT_OBJECT, FC_FOUNDRY_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
@@ -43,16 +44,15 @@ use font_types::Tag;
 use pattern_bindings::{FcPatternBuilder, PatternElement};
 use std::str::FromStr;
 
-use read_fonts::{
-    FileRef::{self, Collection, Font},
-    FontRef, TableProvider,
-};
+use read_fonts::{FileRef, FontRef, TableProvider};
 
 use std::{
     ffi::{CStr, CString, OsStr},
     iter::IntoIterator,
     os::unix::ffi::OsStrExt,
 };
+
+use instance_enumerate::{all_instances, fonts_and_indices};
 
 #[no_mangle]
 /// Externally called in fcfontations.c as the file scanner function
@@ -86,40 +86,12 @@ pub unsafe extern "C" fn add_patterns_to_fontset(
 ///
 /// We add one pattern for the default instance, one for each named instance,
 /// and one for using the font as a variable font, with ranges of values where applicable.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[allow(dead_code)]
 enum InstanceMode {
     Default,
     Named(i32),
     Variable,
-}
-
-fn fonts_and_indices(
-    file_ref: Option<FileRef>,
-) -> impl Iterator<Item = (FontRef<'_>, Option<i32>)> {
-    let (iter_one, iter_two) = match file_ref {
-        Some(Font(font)) => (Some((Ok(font.clone()), None)), None),
-        Some(Collection(collection)) => (
-            None,
-            Some(
-                collection
-                    .iter()
-                    .enumerate()
-                    .map(|entry| (entry.1, Some(entry.0 as i32))),
-            ),
-        ),
-        None => (None, None),
-    };
-    iter_two
-        .into_iter()
-        .flatten()
-        .chain(iter_one)
-        .filter_map(|(font_result, index)| {
-            if let Ok(font) = font_result {
-                return Some((font, index));
-            }
-            None
-        })
 }
 
 fn has_one_of_tables<I>(font_ref: &FontRef, tags: I) -> bool
@@ -153,8 +125,6 @@ fn build_patterns_for_font(
     ttc_index: Option<i32>,
 ) -> Vec<*mut FcPattern> {
     let mut pattern = FcPatternBuilder::new();
-
-    add_names(font, &mut pattern);
 
     let has_glyf = has_one_of_tables(font, ["glyf"]);
     let has_cff = has_one_of_tables(font, ["CFF ", "CFF2"]);
@@ -214,14 +184,48 @@ fn build_patterns_for_font(
         version.into(),
     ));
 
-    // TODO: Handle variable instance and named instances.
-    append_style_elements(font, InstanceMode::Default, ttc_index, &mut pattern);
+    // So far the pattern elements applied to te whole font file, in the below,
+    // clone the current pattern state and add instance specific
+    // attributes. FontConfig for variable fonts produces a pattern for the
+    // default instance, each named instance, and a separate one for the
+    // "variable instance", which may contain ranges for pattern elements that
+    // describe variable aspects, such as weight of the font.
+    all_instances(font)
+        .flat_map(move |instance_mode| {
+            let mut instance_pattern = pattern.clone();
 
-    pattern
-        .create_fc_pattern()
-        .map(|p| p.into_raw() as *mut FcPattern)
-        .into_iter()
-        .collect()
+            // Style names: fcfreetype adds TT_NAME_ID_WWS_SUBFAMILY, TT_NAME_ID_TYPOGRAPHIC_SUBFAMILY,
+            // TT_NAME_ID_FONT_SUBFAMILY as FC_STYLE_OBJECT, FC_STYLE_OBJECT_LANG unless a named instance
+            // is added,then the instance's name id is used as FC_STYLE_OBJECT.
+
+            append_style_elements(font, instance_mode, ttc_index, &mut instance_pattern);
+
+            // For variable fonts:
+            // Names (mainly postscript name and style), weight, width and opsz (font-size?) are affected.
+            // * Add the variable font itself, with ranges for weight, width, opsz.
+            // * Add an entry for each named instance
+            //   * With instance name turning into FC_STYLE_OBJECT.
+            //   * Fixed width, wgth, opsz
+            // * Add the default instance with fixed values.
+            let mut had_decoratve = false;
+            // Family and full name.
+            add_names(
+                font,
+                instance_mode,
+                &mut instance_pattern,
+                &mut had_decoratve,
+            );
+
+            instance_pattern.append_element(PatternElement::new(
+                FC_DECORATIVE_OBJECT as i32,
+                had_decoratve.into(),
+            ));
+
+            instance_pattern
+                .create_fc_pattern()
+                .map(|wrapper| wrapper.into_raw() as *mut FcPattern)
+        })
+        .collect::<Vec<_>>()
 }
 
 #[cfg(test)]

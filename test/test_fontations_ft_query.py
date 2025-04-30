@@ -19,7 +19,7 @@ def list_test_fonts():
     for root, _, files in os.walk(builddir() / "testfonts"):
         for file in files:
             # Variable .ttc not supported yet.
-            if file.endswith(".ttf") and not "RobotoFlex" in file:
+            if file.endswith(".ttf"):
                 font_files.append(os.path.join(root, file))
     return font_files
 
@@ -53,8 +53,8 @@ def test_fontations_freetype_fcquery_equal(font_file):
     print(f"Testing with: {font_file}")  # Example usage
 
     supported_format_entitites = [
-        "family[0]",
-        "familylang[0]",
+        "family",
+        "familylang",
         "outline",
         "scalable",
         "fontformat",
