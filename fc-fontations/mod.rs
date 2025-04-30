@@ -22,11 +22,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-extern crate fc_fontations_bindgen;
-extern crate font_types;
-extern crate read_fonts;
-extern crate skrifa;
-
 mod names;
 mod pattern_bindings;
 
@@ -195,7 +190,7 @@ fn build_patterns_for_font(
 mod test {
     use crate::add_patterns_to_fontset;
     use fc_fontations_bindgen::{FcFontSetCreate, FcFontSetDestroy};
-    use CString;
+    use std::ffi::CString;
 
     #[test]
     fn basic_pattern_construction() {

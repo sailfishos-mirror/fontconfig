@@ -28,10 +28,9 @@ use fc_fontations_bindgen::fcint::{
     FC_FAMILYLANG_OBJECT, FC_FAMILY_OBJECT, FC_INVALID_OBJECT, FC_POSTSCRIPT_NAME_OBJECT,
 };
 
-use CString;
-use FcPatternBuilder;
-use FontRef;
-use PatternElement;
+use crate::{FcPatternBuilder, PatternElement};
+use read_fonts::FontRef;
+use std::ffi::CString;
 
 use std::collections::HashSet;
 
