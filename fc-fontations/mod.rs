@@ -28,6 +28,7 @@ mod charset;
 mod foundries;
 mod instance_enumerate;
 mod lang;
+mod name_records;
 mod names;
 mod pattern_bindings;
 
@@ -40,9 +41,9 @@ use names::add_names;
 use fc_fontations_bindgen::{
     fcint::{
         FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
-        FC_DECORATIVE_OBJECT, FC_FILE_OBJECT, FC_FONTFORMAT_OBJECT,
-        FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FONT_WRAPPER_OBJECT, FC_FOUNDRY_OBJECT,
-        FC_LANG_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
+        FC_DECORATIVE_OBJECT, FC_FILE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT,
+        FC_FONT_HAS_HINT_OBJECT, FC_FONT_WRAPPER_OBJECT, FC_FOUNDRY_OBJECT, FC_LANG_OBJECT,
+        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };

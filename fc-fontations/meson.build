@@ -14,6 +14,8 @@ if (fontations.enabled())
       '--raw-line= ',
       '--raw-line=pub mod fcint;',
     ],
+    # FC_NO_MT=1 is added here to reduce required headers in bindings generation.
+    # It does not mean a functional change in multi-threading behavior.
     c_args : ['-DBINDGEN_IGNORE_VISIBILITY=1', '-DFC_NO_MT=1'],
   )
 
@@ -29,6 +31,8 @@ if (fontations.enabled())
       '--raw-line= ',
       '--raw-line=pub use crate::FcCharSet; pub use crate::FcLangSet;',
     ],
+    # FC_NO_MT=1 is added here to reduce required headers in bindings generation.
+    # It does not mean a functional change in multi-threading behavior.
     c_args : ['-DBINDGEN_IGNORE_VISIBILITY=1', '-DFC_NO_MT=1'],
   )
 
