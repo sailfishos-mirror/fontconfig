@@ -189,6 +189,7 @@ FcCharSetPutLeaf (FcCharSet  *fcs,
 		return FcFalse;
 	    }
 	    for (i = 0; i < fcs->num; i++) {
+		// Reconstruct FcCharLeaf* from offset, similar to how FcCharSetLeaf() macro operates
 		FcCharLeaf *leaf = FcOffsetToPtr (leaves, new_leaves[i], FcCharLeaf);
 		new_leaves[i] = FcPtrToOffset (new_leaves, leaf);
 	    }
