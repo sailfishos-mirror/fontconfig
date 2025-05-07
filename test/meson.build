@@ -21,6 +21,7 @@ tests = [
   ['test-bz1744377.c'],
   ['test-issue180.c'],
   ['test-family-matching.c'],
+  ['test-ptrlist.c', {'include_directories': include_directories('../src'), 'dependencies': libintl_dep}],
 ]
 tests_not_parallel = []
 
@@ -53,12 +54,13 @@ foreach test_data : tests + tests_not_parallel
   opts = test_data.length() > 1 ? test_data[1] : {}
   extra_c_args = opts.get('c_args', [])
   extra_deps = opts.get('dependencies', [])
+  extra_incdir = opts.get('include_directories', [])
 
   test_name = fname.split('.')[0].underscorify()
 
   exe = executable(test_name, fname,
     c_args: c_args + extra_c_args,
-    include_directories: incbase,
+    include_directories: [incbase] + extra_incdir,
     link_with: link_with_libs,
     dependencies: extra_deps,
   )
