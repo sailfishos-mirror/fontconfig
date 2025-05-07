@@ -215,7 +215,6 @@ FcFini (void)
 {
     FcConfigFini();
     FcConfigPathFini();
-    FcDefaultFini();
     FcObjectFini();
     FcCacheFini();
 }

@@ -202,6 +202,10 @@ FcConfigCreate (void)
     config->filter_func = NULL;
     config->filter_data = NULL;
     config->destroy_data_func = NULL;
+    config->default_lang = NULL;
+    config->default_langs = NULL;
+    config->prgname = NULL;
+    config->desktop_name = NULL;
 
     config->prefer_app_fonts = FcFalse;
 
@@ -382,6 +386,15 @@ FcConfigDestroy (FcConfig *config)
 
 	if (config->filter_data && config->destroy_data_func)
 	    config->destroy_data_func (config->filter_data);
+
+	if (config->default_lang)
+	    FcStrFree (config->default_lang);
+	if (config->default_langs)
+	    FcStrSetDestroy (config->default_langs);
+	if (config->prgname)
+	    FcStrFree (config->prgname);
+	if (config->desktop_name)
+	    FcStrFree (config->desktop_name);
 
 	free (config);
     }
@@ -1935,7 +1948,7 @@ FcConfigSubstituteWithPat (FcConfig   *config,
 
     s = config->subst[kind];
     if (kind == FcMatchPattern) {
-	strs = FcGetDefaultLangs();
+	strs = FcConfigGetDefaultLangs (config);
 	if (strs) {
 	    FcStrList *l = FcStrListCreate (strs);
 	    FcChar8   *lang;
@@ -1982,7 +1995,7 @@ FcConfigSubstituteWithPat (FcConfig   *config,
 	    FcLangSetDestroy (lsund);
 	}
 	if (FcPatternObjectGet (p, FC_PRGNAME_OBJECT, 0, &v) == FcResultNoMatch) {
-	    FcChar8 *prgname = FcGetPrgname();
+	    FcChar8 *prgname = FcConfigGetPrgname (config);
 	    if (prgname)
 		FcPatternObjectAddString (p, FC_PRGNAME_OBJECT, prgname);
 	}
