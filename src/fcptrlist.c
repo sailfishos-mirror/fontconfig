@@ -31,6 +31,7 @@ typedef struct _FcPtrListEntry {
 struct _FcPtrList {
     FcDestroyFunc   destroy_func;
     FcPtrListEntry *list;
+    FcPtrListEntry *last;
 };
 typedef struct _FcPtrListIterPrivate {
     const FcPtrList *list;
@@ -46,6 +47,7 @@ FcPtrListCreate (FcDestroyFunc func)
     if (ret) {
 	ret->destroy_func = func;
 	ret->list = NULL;
+	ret->last = NULL;
     }
 
     return ret;
@@ -85,16 +87,10 @@ FcPtrListIterInitAtLast (FcPtrList     *list,
                          FcPtrListIter *iter)
 {
     FcPtrListIterPrivate *priv = (FcPtrListIterPrivate *)iter;
-    FcPtrListEntry      **e, **p;
-
-    e = &list->list;
-    p = e;
-    for (; *e; p = e, e = &(*e)->next)
-	;
 
     priv->list = list;
-    priv->entry = *e;
-    priv->prev = *p;
+    priv->entry = NULL;
+    priv->prev = list->last;
 }
 
 FcBool
@@ -154,6 +150,7 @@ FcPtrListIterAdd (FcPtrList     *list,
 	priv->entry->next = e;
     } else {
 	e->next = NULL;
+	list->last = e;
 	if (priv->prev) {
 	    priv->prev->next = e;
 	    priv->entry = priv->prev;
@@ -187,6 +184,8 @@ FcPtrListIterRemove (FcPtrList     *list,
 	priv->prev->next = priv->entry->next;
     priv->entry = priv->entry->next;
     free (e);
+    if (!priv->entry)
+	list->last = priv->prev;
 
     return FcTrue;
 }
