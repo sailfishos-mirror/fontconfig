@@ -61,6 +61,7 @@ def test_fontations_freetype_fcquery_equal(font_file):
         "color",
         "fonthashint",
         "foundry",
+        "version",
     ]
     format_string = ":".join(
         "%{" + entity + "}" for entity in supported_format_entitites

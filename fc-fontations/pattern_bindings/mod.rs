@@ -61,6 +61,12 @@ impl From<bool> for PatternValue {
     }
 }
 
+impl From<i32> for PatternValue {
+    fn from(item: i32) -> Self {
+        PatternValue::Integer(item)
+    }
+}
+
 #[derive(Debug)]
 pub struct PatternElement {
     object_id: i32,
