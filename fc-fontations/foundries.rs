@@ -63,7 +63,7 @@ pub fn make_foundry(font: &FontRef) -> Option<CString> {
         return CString::new(os2.ach_vend_id().to_be_bytes()).ok();
     }
 
-    map_foundry_from_name_entry(&mut font.localized_strings(StringId::TRADEMARK)).or_else(
-        || map_foundry_from_name_entry(&mut font.localized_strings(StringId::MANUFACTURER)),
-    )
+    map_foundry_from_name_entry(&mut font.localized_strings(StringId::TRADEMARK)).or_else(|| {
+        map_foundry_from_name_entry(&mut font.localized_strings(StringId::MANUFACTURER))
+    })
 }
