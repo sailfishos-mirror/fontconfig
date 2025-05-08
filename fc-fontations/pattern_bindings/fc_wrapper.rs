@@ -24,10 +24,11 @@
 
 use fc_fontations_bindgen::{
     fcint::{
-        FcCharSet, FcCharSetCreate, FcCharSetDestroy, FcLangSet, FcPattern, FcPatternCreate,
-        FcPatternDestroy, FcRange, FcRangeCopy, FcRangeCreateDouble, FcRangeDestroy,
+        FcCharSet, FcCharSetCopy, FcCharSetCreate, FcCharSetDestroy, FcLangSet, FcPattern,
+        FcPatternCreate, FcPatternDestroy, FcRange, FcRangeCopy, FcRangeCreateDouble,
+        FcRangeDestroy,
     },
-    FcLangSetCreate, FcLangSetDestroy,
+    FcLangSetCopy, FcLangSetCreate, FcLangSetDestroy,
 };
 
 macro_rules! wrap_fc_object {
@@ -128,7 +129,8 @@ impl FcPatternWrapper {
 wrap_fc_object! {
     FcCharSetWrapper,
     FcCharSet,
-    FcCharSetDestroy
+    FcCharSetDestroy,
+    FcCharSetCopy
 }
 
 impl FcCharSetWrapper {
@@ -151,7 +153,8 @@ impl FcCharSetWrapper {
 wrap_fc_object! {
     FcLangSetWrapper,
     FcLangSet,
-    FcLangSetDestroy
+    FcLangSetDestroy,
+    FcLangSetCopy
 }
 
 impl FcLangSetWrapper {
