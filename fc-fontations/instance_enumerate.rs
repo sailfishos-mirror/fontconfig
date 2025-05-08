@@ -1,5 +1,5 @@
 /*
- * fontconfig/fc-fontations/mod.rs
+ * fontconfig/fc-fontations/instance_enumerate.rs
  *
  * Copyright 2025 Google LLC.
  *
