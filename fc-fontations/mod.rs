@@ -23,19 +23,22 @@
  */
 
 mod attributes;
+mod capabilities;
 mod foundries;
 mod instance_enumerate;
 mod names;
 mod pattern_bindings;
 
 use attributes::append_style_elements;
+use capabilities::make_capabilities;
 use foundries::make_foundry;
 use names::add_names;
 
 use fc_fontations_bindgen::{
     fcint::{
-        FC_COLOR_OBJECT, FC_DECORATIVE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT,
-        FC_FONT_HAS_HINT_OBJECT, FC_FOUNDRY_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
+        FC_CAPABILITY_OBJECT, FC_COLOR_OBJECT, FC_DECORATIVE_OBJECT, FC_FONTFORMAT_OBJECT,
+        FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FOUNDRY_OBJECT, FC_OUTLINE_OBJECT,
+        FC_SCALABLE_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
@@ -171,6 +174,13 @@ fn build_patterns_for_font(
         FC_FOUNDRY_OBJECT as i32,
         foundry_string.into(),
     ));
+
+    if let Some(capabilities) = make_capabilities(font) {
+        pattern.append_element(PatternElement::new(
+            FC_CAPABILITY_OBJECT as i32,
+            capabilities.into(),
+        ));
+    };
 
     let version = font
         .head()

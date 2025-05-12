@@ -493,6 +493,8 @@ static const FcMacRomanFake fcMacRomanFake[] = {
     { TT_MS_LANGID_ENGLISH_UNITED_STATES, "ASCII"    },
 };
 
+static const char fcSilfCapability[] = "ttable:Silf";
+
 static FcChar8 *
 FcFontCapabilities (FT_Face face);
 
@@ -2662,14 +2664,14 @@ FcFontCapabilities (FT_Face face)
 	goto bail;
 
     maxsize = (((FT_ULong)gpos_count + (FT_ULong)gsub_count) * OTLAYOUT_LEN +
-               (issilgraphitefont ? 13 : 0));
+               (issilgraphitefont ? strlen(fcSilfCapability) : 0));
     complex_ = malloc (sizeof (FcChar8) * maxsize);
     if (!complex_)
 	goto bail;
 
     complex_[0] = '\0';
     if (issilgraphitefont)
-	strcpy ((char *)complex_, "ttable:Silf ");
+	strcpy ((char *)complex_, fcSilfCapability);
 
     while ((indx1 < gsub_count) || (indx2 < gpos_count)) {
 	if (indx1 == gsub_count) {
