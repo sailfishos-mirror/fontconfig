@@ -24,6 +24,7 @@
 
 mod attributes;
 mod capabilities;
+mod charset;
 mod foundries;
 mod instance_enumerate;
 mod names;
@@ -36,9 +37,9 @@ use names::add_names;
 
 use fc_fontations_bindgen::{
     fcint::{
-        FC_CAPABILITY_OBJECT, FC_COLOR_OBJECT, FC_DECORATIVE_OBJECT, FC_FONTFORMAT_OBJECT,
-        FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FOUNDRY_OBJECT, FC_OUTLINE_OBJECT,
-        FC_SCALABLE_OBJECT,
+        FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT, FC_DECORATIVE_OBJECT,
+        FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FOUNDRY_OBJECT,
+        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
@@ -179,6 +180,13 @@ fn build_patterns_for_font(
         pattern.append_element(PatternElement::new(
             FC_CAPABILITY_OBJECT as i32,
             capabilities.into(),
+        ));
+    };
+
+    if let Some(charset) = charset::make_charset(font) {
+        pattern.append_element(PatternElement::new(
+            FC_CHARSET_OBJECT as i32,
+            charset.into(),
         ));
     };
 

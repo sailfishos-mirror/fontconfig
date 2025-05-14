@@ -79,6 +79,12 @@ impl From<FcRangeWrapper> for PatternValue {
     }
 }
 
+impl From<FcCharSetWrapper> for PatternValue {
+    fn from(value: FcCharSetWrapper) -> Self {
+        PatternValue::CharSet(value)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct PatternElement {
     object_id: i32,
