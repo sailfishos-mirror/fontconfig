@@ -40,14 +40,16 @@ use names::add_names;
 use fc_fontations_bindgen::{
     fcint::{
         FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
-        FC_DECORATIVE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT,
-        FC_FOUNDRY_OBJECT, FC_LANG_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
+        FC_DECORATIVE_OBJECT, FC_FILE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT,
+        FC_FONT_HAS_HINT_OBJECT, FC_FONT_WRAPPER_OBJECT, FC_FOUNDRY_OBJECT, FC_LANG_OBJECT,
+        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
 
 use font_types::Tag;
 use pattern_bindings::{fc_wrapper::FcLangSetWrapper, FcPatternBuilder, PatternElement};
+use skrifa::MetadataProvider;
 use std::str::FromStr;
 
 use read_fonts::{FileRef, FontRef, TableProvider};
@@ -127,7 +129,7 @@ fn has_hint(font_ref: &FontRef) -> bool {
 
 fn build_patterns_for_font(
     font: &FontRef,
-    _: *const libc::c_char,
+    font_file: *const libc::c_char,
     ttc_index: Option<i32>,
 ) -> Vec<*mut FcPattern> {
     let mut pattern = FcPatternBuilder::new();
@@ -178,6 +180,11 @@ fn build_patterns_for_font(
         foundry_string.into(),
     ));
 
+    pattern.append_element(PatternElement::new(
+        FC_SYMBOL_OBJECT as i32,
+        font.charmap().is_symbol().into(),
+    ));
+
     if let Some(capabilities) = make_capabilities(font) {
         pattern.append_element(PatternElement::new(
             FC_CAPABILITY_OBJECT as i32,
@@ -212,6 +219,20 @@ fn build_patterns_for_font(
         .map(|head| head.font_revision())
         .unwrap_or_default()
         .to_bits();
+
+    if !font_file.is_null() {
+        let filename = unsafe { std::ffi::CStr::from_ptr(font_file) };
+
+        pattern.append_element(PatternElement::new(
+            FC_FILE_OBJECT as i32,
+            filename.to_owned().into(),
+        ));
+    }
+
+    pattern.append_element(PatternElement::new(
+        FC_FONT_WRAPPER_OBJECT as i32,
+        CString::new("SFNT").unwrap().into(),
+    ));
 
     pattern.append_element(PatternElement::new(
         FC_FONTVERSION_OBJECT as i32,
