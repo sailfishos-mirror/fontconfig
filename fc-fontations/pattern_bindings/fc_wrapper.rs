@@ -181,4 +181,8 @@ impl FcLangSetWrapper {
             })
         }
     }
+
+    pub fn is_null(&self) -> bool {
+        self.inner.is_null()
+    }
 }

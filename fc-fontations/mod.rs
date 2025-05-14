@@ -27,25 +27,27 @@ mod capabilities;
 mod charset;
 mod foundries;
 mod instance_enumerate;
+mod lang;
 mod names;
 mod pattern_bindings;
 
 use attributes::append_style_elements;
 use capabilities::make_capabilities;
 use foundries::make_foundry;
+use lang::exclusive_lang;
 use names::add_names;
 
 use fc_fontations_bindgen::{
     fcint::{
-        FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT, FC_DECORATIVE_OBJECT,
-        FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FOUNDRY_OBJECT,
-        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
+        FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
+        FC_DECORATIVE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT,
+        FC_FOUNDRY_OBJECT, FC_LANG_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
 
 use font_types::Tag;
-use pattern_bindings::{FcPatternBuilder, PatternElement};
+use pattern_bindings::{fc_wrapper::FcLangSetWrapper, FcPatternBuilder, PatternElement};
 use std::str::FromStr;
 
 use read_fonts::{FileRef, FontRef, TableProvider};
@@ -183,11 +185,25 @@ fn build_patterns_for_font(
         ));
     };
 
+    // CharSet and Langset.
     if let Some(charset) = charset::make_charset(font) {
-        pattern.append_element(PatternElement::new(
-            FC_CHARSET_OBJECT as i32,
-            charset.into(),
-        ));
+        let exclusive_lang =
+            exclusive_lang(font).map_or(std::ptr::null(), |lang| lang.as_bytes_with_nul().as_ptr());
+
+        unsafe {
+            let langset =
+                FcLangSetWrapper::from_raw(FcFreeTypeLangSet(charset.as_ptr(), exclusive_lang));
+
+            pattern.append_element(PatternElement::new(
+                FC_CHARSET_OBJECT as i32,
+                charset.into(),
+            ));
+
+            // TODO: Move FcFreeTypeLangSet to a different name, as the function does not actually depend on FreeType.
+            if !langset.is_null() {
+                pattern.append_element(PatternElement::new(FC_LANG_OBJECT as i32, langset.into()));
+            }
+        }
     };
 
     let version = font

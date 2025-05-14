@@ -85,6 +85,12 @@ impl From<FcCharSetWrapper> for PatternValue {
     }
 }
 
+impl From<FcLangSetWrapper> for PatternValue {
+    fn from(value: FcLangSetWrapper) -> Self {
+        PatternValue::LangSet(value)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct PatternElement {
     object_id: i32,
