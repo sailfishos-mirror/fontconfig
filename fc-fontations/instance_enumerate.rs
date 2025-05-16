@@ -29,7 +29,6 @@ use read_fonts::{
 };
 use skrifa::MetadataProvider;
 
-#[allow(unused)]
 pub fn fonts_and_indices(
     file_ref: Option<FileRef>,
 ) -> impl Iterator<Item = (FontRef<'_>, Option<i32>)> {

@@ -32,7 +32,7 @@ use std::fmt::Debug;
 use fc_fontations_bindgen::fcint::{
     FcPattern, FcPatternObjectAddBool, FcPatternObjectAddCharSet, FcPatternObjectAddDouble,
     FcPatternObjectAddInteger, FcPatternObjectAddLangSet, FcPatternObjectAddRange,
-    FcPatternObjectAddString, FC_FAMILY_OBJECT,
+    FcPatternObjectAddString, FC_FAMILY_OBJECT, FC_FILE_OBJECT,
 };
 
 use fc_wrapper::{FcCharSetWrapper, FcLangSetWrapper, FcPatternWrapper, FcRangeWrapper};
@@ -165,23 +165,25 @@ impl FcPatternBuilder {
     pub fn create_fc_pattern(&mut self) -> Option<FcPatternWrapper> {
         let pattern = FcPatternWrapper::new()?;
 
-        let mut family_name_encountered = false;
+        let mut family_name_or_file_name_encountered = false;
 
         const FAMILY_ID: i32 = FC_FAMILY_OBJECT as i32;
+        const FILE_ID: i32 = FC_FILE_OBJECT as i32;
+
         for element in self.elements.drain(0..) {
             if let PatternElement {
-                object_id: FAMILY_ID,
-                value: PatternValue::String(ref fam_name),
+                object_id: FAMILY_ID | FILE_ID,
+                value: PatternValue::String(ref file_fam_name),
             } = element
             {
-                if !fam_name.is_empty() {
-                    family_name_encountered = true;
+                if !file_fam_name.is_empty() {
+                    family_name_or_file_name_encountered = true;
                 }
             }
             element.append_to_fc_pattern(pattern.as_ptr()).ok()?;
         }
 
-        if !family_name_encountered {
+        if !family_name_or_file_name_encountered {
             return None;
         }
 
