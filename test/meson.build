@@ -58,7 +58,7 @@ foreach test_data : tests + tests_not_parallel
 
   test_name = fname.split('.')[0].underscorify()
 
-  exe = executable(test_name, fname,
+  exe = executable(test_name, fname, fcstdint_h,
     c_args: c_args + extra_c_args,
     include_directories: [incbase] + extra_incdir,
     link_with: link_with_libs,
