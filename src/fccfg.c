@@ -210,6 +210,7 @@ FcConfigCreate (void)
     config->prefer_app_fonts = FcFalse;
 
     FcRefInit (&config->ref, 1);
+    FcObjectInit();
 
     return config;
 
@@ -356,6 +357,7 @@ FcConfigDestroy (FcConfig *config)
 	if (FcRefDec (&config->ref) != 1)
 	    return;
 
+	FcObjectFini();
 	(void)fc_atomic_ptr_cmpexch (&_fcConfig, config, NULL);
 
 	FcStrSetDestroy (config->configDirs);

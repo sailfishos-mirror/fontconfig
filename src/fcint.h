@@ -1413,6 +1413,8 @@ FcPrivate FcChar8 *
 FcStrSerialize (FcSerialize *serialize, const FcChar8 *str);
 
 /* fcobjs.c */
+FcPrivate void
+FcObjectInit (void);
 
 FcPrivate void
 FcObjectFini (void);
