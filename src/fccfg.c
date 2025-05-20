@@ -203,6 +203,8 @@ FcConfigCreate (void)
     config->filter_data = NULL;
     config->destroy_data_func = NULL;
 
+    config->prefer_app_fonts = FcFalse;
+
     FcRefInit (&config->ref, 1);
 
     return config;
