@@ -620,6 +620,11 @@ struct _FcConfig {
 
     FcBool prefer_app_fonts; /* Whether FcSetApplication has a priority than
                                 FcSetSystem for lookup */
+
+    FcChar8  *default_lang;  /* Primary language in default_langs */
+    FcStrSet *default_langs; /* String sets of the default languages */
+    FcChar8  *prgname;       /* Program name of current process */
+    FcChar8  *desktop_name;  /* Current desktop name */
 };
 
 typedef struct _FcFileTime {
@@ -944,16 +949,22 @@ FcInitDebug (void);
 
 /* fcdefault.c */
 FcPrivate FcChar8 *
+FcConfigGetDefaultLang (FcConfig *config);
+
+FcPrivate FcChar8 *
 FcGetDefaultLang (void);
+
+FcPrivate FcChar8 *
+FcConfigGetPrgname (FcConfig *config);
 
 FcPrivate FcChar8 *
 FcGetPrgname (void);
 
 FcPrivate FcChar8 *
-FcGetDesktopName (void);
+FcConfigGetDesktopName (FcConfig *config);
 
-FcPrivate void
-FcDefaultFini (void);
+FcPrivate FcChar8 *
+FcGetDesktopName (void);
 
 /* fcdir.c */
 
@@ -1402,6 +1413,8 @@ FcPrivate FcChar8 *
 FcStrSerialize (FcSerialize *serialize, const FcChar8 *str);
 
 /* fcobjs.c */
+FcPrivate void
+FcObjectInit (void);
 
 FcPrivate void
 FcObjectFini (void);

@@ -754,18 +754,20 @@ FcCacheAllocate (FcCache *cache, size_t len)
 void
 FcCacheFini (void)
 {
-    int i;
+    int    i;
+    FcBool res = FcTrue;
 
-    if (FcDebug() & FC_DBG_CACHE) {
-	for (i = 0; i < FC_CACHE_MAX_LEVEL; i++) {
-	    if (fcCacheChains[i] != NULL) {
+    for (i = 0; i < FC_CACHE_MAX_LEVEL; i++) {
+	if (fcCacheChains[i] != NULL) {
+	    res = FcFalse;
+	    if (FcDebug() & FC_DBG_CACHE) {
 		FcCacheSkip *s = fcCacheChains[i];
 		fprintf (stderr, "Fontconfig error: not freed %p (dir: %s, refcount %" FC_ATOMIC_INT_FORMAT ")\n", s->cache, FcCacheDir (s->cache), s->ref.count);
 	    }
 	}
     }
-
-    free_lock();
+    if (res)
+	free_lock();
 }
 
 static FcBool

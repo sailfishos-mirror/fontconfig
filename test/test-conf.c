@@ -455,7 +455,7 @@ run_test (FcConfig *config, json_object *root)
 		goto bail;
 	    }
 	    FcConfigSubstitute (config, query, FcMatchPattern);
-	    FcDefaultSubstitute (query);
+	    FcConfigSetDefaultSubstitute (config, query);
 	    match = FcFontMatch (config, query, &res);
 	    if (match) {
 		FcPatternIter iter;
