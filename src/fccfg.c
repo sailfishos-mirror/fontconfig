@@ -123,10 +123,21 @@ FcConfigInit (void)
 void
 FcConfigFini (void)
 {
-    FcConfig *cfg = fc_atomic_ptr_get (&_fcConfig);
-    if (cfg && fc_atomic_ptr_cmpexch (&_fcConfig, cfg, NULL))
-	FcConfigDestroy (cfg);
-    free_lock();
+    FcConfig *cfg;
+
+retry:
+    cfg = fc_atomic_ptr_get (&_fcConfig);
+    if (cfg) {
+	if (cfg->ref.count > 1)
+	    FcConfigDestroy (cfg);
+	else {
+	    if (fc_atomic_ptr_cmpexch (&_fcConfig, cfg, NULL))
+		FcConfigDestroy (cfg);
+	    else
+		goto retry;
+	    free_lock();
+	}
+    }
 }
 
 FcConfig *
