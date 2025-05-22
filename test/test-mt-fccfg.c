@@ -10,8 +10,7 @@
 #define NTHR 100
 
 struct thr_arg_s {
-    int       thr_num;
-    FcConfig *config;
+    int thr_num;
 };
 
 static void *
@@ -20,6 +19,7 @@ run_test_in_thread (void *arg)
     FcPattern *pat, *m;
     FcResult   result;
 
+    FcInit();
     pat = FcNameParse ((const FcChar8 *)"sans-serif");
     FcConfigSubstitute (NULL, pat, FcMatchPattern);
     FcConfigSetDefaultSubstitute (NULL, pat);
@@ -43,7 +43,6 @@ test (void)
     for (i = 0; i < NTHR; i++) {
 	int result;
 	thr_args[i].thr_num = i;
-	thr_args[i].config = FcConfigReference (c1);
 
 	result = pthread_create (&threads[i], NULL, run_test_in_thread, (void *)&thr_args[i]);
 	if (result != 0) {

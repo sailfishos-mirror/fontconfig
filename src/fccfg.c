@@ -117,7 +117,13 @@ FcDestroyAsRuleSet (void *data)
 FcBool
 FcConfigInit (void)
 {
-    return FcConfigEnsure() ? FcTrue : FcFalse;
+    FcBool is_new = !!(_fcConfig == NULL);
+    FcBool ret;
+
+    ret = FcConfigEnsure() ? FcTrue : FcFalse;
+    if (ret && !is_new)
+	FcConfigReference (_fcConfig);
+    return ret;
 }
 
 void
