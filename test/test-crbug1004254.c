@@ -38,18 +38,20 @@ run_query (void)
 {
     FcPattern *pat = FcPatternCreate(), *match;
     FcResult   result;
+    FcConfig *config = FcConfigReference (FcConfigGetCurrent());
 
     FcPatternAddString (pat, FC_FAMILY, (const FcChar8 *)"sans-serif");
     FcPatternAddBool (pat, FC_SCALABLE, FcTrue);
-    FcConfigSubstitute (NULL, pat, FcMatchPattern);
-    FcConfigSetDefaultSubstitute (NULL, pat);
-    match = FcFontMatch (NULL, pat, &result);
+    FcConfigSubstitute (config, pat, FcMatchPattern);
+    FcConfigSetDefaultSubstitute (config, pat);
+    match = FcFontMatch (config, pat, &result);
     if (result != FcResultMatch || !match) {
 	fprintf (stderr, "ERROR: No matches found\n");
     }
     if (match)
 	FcPatternDestroy (match);
     FcPatternDestroy (pat);
+    FcConfigDestroy (config);
 }
 
 static void
