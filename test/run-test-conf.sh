@@ -41,6 +41,7 @@ fi
 
 for i in \
 	45-generic.conf \
+	48-guessfamily.conf \
 	60-generic.conf \
 	70-no-bitmaps-and-emoji.conf \
 	70-no-bitmaps-except-emoji.conf \
