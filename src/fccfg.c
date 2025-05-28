@@ -70,7 +70,8 @@ unlock_config (void)
 {
     FcMutex *lock;
     lock = fc_atomic_ptr_get (&_lock);
-    FcMutexUnlock (lock);
+    if (lock)
+	FcMutexUnlock (lock);
 }
 
 static void
@@ -131,19 +132,10 @@ FcConfigFini (void)
 {
     FcConfig *cfg;
 
-retry:
+    FcConfigDestroy (_fcConfig);
     cfg = fc_atomic_ptr_get (&_fcConfig);
-    if (cfg) {
-	if (cfg->ref.count > 1)
-	    FcConfigDestroy (cfg);
-	else {
-	    if (fc_atomic_ptr_cmpexch (&_fcConfig, cfg, NULL))
-		FcConfigDestroy (cfg);
-	    else
-		goto retry;
-	    free_lock();
-	}
-    }
+    if (!cfg)
+	free_lock();
 }
 
 FcConfig *
@@ -408,8 +400,10 @@ FcConfigDestroy (FcConfig *config)
 
 	if (config->default_lang)
 	    FcStrFree (config->default_lang);
-	if (config->default_langs)
+	if (config->default_langs) {
+	    FcRefInit (&config->default_langs->ref, 1);
 	    FcStrSetDestroy (config->default_langs);
+	}
 	if (config->prgname)
 	    FcStrFree (config->prgname);
 	if (config->desktop_name)
