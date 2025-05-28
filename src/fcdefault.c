@@ -295,6 +295,8 @@ FcConfigSetDefaultSubstitute (FcConfig  *config,
     int           i;
     double        dpi, size, scale, pixelsize;
 
+    config = FcConfigReference (config);
+
     if (!FcPatternFindObjectIter (pattern, &iter, FC_WEIGHT_OBJECT))
 	FcPatternObjectAddInteger (pattern, FC_WEIGHT_OBJECT, FC_WEIGHT_NORMAL);
 
@@ -391,6 +393,8 @@ FcConfigSetDefaultSubstitute (FcConfig  *config,
 
     if (!FcPatternFindObjectIter (pattern, &iter, FC_ORDER_OBJECT))
 	FcPatternObjectAddInteger (pattern, FC_ORDER_OBJECT, 0);
+
+    FcConfigDestroy (config);
 }
 
 void
