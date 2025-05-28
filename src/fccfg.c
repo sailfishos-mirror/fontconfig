@@ -400,8 +400,10 @@ FcConfigDestroy (FcConfig *config)
 
 	if (config->default_lang)
 	    FcStrFree (config->default_lang);
-	if (config->default_langs)
+	if (config->default_langs) {
+	    FcRefInit (&config->default_langs->ref, 1);
 	    FcStrSetDestroy (config->default_langs);
+	}
 	if (config->prgname)
 	    FcStrFree (config->prgname);
 	if (config->desktop_name)
