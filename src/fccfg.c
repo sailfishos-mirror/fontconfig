@@ -70,7 +70,8 @@ unlock_config (void)
 {
     FcMutex *lock;
     lock = fc_atomic_ptr_get (&_lock);
-    FcMutexUnlock (lock);
+    if (lock)
+	FcMutexUnlock (lock);
 }
 
 static void
