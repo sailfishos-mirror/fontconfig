@@ -141,6 +141,7 @@ noinst_SCRIPTS =		\
 ##
 check_SCRIPTS =			\
 	check-missing-doc	\
+	check-missing-doc.py	\
 	check-whitespace-in-args	\
 	check-whitespace-in-args.py	\
 	$(NULL)

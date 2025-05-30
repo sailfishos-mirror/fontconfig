@@ -3,7 +3,7 @@ tests = []
 
 if host_machine.system() != 'windows'
   tests += [
-    'check-missing-doc',
+    'check-missing-doc.py',
     #    'check-whitespace-in-args'
   ]
   meson.add_dist_script(find_program('check-whitespace-in-args.py'), '@SOURCE_ROOT@/doc')
@@ -193,5 +193,5 @@ endif
 
 foreach script : tests
   py = find_program(script)
-  test(script, py)
+  test(script, py, args: [meson.project_source_root(), meson.project_build_root()])
 endforeach
