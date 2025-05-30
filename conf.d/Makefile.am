@@ -52,6 +52,8 @@ CONF_LINKS = \
 	80-delicious.conf \
 	90-synthetic.conf
 
+CONF_LINKS += 70-$(PREFERRED_BITMAP).conf
+
 EXTRA_DIST = $(template_DATA) $(DOC_SOURCES)
 CLEANFILES = $(DOC_FILES)
 

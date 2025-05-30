@@ -46,6 +46,7 @@ conf_files = [
 
 preferred_hinting = get_option('default-hinting')
 preferred_sub_pixel_rendering = get_option('default-sub-pixel-rendering')
+preferred_bitmap = get_option('bitmap-conf')
 
 conf_links = [
   '10-hinting-@0@.conf'.format(preferred_hinting),
@@ -70,6 +71,18 @@ conf_links = [
   '80-delicious.conf',
   '90-synthetic.conf',
 ]
+
+bitmap_conf_options = {
+  'yes': 'yes-bitmaps',
+  'no': 'no-bitmaps-and-emoji',
+  'no-except-emoji': 'no-bitmaps-except-emoji'
+}
+
+foreach opt, configfile : bitmap_conf_options
+  if opt == preferred_bitmap
+    conf_links += '70-@0@.conf'.format(configfile)
+  endif
+endforeach
 
 install_data(conf_files,
              install_dir: fc_templatedir,
