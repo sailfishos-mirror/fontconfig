@@ -484,6 +484,30 @@ none|slight|medium|full)
 esac
 
 #
+# default bitmap config
+#
+
+AC_ARG_WITH(bitmap-conf,
+    [AS_HELP_STRING([--with-bitmap-conf=NAME],[Enable your preferred bitmap related configuration (yes/no/no-except-emoji) [default=no-except-emoji]])],
+    preferred_bitmap="$withval", preferred_bitmap=no-except-emoji)
+
+case "$preferred_bitmap" in
+yes)
+    PREFERRED_BITMAP="yes-bitmaps"
+    ;;
+no)
+    PREFERRED_BITMAP="no-bitmaps-and-emoji"
+    ;;
+no-except-emoji)
+    PREFERRED_BITMAP="no-bitmaps-except-emoji"
+    ;;
+*)
+	AC_MSG_ERROR([Invalid bitmap config. please choose one of yes, no, or no-except-emoji])
+	;;
+esac
+AC_SUBST(PREFERRED_BITMAP)
+
+#
 # Set default font directory
 #
 
