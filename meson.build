@@ -25,6 +25,7 @@ curversion = fc_version_minor - 1
 libversion = '@0@.@1@.0'.format(soversion, curversion)
 defversion = '@0@.@1@'.format(curversion, fc_version_micro)
 osxversion = curversion + 1
+cacheversion = '9'
 
 freetype_req = '>= 21.0.15'
 freetype_req_cmake = '>= 2.8.1'
@@ -481,9 +482,10 @@ fcstdint_h = fs.copyfile('src/fcstdint.h.in', 'fcstdint.h')
 makealias = files('src/makealias.py')[0]
 
 
+subdir('fontconfig')
 
 
-alias_input_headers = ['fontconfig/fontconfig.h', 'src/fcdeprecate.h', 'fontconfig/fcprivate.h']
+alias_input_headers = [fontconfig_h, 'src/fcdeprecate.h', 'fontconfig/fcprivate.h']
 if get_option('fontations').enabled()
   alias_input_headers += ['fontconfig/fcfontations.h']
 endif
@@ -595,7 +597,7 @@ install_data('fonts.dtd',
              install_tag: 'runtime')
 
 fc_headers = [
-  'fontconfig/fontconfig.h',
+  fontconfig_h,
   'fontconfig/fcfreetype.h',
   'fontconfig/fcprivate.h',
 ]

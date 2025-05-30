@@ -68,6 +68,10 @@ dnl Initialize libtool
 LT_PREREQ([2.2])
 LT_INIT([disable-static win32-dll])
 
+dnl cache version
+CACHE_VERSION=9
+AC_SUBST(CACHE_VERSION)
+
 dnl libtool versioning
 
 dnl bump revision when fixing bugs
@@ -850,7 +854,9 @@ fc-pattern/Makefile
 fc-query/Makefile
 fc-scan/Makefile
 fc-validate/Makefile
+fontconfig/fontconfig.h
 doc/Makefile
+doc/cache-version.sgml
 doc/version.sgml
 its/Makefile
 po/Makefile.in
