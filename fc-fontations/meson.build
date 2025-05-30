@@ -4,7 +4,7 @@ if (fontations.enabled())
   rust = import('rust')
 
   generated_fontconfig = rust.bindgen(
-    input : '../fontconfig/fontconfig.h',
+    input : fontconfig_h,
     output : 'fontconfig.rs',
     include_directories : [ '../' ],
     args : [

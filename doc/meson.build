@@ -66,6 +66,12 @@ edit_sgml = find_program('edit-sgml.py')
 fontconfig_devel_sgml = fs.copyfile('fontconfig-devel.sgml')
 fontconfig_user_sgml = fs.copyfile('fontconfig-user.sgml')
 
+cacheversion_conf = configuration_data()
+cacheversion_conf.set('CACHE_VERSION', cacheversion)
+configure_file(output: 'cache-version.sgml',
+  input: 'cache-version.sgml.in',
+  configuration: cacheversion_conf)
+
 version_conf = configuration_data()
 version_conf.set('VERSION', meson.project_version())
 
