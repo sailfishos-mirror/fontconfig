@@ -32,7 +32,7 @@ def run_fc_query(font_file, format_string, with_fontations=False):
         env["FC_FONTATIONS"] = ""
 
     result = subprocess.run(
-        [fc_query_path, "-f", format_string, font_file],
+        [fc_query_path, '-f', format_string, font_file],
         stdout=subprocess.PIPE,
         env=env,
         stderr=subprocess.PIPE,
@@ -75,7 +75,6 @@ def test_fontations_freetype_fcquery_equal(font_file):
     format_string = ":".join(
         "%{" + entity + "}" for entity in supported_format_entitites
     )
-    print(format_string)
 
     font_path = Path(font_file)
 

@@ -23,6 +23,7 @@
  */
 
 mod attributes;
+mod bitmap;
 mod capabilities;
 mod charset;
 mod foundries;
@@ -33,6 +34,7 @@ mod names;
 mod pattern_bindings;
 
 use attributes::append_style_elements;
+use bitmap::add_pixel_size;
 use capabilities::make_capabilities;
 use foundries::make_foundry;
 use lang::exclusive_lang;
@@ -43,7 +45,7 @@ use fc_fontations_bindgen::{
         FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
         FC_DECORATIVE_OBJECT, FC_FILE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT,
         FC_FONT_HAS_HINT_OBJECT, FC_FONT_WRAPPER_OBJECT, FC_FOUNDRY_OBJECT, FC_LANG_OBJECT,
-        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
+        FC_ORDER_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
@@ -271,6 +273,10 @@ fn build_patterns_for_font(
         FC_FONTVERSION_OBJECT as i32,
         version.into(),
     ));
+
+    add_pixel_size(&mut pattern, font);
+
+    pattern.append_element(PatternElement::new(FC_ORDER_OBJECT as i32, 0.into()));
 
     // So far the pattern elements applied to te whole font file, in the below,
     // clone the current pattern state and add instance specific
