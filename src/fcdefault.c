@@ -229,7 +229,6 @@ retry:
     }
 
     if (prgname && !prgname[0]) {
-	free (prgname);
 	prgname = NULL;
     }
     FcConfigDestroy (config);
