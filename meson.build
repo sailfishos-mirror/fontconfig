@@ -370,10 +370,10 @@ endif
 xml_path = ''
 escaped_xml_path = ''
 foreach p : fc_add_fonts
-  s = '\t<dir>' + p + '</dir>\n'
+  s = '<dir>' + p + '</dir>\n\t'
   xml_path += s
   # No substitution method for string
-  s = '\\t<dir>' + p + '</dir>\\n'
+  s = '<dir>' + p + '</dir>\\n\\t'
   escaped_xml_path += s
 endforeach
 conf.set_quoted('FC_FONTPATH', escaped_xml_path)
@@ -420,9 +420,7 @@ conf.set_quoted('CONFIGDIR', fc_configdir)
 conf.set_quoted('FC_CACHEDIR', fc_cachedir)
 conf.set_quoted('FC_TEMPLATEDIR', fc_templatedir)
 conf.set_quoted('FONTCONFIG_PATH', fc_baseconfigdir)
-conf.set_quoted('FC_FONTPATH', '')
 
-fonts_conf.set('FC_FONTPATH', '')
 fonts_conf.set('FC_CACHEDIR', fc_cachedir)
 fonts_conf.set('CONFIGDIR', fc_configdir)
 # strip off fc_baseconfigdir prefix if that is the prefix
