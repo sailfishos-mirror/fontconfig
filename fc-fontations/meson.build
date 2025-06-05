@@ -14,7 +14,9 @@ if (fontations.enabled())
       '--raw-line= ',
       '--raw-line=pub mod fcint;',
     ],
-    c_args : ['-DBINDGEN_IGNORE_VISIBILITY=1'],
+    # FC_NO_MT=1 is added here to reduce required headers in bindings generation.
+    # It does not mean a functional change in multi-threading behavior.
+    c_args : ['-DBINDGEN_IGNORE_VISIBILITY=1', '-DFC_NO_MT=1'],
   )
 
   generated_fcint = rust.bindgen(
@@ -29,7 +31,9 @@ if (fontations.enabled())
       '--raw-line= ',
       '--raw-line=pub use crate::FcCharSet; pub use crate::FcLangSet;',
     ],
-    c_args : ['-DBINDGEN_IGNORE_VISIBILITY=1'],
+    # FC_NO_MT=1 is added here to reduce required headers in bindings generation.
+    # It does not mean a functional change in multi-threading behavior.
+    c_args : ['-DBINDGEN_IGNORE_VISIBILITY=1', '-DFC_NO_MT=1'],
   )
 
   bindgen_lib = static_library(
@@ -50,9 +54,9 @@ if (fontations.enabled())
     link_with: [bindgen_lib, pattern_lib, fontations_query_lib],
     rust_abi: 'c',
     dependencies: [
-      dependency('skrifa-0.30-rs'),
-      dependency('read-fonts-0.28-rs'),
-      dependency('font-types-0.8-rs'),
+      dependency('skrifa-0.31-rs'),
+      dependency('read-fonts-0.29-rs'),
+      dependency('font-types-0.9-rs'),
       dependency('libc-0.2-rs'),
     ],
     install: true,

@@ -1,5 +1,5 @@
 /*
- * fontconfig/fc-fontations/mod.rs
+ * fontconfig/fc-fontations/names.rs
  *
  * Copyright 2025 Google LLC.
  *
@@ -22,6 +22,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+use skrifa::string::LocalizedString;
 use skrifa::{string::StringId, MetadataProvider};
 
 use fc_fontations_bindgen::fcint::{
@@ -29,26 +30,27 @@ use fc_fontations_bindgen::fcint::{
     FC_INVALID_OBJECT, FC_POSTSCRIPT_NAME_OBJECT, FC_STYLELANG_OBJECT, FC_STYLE_OBJECT,
 };
 
-use crate::{FcPatternBuilder, InstanceMode, PatternElement};
-use read_fonts::FontRef;
+use crate::{name_records::FcSortedNameRecords, FcPatternBuilder, InstanceMode, PatternElement};
+use read_fonts::{FontRef, TableProvider};
 use std::ffi::CString;
 
 use std::collections::HashSet;
 
-fn objects_for_id(string_id: StringId) -> (i32, i32) {
+fn object_ids_for_name_id(string_id: StringId) -> Option<(i32, i32)> {
     match string_id {
         StringId::FAMILY_NAME | StringId::WWS_FAMILY_NAME | StringId::TYPOGRAPHIC_FAMILY_NAME => {
-            (FC_FAMILY_OBJECT as i32, FC_FAMILYLANG_OBJECT as i32)
+            Some((FC_FAMILY_OBJECT as i32, FC_FAMILYLANG_OBJECT as i32))
         }
-        StringId::FULL_NAME => (FC_FULLNAME_OBJECT as i32, FC_FULLNAMELANG_OBJECT as i32),
-        StringId::POSTSCRIPT_NAME => (FC_POSTSCRIPT_NAME_OBJECT as i32, FC_INVALID_OBJECT as i32),
+        StringId::FULL_NAME => Some((FC_FULLNAME_OBJECT as i32, FC_FULLNAMELANG_OBJECT as i32)),
+        StringId::POSTSCRIPT_NAME => {
+            Some((FC_POSTSCRIPT_NAME_OBJECT as i32, FC_INVALID_OBJECT as i32))
+        }
         StringId::SUBFAMILY_NAME
         | StringId::WWS_SUBFAMILY_NAME
         | StringId::TYPOGRAPHIC_SUBFAMILY_NAME => {
-            (FC_STYLE_OBJECT as i32, FC_STYLELANG_OBJECT as i32)
+            Some((FC_STYLE_OBJECT as i32, FC_STYLELANG_OBJECT as i32))
         }
-
-        _ => panic!("No equivalent FontConfig objects found for StringId."),
+        _ => None,
     }
 }
 
@@ -123,28 +125,24 @@ pub fn add_names(
     pattern: &mut FcPatternBuilder,
     had_decorative: &mut bool,
 ) {
-    // Order of these is important for matching FreeType. Or we might need to sort these descending to achieve the same result.
-    let string_ids = &[
-        StringId::WWS_FAMILY_NAME,
-        StringId::TYPOGRAPHIC_FAMILY_NAME,
-        StringId::FAMILY_NAME,
-        StringId::FULL_NAME,
-        StringId::POSTSCRIPT_NAME,
-        StringId::TYPOGRAPHIC_SUBFAMILY_NAME,
-        StringId::SUBFAMILY_NAME,
-        StringId::WWS_SUBFAMILY_NAME,
-    ];
-
     let mut already_encountered_names: HashSet<(i32, String)> = HashSet::new();
-    for string_id in string_ids.iter() {
-        let object_ids = objects_for_id(*string_id);
-        for string in font.localized_strings(*string_id) {
-            let name = if string.to_string().is_empty() {
+    let name_table = font.name();
+    if name_table.is_err() {
+        return;
+    }
+    let name_table = name_table.unwrap();
+
+    for name_record in FcSortedNameRecords::new(&name_table) {
+        let string_id = name_record.name_id();
+        if let Some(object_ids) = object_ids_for_name_id(string_id) {
+            let localized = LocalizedString::new(&name_table, &name_record);
+
+            let name = if localized.to_string().is_empty() {
                 None
             } else {
-                CString::new(string.to_string()).ok()
+                CString::new(localized.to_string()).ok()
             };
-            let language = string.language().or(Some("und")).and_then(|lang| {
+            let language = localized.language().or(Some("und")).and_then(|lang| {
                 let lang = if lang.starts_with("zh") {
                     lang
                 } else {
@@ -155,15 +153,17 @@ pub fn add_names(
 
             // Instance postscript name.
             let name = match (instance_mode, string_id) {
-                (InstanceMode::Named(instance), &StringId::POSTSCRIPT_NAME) => {
+                (InstanceMode::Named(instance), StringId::POSTSCRIPT_NAME) => {
                     mangle_postscript_name_for_named_instance(font, instance).or(name)
                 }
-                (InstanceMode::Named(instance), &StringId::SUBFAMILY_NAME) => {
+                (InstanceMode::Named(instance), StringId::SUBFAMILY_NAME) => {
                     mangle_subfamily_name_for_named_instance(font, instance).or(name)
                 }
-                (InstanceMode::Named(instance), &StringId::FULL_NAME) => {
+                (InstanceMode::Named(instance), StringId::FULL_NAME) => {
                     mangle_full_name_for_named_instance(font, instance).or(name)
                 }
+                (InstanceMode::Variable, StringId::FULL_NAME)
+                | (InstanceMode::Variable, StringId::POSTSCRIPT_NAME) => None,
                 _ => name,
             };
 

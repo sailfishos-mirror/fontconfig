@@ -55,6 +55,9 @@ def test_fontations_freetype_fcquery_equal(font_file):
     supported_format_entitites = [
         "family",
         "familylang",
+        "fullname",
+        "fullnamelang",
+        "postscriptname",
         "outline",
         "scalable",
         "fontformat",
@@ -71,6 +74,7 @@ def test_fontations_freetype_fcquery_equal(font_file):
         "symbol",
         "fontwrapper",
         "file",
+        "variable",
     ]
     format_string = ":".join(
         "%{" + entity + "}" for entity in supported_format_entitites
