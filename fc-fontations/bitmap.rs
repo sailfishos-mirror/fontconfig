@@ -32,17 +32,19 @@ use fc_fontations_bindgen::fcint::{FC_ANTIALIAS_OBJECT, FC_PIXEL_SIZE_OBJECT};
 pub fn add_pixel_size(pattern: &mut FcPatternBuilder, font: &FontRef) {
     let strikes = BitmapStrikes::new(font);
 
-    if strikes.len() > 0 {
-        pattern.append_element(PatternElement::new(
-            FC_ANTIALIAS_OBJECT as i32,
-            false.into(),
-        ));
-    }
+    let has_strikes = strikes.len() > 0;
 
     for strike in strikes.iter() {
         pattern.append_element(PatternElement::new(
             FC_PIXEL_SIZE_OBJECT as i32,
             (strike.ppem() as f64).into(),
+        ));
+    }
+
+    if has_strikes {
+        pattern.append_element(PatternElement::new(
+            FC_ANTIALIAS_OBJECT as i32,
+            false.into(),
         ));
     }
 }

@@ -25,13 +25,14 @@
 use fc_fontations_bindgen::{
     fcint::{
         FC_INDEX_OBJECT, FC_NAMED_INSTANCE_OBJECT, FC_SIZE_OBJECT, FC_SLANT_OBJECT,
-        FC_VARIABLE_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
+        FC_SPACING_OBJECT, FC_VARIABLE_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
     },
-    FcWeightFromOpenTypeDouble, FC_SLANT_ITALIC, FC_SLANT_OBLIQUE, FC_SLANT_ROMAN, FC_WEIGHT_BLACK,
-    FC_WEIGHT_BOLD, FC_WEIGHT_EXTRABOLD, FC_WEIGHT_EXTRALIGHT, FC_WEIGHT_LIGHT, FC_WEIGHT_MEDIUM,
-    FC_WEIGHT_NORMAL, FC_WEIGHT_SEMIBOLD, FC_WEIGHT_THIN, FC_WIDTH_CONDENSED, FC_WIDTH_EXPANDED,
-    FC_WIDTH_EXTRACONDENSED, FC_WIDTH_EXTRAEXPANDED, FC_WIDTH_NORMAL, FC_WIDTH_SEMICONDENSED,
-    FC_WIDTH_SEMIEXPANDED, FC_WIDTH_ULTRACONDENSED, FC_WIDTH_ULTRAEXPANDED,
+    FcWeightFromOpenTypeDouble, FC_DUAL, FC_MONO, FC_SLANT_ITALIC, FC_SLANT_OBLIQUE,
+    FC_SLANT_ROMAN, FC_WEIGHT_BLACK, FC_WEIGHT_BOLD, FC_WEIGHT_EXTRABOLD, FC_WEIGHT_EXTRALIGHT,
+    FC_WEIGHT_LIGHT, FC_WEIGHT_MEDIUM, FC_WEIGHT_NORMAL, FC_WEIGHT_SEMIBOLD, FC_WEIGHT_THIN,
+    FC_WIDTH_CONDENSED, FC_WIDTH_EXPANDED, FC_WIDTH_EXTRACONDENSED, FC_WIDTH_EXTRAEXPANDED,
+    FC_WIDTH_NORMAL, FC_WIDTH_SEMICONDENSED, FC_WIDTH_SEMIEXPANDED, FC_WIDTH_ULTRACONDENSED,
+    FC_WIDTH_ULTRAEXPANDED,
 };
 
 use crate::{
@@ -41,6 +42,9 @@ use crate::{
 use read_fonts::TableProvider;
 use skrifa::{
     attribute::{Attributes, Stretch, Style, Weight},
+    instance::Location,
+    metrics::GlyphMetrics,
+    prelude::{LocationRef, Size},
     AxisCollection, FontRef, MetadataProvider, NamedInstance, Tag,
 };
 
@@ -120,6 +124,7 @@ struct AttributesToPattern<'a> {
     attributes: Attributes,
     axes: AxisCollection<'a>,
     named_instance: Option<NamedInstance<'a>>,
+    font_ref: FontRef<'a>,
 }
 
 impl<'a> AttributesToPattern<'a> {
@@ -128,12 +133,14 @@ impl<'a> AttributesToPattern<'a> {
             InstanceMode::Named(index) => font.named_instances().get(*index as usize),
             _ => None,
         };
+
         Self {
             weight_from_os2: fc_weight_from_os2(font),
             width_from_os2: fc_width_from_os2(font),
             attributes: Attributes::new(font),
             axes: font.axes(),
             named_instance,
+            font_ref: font.clone(),
         }
     }
 
@@ -259,6 +266,84 @@ impl<'a> AttributesToPattern<'a> {
             FcRangeWrapper::new(opsz_axis.min_value() as f64, opsz_axis.max_value() as f64)?.into(),
         ))
     }
+
+    // Determine FontConfig spacing property.
+    // In fcfreetype.c FcFreeTypeSpacing a heuristic checks whether the glyphs
+    //  for a bitmap font are "approximately equal".
+    // For this purpose, fcfreetype.c selects the strike size closest to 16 px,
+    // then iterates over available glyphs and checks whether the advance width
+    // is within a relative tolerance of 1/33.
+    // We'll do this based on skrifa advances here - if needed, this can be
+    // moved to selecting a particular bitmap strike size and compare pixel
+    // widths.
+    fn spacing_from_advances(advances: impl Iterator<Item = f32>) -> Option<i32> {
+        let mut encountered_advances = Vec::new();
+
+        let approximately_equal =
+            |a: f32, b: f32| (a - b).abs() / a.abs().max(b.abs()) <= 1.0 / 33.0;
+
+        'outer: for advance in advances {
+            let mut may_push: Option<f32> = None;
+            if encountered_advances.is_empty() {
+                encountered_advances.push(advance);
+                continue;
+            }
+
+            for encountered in encountered_advances.iter() {
+                if encountered_advances.len() >= 3 {
+                    break 'outer;
+                }
+                if approximately_equal(advance, *encountered) {
+                    may_push = None;
+                    break;
+                }
+                may_push = Some(advance);
+            }
+            if let Some(push) = may_push {
+                encountered_advances.push(push);
+            }
+        }
+
+        match encountered_advances.len() {
+            1 => Some(FC_MONO as i32),
+            2 if approximately_equal(
+                encountered_advances[0].min(encountered_advances[1]) * 2.0,
+                encountered_advances[0].max(encountered_advances[1]),
+            ) =>
+            {
+                Some(FC_DUAL as i32)
+            }
+
+            _ => None,
+        }
+    }
+
+    fn spacing(&self) -> Option<PatternElement> {
+        let mut location = Location::default();
+        if let Some(instance) = &self.named_instance {
+            location = instance.location().clone();
+        };
+
+        let glyph_metrics = GlyphMetrics::new(
+            &self.font_ref,
+            Size::new(16.0),
+            LocationRef::from(&location),
+        );
+
+        let advances = self
+            .font_ref
+            .charmap()
+            .mappings()
+            .map(|(_codepoint, gid)| {
+                glyph_metrics
+                    .advance_width(gid)
+                    .and_then(|adv| if adv > 0.0 { Some(adv) } else { None })
+            })
+            .flatten();
+
+        Self::spacing_from_advances(advances)
+            .map(|spacing| PatternElement::new(FC_SPACING_OBJECT as i32, spacing.into()))
+    }
 }
 
 pub fn append_style_elements(
@@ -272,6 +357,10 @@ pub fn append_style_elements(
     // for which the WWS code path would trigger.
 
     let attributes_converter = AttributesToPattern::new(font, &instance_mode);
+
+    if let Some(spacing) = attributes_converter.spacing() {
+        pattern.append_element(spacing);
+    }
 
     match instance_mode {
         InstanceMode::Default => {
@@ -349,5 +438,80 @@ pub fn append_style_elements(
                 true.into(),
             ));
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::attributes::AttributesToPattern;
+    use fc_fontations_bindgen::{FC_DUAL, FC_MONO};
+
+    const THRESHOLD_FACTOR_DOWN: f32 = 1.0 - 1.0 / 33.0;
+    const THRESHOLD_FACTOR_UP: f32 = 1.0 + 1.0 / 33.0;
+
+    fn assert_spacing(advances: impl Iterator<Item = f32>, expectation: Option<i32>) {
+        assert_eq!(
+            AttributesToPattern::spacing_from_advances(advances),
+            expectation
+        );
+    }
+
+    #[test]
+    fn spacing_mono() {
+        assert_spacing([10.0].iter().cloned(), Some(FC_MONO as i32));
+
+        assert_spacing(
+            [
+                10.0,
+                10.0,
+                10.0,
+                10.0 * THRESHOLD_FACTOR_UP,
+                10.0 * THRESHOLD_FACTOR_DOWN,
+            ]
+            .iter()
+            .cloned(),
+            Some(FC_MONO as i32),
+        );
+    }
+
+    #[test]
+    fn spacing_proportional() {
+        assert_spacing(
+            [10.0, 10.0 * THRESHOLD_FACTOR_UP + 0.01].iter().cloned(),
+            None,
+        );
+
+        assert_spacing(
+            [10.0, 10.0 * THRESHOLD_FACTOR_DOWN - 0.01].iter().cloned(),
+            None,
+        );
+
+        assert_spacing([10.0, 15.0].iter().cloned(), None);
+
+        assert_spacing([10.0, 15.0, 20.0].iter().cloned(), None);
+    }
+
+    #[test]
+    fn advances_dual() {
+        assert_spacing([10.0, 20.0].iter().cloned(), Some(FC_DUAL as i32));
+
+        assert_spacing(
+            [10.0, 20.0, 10.0, 20.0, 10.0, 20.0].iter().cloned(),
+            Some(FC_DUAL as i32),
+        );
+
+        assert_spacing(
+            [
+                10.0,
+                20.0 * THRESHOLD_FACTOR_UP,
+                10.0,
+                20.0,
+                10.0 * THRESHOLD_FACTOR_DOWN,
+                20.0,
+            ]
+            .iter()
+            .cloned(),
+            Some(FC_DUAL as i32),
+        );
     }
 }

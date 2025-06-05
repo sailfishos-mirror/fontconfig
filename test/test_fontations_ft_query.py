@@ -73,6 +73,7 @@ def test_fontations_freetype_fcquery_equal(font_file):
         "scalable",
         "size",
         "slant",
+        "spacing",
         "symbol",
         "variable",
         "version",
