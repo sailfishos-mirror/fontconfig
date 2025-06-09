@@ -162,8 +162,14 @@ pub fn add_names(
                 (InstanceMode::Named(instance), StringId::FULL_NAME) => {
                     mangle_full_name_for_named_instance(font, instance).or(name)
                 }
-                (InstanceMode::Variable, StringId::FULL_NAME)
-                | (InstanceMode::Variable, StringId::POSTSCRIPT_NAME) => None,
+                (
+                    InstanceMode::Variable,
+                    StringId::SUBFAMILY_NAME
+                    | StringId::WWS_SUBFAMILY_NAME
+                    | StringId::TYPOGRAPHIC_SUBFAMILY_NAME
+                    | StringId::FULL_NAME
+                    | StringId::POSTSCRIPT_NAME,
+                ) => None,
                 _ => name,
             };
 
