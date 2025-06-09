@@ -53,6 +53,7 @@ def test_fontations_freetype_fcquery_equal(font_file):
     print(f"Testing with: {font_file}")  # Example usage
 
     supported_format_entitites = [
+        "antialias",
         "capability",
         "charset",
         "color",
@@ -63,11 +64,17 @@ def test_fontations_freetype_fcquery_equal(font_file):
         "fonthashint",
         "fontwrapper",
         "foundry",
-        "langset",
+        "fullname",
+        "fullnamelang",
+        "lang",
+        "namedinstance",
+        "order",
         "outline",
         "scalable",
+        "size",
         "slant",
         "symbol",
+        "variable",
         "version",
         "weight",
         "width",

@@ -285,6 +285,10 @@ pub fn append_style_elements(
                 ttc_index.unwrap_or_default().into(),
             ));
 
+            if let Some(size) = attributes_converter.default_size() {
+                pattern.append_element(size);
+            }
+
             pattern.append_element(PatternElement::new(
                 FC_NAMED_INSTANCE_OBJECT as i32,
                 false.into(),
