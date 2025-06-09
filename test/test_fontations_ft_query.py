@@ -24,7 +24,7 @@ def list_test_fonts():
     return font_files
 
 
-def run_fc_query(font_file, format_string, with_fontations=False):
+def run_fc_query(font_file, with_fontations=False):
     fc_query_path = builddir() / "fc-query" / "fc-query"
 
     env = os.environ.copy()
@@ -52,46 +52,14 @@ def run_fc_query(font_file, format_string, with_fontations=False):
 def test_fontations_freetype_fcquery_equal(font_file):
     print(f"Testing with: {font_file}")  # Example usage
 
-    supported_format_entitites = [
-        "antialias",
-        "capability",
-        "charset",
-        "color",
-        "family",
-        "familylang",
-        "file",
-        "fontformat",
-        "fonthashint",
-        "fontwrapper",
-        "foundry",
-        "fullname",
-        "fullnamelang",
-        "lang",
-        "namedinstance",
-        "order",
-        "outline",
-        "scalable",
-        "size",
-        "slant",
-        "spacing",
-        "symbol",
-        "variable",
-        "version",
-        "weight",
-        "width",
-    ]
-    format_string = ":".join(
-        "%{" + entity + "}" for entity in supported_format_entitites
-    )
-
     font_path = Path(font_file)
 
     if not font_path.exists():
         pytest.skip(f"Font file not found: {font_file}")  # Skip if file missing
 
-    result_freetype = run_fc_query(font_file, format_string).stdout.strip().splitlines()
+    result_freetype = run_fc_query(font_file).stdout.strip().splitlines()
     result_fontations = (
-        run_fc_query(font_file, format_string, with_fontations=True)
+        run_fc_query(font_file, with_fontations=True)
         .stdout.strip()
         .splitlines()
     )
