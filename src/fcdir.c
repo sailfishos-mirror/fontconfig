@@ -245,7 +245,12 @@ FcDirScanConfig (FcFontSet     *set,
 	goto bail1;
     }
     while ((e = readdir (d))) {
-	if (e->d_name[0] != '.' && strlen (e->d_name) < FC_MAX_FILE_LEN) {
+	/* Ignore . and .. */
+	if (e->d_name[0] == '.' &&
+	    (e->d_name[1] == 0 ||
+	     (e->d_name[1] == '.' && e->d_name[2] == 0)))
+	    continue;
+	if (strlen (e->d_name) < FC_MAX_FILE_LEN) {
 	    strcpy ((char *)base, (char *)e->d_name);
 	    if (!FcStrSetAdd (files, file_prefix)) {
 		ret = FcFalse;

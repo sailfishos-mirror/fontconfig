@@ -170,6 +170,28 @@ fi
 $FCCACHE "$FONTDIR"/a
 check
 
+dotest "with a dotfile"
+prep
+FONT3=$(basename $FONT1)
+FONT4=$(basename $FONT2)
+cp "$FONT1" "$FONTDIR"/."$FONT3"
+cp "$FONT2" "$FONTDIR"/."$FONT4"
+if [ -n "${SOURCE_DATE_EPOCH:-}" ] && [ ${#SOURCE_DATE_EPOCH} -gt 0 ]; then
+    touch -m -t "$(fdate ${SOURCE_DATE_EPOCH})" "$FONTDIR"
+fi
+$FCCACHE "$FONTDIR"
+check
+
+dotest "with a dotdir"
+prep
+mkdir "$FONTDIR"/.a
+cp "$FONT1" "$FONT2" "$FONTDIR"/.a
+if [ -n "${SOURCE_DATE_EPOCH:-}" ] && [ ${#SOURCE_DATE_EPOCH} -gt 0 ]; then
+    touch -m -t "$(fdate ${SOURCE_DATE_EPOCH})" "$FONTDIR"
+fi
+$FCCACHE "$FONTDIR"
+check
+
 dotest "Complicated directory structure"
 prep
 mkdir "$FONTDIR"/a
