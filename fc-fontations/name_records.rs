@@ -91,7 +91,7 @@ impl<'a> FcSortedNameRecords<'a> {
             }
             (MS_ENGLISH_US, _) | (MAC_ENGLISH, _) => std::cmp::Ordering::Greater,
             (_, MS_ENGLISH_US) | (_, MAC_ENGLISH) => std::cmp::Ordering::Less,
-            _ => a.cmp(&b),
+            _ => a.cmp(&b).reverse(),
         }
     }
 
@@ -125,7 +125,7 @@ impl<'a> FcSortedNameRecords<'a> {
     }
 }
 
-impl<'a> Iterator for FcSortedNameRecords<'a> {
+impl Iterator for FcSortedNameRecords<'_> {
     type Item = NameRecord;
 
     fn next(&mut self) -> Option<Self::Item> {

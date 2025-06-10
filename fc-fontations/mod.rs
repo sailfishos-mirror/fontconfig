@@ -43,9 +43,9 @@ use names::add_names;
 use fc_fontations_bindgen::{
     fcint::{
         FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
-        FC_DECORATIVE_OBJECT, FC_FILE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT,
-        FC_FONT_HAS_HINT_OBJECT, FC_FONT_WRAPPER_OBJECT, FC_FOUNDRY_OBJECT, FC_LANG_OBJECT,
-        FC_ORDER_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
+        FC_FILE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT,
+        FC_FONT_WRAPPER_OBJECT, FC_FOUNDRY_OBJECT, FC_LANG_OBJECT, FC_ORDER_OBJECT,
+        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
     },
     FcFontSet, FcFontSetAdd, FcPattern,
 };
@@ -288,32 +288,14 @@ fn build_patterns_for_font(
         .flat_map(move |instance_mode| {
             let mut instance_pattern = pattern.clone();
 
+            // Family, full name, postscript name, etc.
+            // Includes adding style name to the pattern, which is then used by append_style_elements.
+            add_names(font, instance_mode, &mut instance_pattern);
+
             // Style names: fcfreetype adds TT_NAME_ID_WWS_SUBFAMILY, TT_NAME_ID_TYPOGRAPHIC_SUBFAMILY,
             // TT_NAME_ID_FONT_SUBFAMILY as FC_STYLE_OBJECT, FC_STYLE_OBJECT_LANG unless a named instance
             // is added,then the instance's name id is used as FC_STYLE_OBJECT.
-
             append_style_elements(font, instance_mode, ttc_index, &mut instance_pattern);
-
-            // For variable fonts:
-            // Names (mainly postscript name and style), weight, width and opsz (font-size?) are affected.
-            // * Add the variable font itself, with ranges for weight, width, opsz.
-            // * Add an entry for each named instance
-            //   * With instance name turning into FC_STYLE_OBJECT.
-            //   * Fixed width, wgth, opsz
-            // * Add the default instance with fixed values.
-            let mut had_decoratve = false;
-            // Family and full name.
-            add_names(
-                font,
-                instance_mode,
-                &mut instance_pattern,
-                &mut had_decoratve,
-            );
-
-            instance_pattern.append_element(PatternElement::new(
-                FC_DECORATIVE_OBJECT as i32,
-                had_decoratve.into(),
-            ));
 
             instance_pattern
                 .create_fc_pattern()

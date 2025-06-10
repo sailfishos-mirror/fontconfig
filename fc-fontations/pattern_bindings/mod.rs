@@ -93,8 +93,8 @@ impl From<FcLangSetWrapper> for PatternValue {
 
 #[derive(Debug, Clone)]
 pub struct PatternElement {
-    object_id: i32,
-    value: PatternValue,
+    pub object_id: i32,
+    pub value: PatternValue,
 }
 
 impl PatternElement {
@@ -188,6 +188,16 @@ impl FcPatternBuilder {
         }
 
         Some(pattern)
+    }
+}
+
+/// Mainly needed for finding the style PatternElement in attributes.rs.
+impl<'a> IntoIterator for &'a FcPatternBuilder {
+    type Item = &'a PatternElement;
+    type IntoIter = std::slice::Iter<'a, PatternElement>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.elements.iter()
     }
 }
 

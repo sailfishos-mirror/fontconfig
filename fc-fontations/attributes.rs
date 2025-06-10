@@ -24,19 +24,24 @@
 
 use fc_fontations_bindgen::{
     fcint::{
-        FC_INDEX_OBJECT, FC_NAMED_INSTANCE_OBJECT, FC_SIZE_OBJECT, FC_SLANT_OBJECT,
-        FC_SPACING_OBJECT, FC_VARIABLE_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
+        FC_DECORATIVE_OBJECT, FC_INDEX_OBJECT, FC_NAMED_INSTANCE_OBJECT, FC_SIZE_OBJECT,
+        FC_SLANT_OBJECT, FC_SPACING_OBJECT, FC_STYLE_OBJECT, FC_VARIABLE_OBJECT, FC_WEIGHT_OBJECT,
+        FC_WIDTH_OBJECT,
     },
     FcWeightFromOpenTypeDouble, FC_DUAL, FC_MONO, FC_SLANT_ITALIC, FC_SLANT_OBLIQUE,
-    FC_SLANT_ROMAN, FC_WEIGHT_BLACK, FC_WEIGHT_BOLD, FC_WEIGHT_EXTRABOLD, FC_WEIGHT_EXTRALIGHT,
-    FC_WEIGHT_LIGHT, FC_WEIGHT_MEDIUM, FC_WEIGHT_NORMAL, FC_WEIGHT_SEMIBOLD, FC_WEIGHT_THIN,
-    FC_WIDTH_CONDENSED, FC_WIDTH_EXPANDED, FC_WIDTH_EXTRACONDENSED, FC_WIDTH_EXTRAEXPANDED,
-    FC_WIDTH_NORMAL, FC_WIDTH_SEMICONDENSED, FC_WIDTH_SEMIEXPANDED, FC_WIDTH_ULTRACONDENSED,
-    FC_WIDTH_ULTRAEXPANDED,
+    FC_SLANT_ROMAN, FC_WEIGHT_BLACK, FC_WEIGHT_BOLD, FC_WEIGHT_BOOK, FC_WEIGHT_DEMIBOLD,
+    FC_WEIGHT_DEMILIGHT, FC_WEIGHT_EXTRABLACK, FC_WEIGHT_EXTRABOLD, FC_WEIGHT_EXTRALIGHT,
+    FC_WEIGHT_HEAVY, FC_WEIGHT_LIGHT, FC_WEIGHT_MEDIUM, FC_WEIGHT_NORMAL, FC_WEIGHT_REGULAR,
+    FC_WEIGHT_SEMIBOLD, FC_WEIGHT_SEMILIGHT, FC_WEIGHT_THIN, FC_WEIGHT_ULTRABLACK,
+    FC_WEIGHT_ULTRABOLD, FC_WEIGHT_ULTRALIGHT, FC_WIDTH_CONDENSED, FC_WIDTH_EXPANDED,
+    FC_WIDTH_EXTRACONDENSED, FC_WIDTH_EXTRAEXPANDED, FC_WIDTH_NORMAL, FC_WIDTH_SEMICONDENSED,
+    FC_WIDTH_SEMIEXPANDED, FC_WIDTH_ULTRACONDENSED, FC_WIDTH_ULTRAEXPANDED,
 };
 
 use crate::{
-    pattern_bindings::{fc_wrapper::FcRangeWrapper, FcPatternBuilder, PatternElement},
+    pattern_bindings::{
+        fc_wrapper::FcRangeWrapper, FcPatternBuilder, PatternElement, PatternValue,
+    },
     InstanceMode,
 };
 use read_fonts::TableProvider;
@@ -47,6 +52,7 @@ use skrifa::{
     prelude::{LocationRef, Size},
     AxisCollection, FontRef, MetadataProvider, NamedInstance, Tag,
 };
+use std::ffi::CString;
 
 fn fc_weight(skrifa_weight: Weight) -> f64 {
     (match skrifa_weight {
@@ -118,6 +124,15 @@ fn fc_width_from_os2(font_ref: &FontRef) -> Option<f64> {
     Some(converted as f64)
 }
 
+fn fc_size_from_os2(font_ref: &FontRef) -> Option<(f64, f64)> {
+    font_ref.os2().ok().and_then(|os2| {
+        Some((
+            os2.us_lower_optical_point_size()? as f64 / 20.0,
+            os2.us_upper_optical_point_size()? as f64 / 20.0,
+        ))
+    })
+}
+
 struct AttributesToPattern<'a> {
     weight_from_os2: Option<f64>,
     width_from_os2: Option<f64>,
@@ -153,28 +168,28 @@ impl<'a> AttributesToPattern<'a> {
         Some(axis_coords.find(|item| item.0 == tag)?.1 as f64)
     }
 
-    fn static_weight(&self) -> PatternElement {
-        self.weight_from_os2.map_or_else(
-            || {
-                PatternElement::new(
-                    FC_WEIGHT_OBJECT as i32,
-                    fc_weight(self.attributes.weight).into(),
-                )
-            },
-            |os2_weight| PatternElement::new(FC_WEIGHT_OBJECT as i32, os2_weight.into()),
+    fn flags_weight(&self) -> PatternElement {
+        PatternElement::new(
+            FC_WEIGHT_OBJECT as i32,
+            fc_weight(self.attributes.weight).into(),
         )
     }
 
-    fn static_width(&self) -> PatternElement {
-        self.width_from_os2.map_or_else(
-            || {
-                PatternElement::new(
-                    FC_WIDTH_OBJECT as i32,
-                    fc_width(self.attributes.stretch).into(),
-                )
-            },
-            |os2_width| PatternElement::new(FC_WIDTH_OBJECT as i32, os2_width.into()),
+    fn os2_weight(&self) -> Option<PatternElement> {
+        self.weight_from_os2
+            .map(|weight| PatternElement::new(FC_WEIGHT_OBJECT as i32, weight.into()))
+    }
+
+    fn flags_width(&self) -> PatternElement {
+        PatternElement::new(
+            FC_WIDTH_OBJECT as i32,
+            fc_width(self.attributes.stretch).into(),
         )
+    }
+
+    fn os2_width(&self) -> Option<PatternElement> {
+        self.width_from_os2
+            .map(|width| PatternElement::new(FC_WIDTH_OBJECT as i32, width.into()))
     }
 
     fn static_slant(&self) -> PatternElement {
@@ -227,12 +242,23 @@ impl<'a> AttributesToPattern<'a> {
         ))
     }
 
-    fn default_size(&self) -> Option<PatternElement> {
+    fn default_axis_size(&self) -> Option<PatternElement> {
         self.axes.get_by_tag(Tag::new(b"opsz")).map(|opsz_axis| {
             PatternElement::new(
                 FC_SIZE_OBJECT as i32,
                 (opsz_axis.default_value() as f64).into(),
             )
+        })
+    }
+
+    fn os2_size(&self) -> Option<PatternElement> {
+        fc_size_from_os2(&self.font_ref).and_then(|(lower, higher)| {
+            if lower != higher {
+                let range = FcRangeWrapper::new(lower, higher)?;
+                Some(PatternElement::new(FC_SIZE_OBJECT as i32, range.into()))
+            } else {
+                Some(PatternElement::new(FC_SIZE_OBJECT as i32, lower.into()))
+            }
         })
     }
 
@@ -334,18 +360,164 @@ impl<'a> AttributesToPattern<'a> {
             .font_ref
             .charmap()
             .mappings()
-            .map(|(_codepoint, gid)| {
+            .filter_map(|(_codepoint, gid)| {
                 glyph_metrics
                     .advance_width(gid)
                     .and_then(|adv| if adv > 0.0 { Some(adv) } else { None })
-            })
-            .flatten();
+            });
 
         Self::spacing_from_advances(advances)
             .map(|spacing| PatternElement::new(FC_SPACING_OBJECT as i32, spacing.into()))
     }
 }
 
+#[derive(Default)]
+struct AttributesFromStyleString {
+    weight: Option<PatternElement>,
+    width: Option<PatternElement>,
+    slant: Option<PatternElement>,
+    decorative: Option<PatternElement>,
+}
+
+fn contains_weight(style_name: &CString) -> Option<PatternElement> {
+    const WEIGHT_MAP: [(&str, f64); 23] = [
+        ("thin", FC_WEIGHT_THIN as f64),
+        ("extralight", FC_WEIGHT_EXTRALIGHT as f64),
+        ("ultralight", FC_WEIGHT_ULTRALIGHT as f64),
+        ("demilight", FC_WEIGHT_DEMILIGHT as f64),
+        ("semilight", FC_WEIGHT_SEMILIGHT as f64),
+        ("light", FC_WEIGHT_LIGHT as f64),
+        ("book", FC_WEIGHT_BOOK as f64),
+        ("regular", FC_WEIGHT_REGULAR as f64),
+        ("normal", FC_WEIGHT_NORMAL as f64),
+        ("medium", FC_WEIGHT_MEDIUM as f64),
+        ("demibold", FC_WEIGHT_DEMIBOLD as f64),
+        ("demi", FC_WEIGHT_DEMIBOLD as f64),
+        ("semibold", FC_WEIGHT_SEMIBOLD as f64),
+        ("extrabold", FC_WEIGHT_EXTRABOLD as f64),
+        ("superbold", FC_WEIGHT_EXTRABOLD as f64),
+        ("ultrabold", FC_WEIGHT_ULTRABOLD as f64),
+        ("bold", FC_WEIGHT_BOLD as f64),
+        ("ultrablack", FC_WEIGHT_ULTRABLACK as f64),
+        ("superblack", FC_WEIGHT_EXTRABLACK as f64),
+        ("extrablack", FC_WEIGHT_EXTRABLACK as f64),
+        ("ultra", FC_WEIGHT_ULTRABOLD as f64),
+        ("black", FC_WEIGHT_BLACK as f64),
+        ("heavy", FC_WEIGHT_HEAVY as f64),
+    ];
+
+    for weight_mapping in WEIGHT_MAP {
+        if style_name
+            .to_string_lossy()
+            .to_lowercase()
+            .contains(weight_mapping.0)
+        {
+            return Some(PatternElement::new(
+                FC_WEIGHT_OBJECT as i32,
+                weight_mapping.1.into(),
+            ));
+        }
+    }
+    None
+}
+
+fn contains_slant(style_name: &CString) -> Option<PatternElement> {
+    const SLANT_MAP: [(&str, i32); 3] = [
+        ("italic", FC_SLANT_ITALIC as i32),
+        ("kursiv", FC_SLANT_ITALIC as i32),
+        ("oblique", FC_SLANT_OBLIQUE as i32),
+    ];
+
+    for mapping in SLANT_MAP {
+        if style_name
+            .to_string_lossy()
+            .to_lowercase()
+            .contains(mapping.0)
+        {
+            return Some(PatternElement::new(
+                FC_SLANT_OBJECT as i32,
+                mapping.1.into(),
+            ));
+        }
+    }
+    None
+}
+
+fn contains_width(style_name: &CString) -> Option<PatternElement> {
+    const WIDTH_MAP: [(&str, f64); 10] = [
+        ("ultracondensed", FC_WIDTH_ULTRACONDENSED as f64),
+        ("extracondensed", FC_WIDTH_EXTRACONDENSED as f64),
+        ("semicondensed", FC_WIDTH_SEMICONDENSED as f64),
+        ("condensed", FC_WIDTH_CONDENSED as f64),
+        ("normal", FC_WIDTH_NORMAL as f64),
+        ("semiexpanded", FC_WIDTH_SEMIEXPANDED as f64),
+        ("extraexpanded", FC_WIDTH_EXTRAEXPANDED as f64),
+        ("ultraexpanded", FC_WIDTH_ULTRAEXPANDED as f64),
+        ("expanded", FC_WIDTH_EXPANDED as f64),
+        ("extended", FC_WIDTH_EXPANDED as f64),
+    ];
+    for mapping in WIDTH_MAP {
+        if style_name
+            .to_string_lossy()
+            .to_lowercase()
+            .contains(mapping.0)
+        {
+            return Some(PatternElement::new(
+                FC_WIDTH_OBJECT as i32,
+                mapping.1.into(),
+            ));
+        }
+    }
+    None
+}
+
+fn contains_decorative(style_name: &CString) -> Option<PatternElement> {
+    let had_decorative = style_name
+        .to_string_lossy()
+        .to_lowercase()
+        .contains("decorative");
+
+    Some(PatternElement::new(
+        FC_DECORATIVE_OBJECT as i32,
+        had_decorative.into(),
+    ))
+}
+
+impl AttributesFromStyleString {
+    fn new(pattern: &FcPatternBuilder) -> Self {
+        let style_string = pattern
+            .into_iter()
+            .find(|element| element.object_id == FC_STYLE_OBJECT as i32)
+            .and_then(|element| match &element.value {
+                PatternValue::String(style) => Some(style),
+                _ => None,
+            });
+
+        if let Some(style) = style_string {
+            Self {
+                weight: contains_weight(style),
+                width: contains_width(style),
+                slant: contains_slant(style),
+                decorative: contains_decorative(style),
+            }
+        } else {
+            Self {
+                weight: None,
+                width: None,
+                slant: None,
+                decorative: Some(PatternElement::new(
+                    FC_DECORATIVE_OBJECT as i32,
+                    false.into(),
+                )),
+            }
+        }
+    }
+}
+
+/// Appends style pattern elements such as weight, width, slant, decorative to the pattern.
+/// Requires a textual style element to be already added to the pattern, so it's good
+/// to run this after names have been added. This is because this method performs certain
+/// string matches on the font name to determine style attributes.
 pub fn append_style_elements(
     font: &FontRef,
     instance_mode: InstanceMode,
@@ -356,17 +528,37 @@ pub fn append_style_elements(
     // but falls back to flags if those are not found. So far, I haven't identified test fonts
     // for which the WWS code path would trigger.
 
-    let attributes_converter = AttributesToPattern::new(font, &instance_mode);
+    let attributes_text = AttributesFromStyleString::new(pattern);
 
-    if let Some(spacing) = attributes_converter.spacing() {
+    let skrifa_attributes = AttributesToPattern::new(font, &instance_mode);
+
+    if let Some(spacing) = skrifa_attributes.spacing() {
         pattern.append_element(spacing);
     }
 
     match instance_mode {
         InstanceMode::Default => {
-            pattern.append_element(attributes_converter.static_weight());
-            pattern.append_element(attributes_converter.static_width());
-            pattern.append_element(attributes_converter.static_slant());
+            let pattern_weight = skrifa_attributes
+                .os2_weight()
+                .or(attributes_text.weight)
+                .unwrap_or(skrifa_attributes.flags_weight());
+            pattern.append_element(pattern_weight);
+
+            let width = skrifa_attributes
+                .os2_width()
+                .or(attributes_text.width)
+                .unwrap_or(skrifa_attributes.flags_width());
+            pattern.append_element(width);
+
+            pattern.append_element(
+                attributes_text
+                    .slant
+                    .unwrap_or(skrifa_attributes.static_slant()),
+            );
+
+            if let Some(element) = attributes_text.decorative {
+                pattern.append_element(element)
+            }
 
             pattern.append_element(PatternElement::new(FC_VARIABLE_OBJECT as i32, false.into()));
             pattern.append_element(PatternElement::new(
@@ -374,7 +566,10 @@ pub fn append_style_elements(
                 ttc_index.unwrap_or_default().into(),
             ));
 
-            if let Some(size) = attributes_converter.default_size() {
+            if let Some(size) = skrifa_attributes
+                .default_axis_size()
+                .or(skrifa_attributes.os2_size())
+            {
                 pattern.append_element(size);
             }
 
@@ -384,21 +579,28 @@ pub fn append_style_elements(
             ));
         }
         InstanceMode::Variable => {
-            if let Some(weight_to_add) = attributes_converter
+            let weight = skrifa_attributes
                 .variable_weight()
-                .or(Some(attributes_converter.static_weight()))
-            {
-                pattern.append_element(weight_to_add);
-            }
-            if let Some(width_to_add) = attributes_converter
+                .or(skrifa_attributes.os2_weight())
+                .or(attributes_text.weight)
+                .unwrap_or(skrifa_attributes.flags_weight());
+            pattern.append_element(weight);
+
+            let width = skrifa_attributes
                 .variable_width()
-                .or(Some(attributes_converter.static_width()))
-            {
-                pattern.append_element(width_to_add);
+                .or(skrifa_attributes.os2_width())
+                .or(attributes_text.width)
+                .unwrap_or(skrifa_attributes.flags_width());
+            pattern.append_element(width);
+
+            if let Some(element) = attributes_text.decorative {
+                pattern.append_element(element)
             }
-            if let Some(size) = attributes_converter.variable_opsz() {
+
+            if let Some(size) = skrifa_attributes.variable_opsz() {
                 pattern.append_element(size);
             }
+
             pattern.append_element(PatternElement::new(FC_VARIABLE_OBJECT as i32, true.into()));
 
             // TODO: Check if this should have a zero ttc index if not part of a collection.
@@ -410,29 +612,44 @@ pub fn append_style_elements(
                 FC_NAMED_INSTANCE_OBJECT as i32,
                 false.into(),
             ));
-            pattern.append_element(attributes_converter.static_slant());
+            pattern.append_element(skrifa_attributes.static_slant());
         }
         InstanceMode::Named(index) => {
-            if let Some(weight) = attributes_converter.instance_weight() {
-                pattern.append_element(weight);
+            let weight = skrifa_attributes
+                .instance_weight()
+                .or(attributes_text.weight)
+                .unwrap_or(skrifa_attributes.flags_weight());
+            pattern.append_element(weight);
+
+            let width = skrifa_attributes
+                .instance_width()
+                .or(attributes_text.width)
+                .unwrap_or(skrifa_attributes.flags_width());
+            pattern.append_element(width);
+
+            pattern.append_element(
+                skrifa_attributes
+                    .instance_slant()
+                    .or(attributes_text.slant)
+                    .unwrap_or(skrifa_attributes.static_slant()),
+            );
+
+            if let Some(element) = attributes_text.decorative {
+                pattern.append_element(element)
             }
-            if let Some(width) = attributes_converter.instance_width() {
-                pattern.append_element(width);
-            }
+
             pattern.append_element(PatternElement::new(FC_VARIABLE_OBJECT as i32, false.into()));
             pattern.append_element(PatternElement::new(
                 FC_INDEX_OBJECT as i32,
                 (ttc_index.unwrap_or_default() + ((index + 1) << 16)).into(),
             ));
-            if let Some(size_element) = attributes_converter
+            if let Some(size_element) = skrifa_attributes
                 .instance_size()
-                .or(attributes_converter.default_size())
+                .or(skrifa_attributes.default_axis_size())
             {
                 pattern.append_element(size_element);
             };
-            if let Some(slant_element) = attributes_converter.instance_slant() {
-                pattern.append_element(slant_element);
-            }
+
             pattern.append_element(PatternElement::new(
                 FC_NAMED_INSTANCE_OBJECT as i32,
                 true.into(),
