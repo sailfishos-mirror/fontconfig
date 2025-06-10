@@ -43,6 +43,9 @@ fn capabilities_string<T: IntoIterator<Item = Tag>>(tags: T, has_silf: bool) -> 
         .join(" ");
 
     has_silf.then(|| capabilities.insert_str(0, SILF_CAPABILITIES_PREFIX));
+    if capabilities.is_empty() {
+        return None;
+    }
     CString::new(capabilities).ok()
 }
 
@@ -77,10 +80,6 @@ mod test {
             "otlayout:DFLT otlayout:cyrl otlayout:grek",
             capabilities_string(tags, false).unwrap().to_str().unwrap()
         );
-        assert_eq!(
-            "",
-            capabilities_string([], false).unwrap().to_str().unwrap()
-        );
         let tags = [
             Tag::new(b"DFLT"),
             Tag::new(b"cyrl"),
@@ -92,6 +91,11 @@ mod test {
             "otlayout:DFLT otlayout:cyrl otlayout:grek",
             capabilities_string(tags, false).unwrap().to_str().unwrap()
         );
+    }
+
+    #[test]
+    fn empty_capabilities() {
+        assert_eq!(None, capabilities_string([], false));
     }
 
     #[test]

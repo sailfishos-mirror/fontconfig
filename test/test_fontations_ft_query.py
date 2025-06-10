@@ -24,7 +24,7 @@ def list_test_fonts():
     return font_files
 
 
-def run_fc_query(font_file, format_string, with_fontations=False):
+def run_fc_query(font_file, with_fontations=False):
     fc_query_path = builddir() / "fc-query" / "fc-query"
 
     env = os.environ.copy()
@@ -32,7 +32,7 @@ def run_fc_query(font_file, format_string, with_fontations=False):
         env["FC_FONTATIONS"] = ""
 
     result = subprocess.run(
-        [fc_query_path, "-f", format_string, font_file],
+        [fc_query_path, font_file],
         stdout=subprocess.PIPE,
         env=env,
         stderr=subprocess.PIPE,
@@ -52,43 +52,14 @@ def run_fc_query(font_file, format_string, with_fontations=False):
 def test_fontations_freetype_fcquery_equal(font_file):
     print(f"Testing with: {font_file}")  # Example usage
 
-    supported_format_entitites = [
-        "family",
-        "familylang",
-        "fullname",
-        "fullnamelang",
-        "postscriptname",
-        "outline",
-        "scalable",
-        "fontformat",
-        "color",
-        "fonthashint",
-        "foundry",
-        "version",
-        "weight",
-        "width",
-        "slant",
-        "capability",
-        "charset",
-        "langset",
-        "symbol",
-        "fontwrapper",
-        "file",
-        "variable",
-    ]
-    format_string = ":".join(
-        "%{" + entity + "}" for entity in supported_format_entitites
-    )
-    print(format_string)
-
     font_path = Path(font_file)
 
     if not font_path.exists():
         pytest.skip(f"Font file not found: {font_file}")  # Skip if file missing
 
-    result_freetype = run_fc_query(font_file, format_string).stdout.strip().splitlines()
+    result_freetype = run_fc_query(font_file).stdout.strip().splitlines()
     result_fontations = (
-        run_fc_query(font_file, format_string, with_fontations=True)
+        run_fc_query(font_file, with_fontations=True)
         .stdout.strip()
         .splitlines()
     )
