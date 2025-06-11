@@ -1514,7 +1514,10 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
 		    len = strlen ((const char *)pp);
 		    memmove (utf8, pp, len + 1);
 		    pp = utf8 + len;
-		    while (pp > utf8 && *(pp - 1) == ' ')
+		    while (pp > utf8 &&
+			   (*(pp - 1) == ' ' ||
+			    *(pp - 1) == '\r' ||
+			    *(pp - 1) == '\n'))
 			pp--;
 		    *pp = 0;
 
