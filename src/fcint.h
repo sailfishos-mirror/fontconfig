@@ -1059,6 +1059,24 @@ void
 FcRuleDestroy (FcRule *rule);
 
 /* fclang.c */
+typedef struct {
+    const FcChar8   lang[16];
+    const FcCharSet charset;
+} FcLangCharSet;
+
+typedef struct {
+    int begin;
+    int end;
+} FcLangCharSetRange;
+
+#include "fclang.h"
+
+struct _FcLangSet {
+    FcStrSet *extra;
+    FcChar32  map_size;
+    FcChar32  map[NUM_LANG_SET_MAP];
+};
+
 FcPrivate FcLangSet *
 FcFreeTypeLangSet (const FcCharSet *charset,
                    const FcChar8   *exclusiveLang);
