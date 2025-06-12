@@ -6,7 +6,7 @@ if (fontations.enabled())
   generated_fontconfig = rust.bindgen(
     input : fontconfig_h,
     output : 'fontconfig.rs',
-    include_directories : [ '../' ],
+    include_directories : incbase,
     args : [
       '--merge-extern-blocks',
       '--allowlist-item=(FcCharSet.*|FC_(SLANT|WEIGHT|WIDTH)_.*|FcFontSet(Add|Create|Destroy).*|FcLangSet(Create|Destroy|Copy|Add|HasLang)|FcWeightFromOpenType.*|FC_DUAL|FC_MONO)',
@@ -20,9 +20,9 @@ if (fontations.enabled())
   )
 
   generated_fcint = rust.bindgen(
-    input : '../src/fcint.h',
+    input : ['../src/fcint.h', fclang_h],
     output : 'fcint.rs',
-    include_directories : [ '../' ],
+    include_directories : incbase,
     args : [
       '--merge-extern-blocks',
       '--allowlist-item=(FcPattern.*|FcRange.*|FC_.*_OBJECT|FcCharSet.*|FcFreeTypeLangSet)',
@@ -44,8 +44,8 @@ if (fontations.enabled())
 
   fontations_query_lib = static_library(
     'fc_fontations_query',
-    include_directories : [ '../', '../fontconfig' ],
-    sources: ['../src/fcfontations.c', fcstdint_h, alias_headers],
+    include_directories : incbase,
+    sources: ['../src/fcfontations.c', fcstdint_h, fclang_h, alias_headers],
   )
 
   fc_fontations = static_library(

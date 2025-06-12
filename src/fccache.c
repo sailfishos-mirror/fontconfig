@@ -850,10 +850,13 @@ FcCacheOffsetsValid (FcCache *cache)
 	    return FcFalse;
 
 	for (i = 0; i < fs->nfont; i++) {
-	    FcPattern     *font = FcFontSetFont (fs, i);
-	    FcPatternElt  *e;
-	    FcValueListPtr l;
-	    char          *last_offset;
+	    FcPattern       *font = FcFontSetFont (fs, i);
+	    FcPatternElt    *e;
+	    FcValueListPtr   l;
+	    char            *last_offset;
+	    const FcLangSet *ls;
+	    const FcRange   *r;
+	    const FcChar8   *s;
 
 	    if ((char *)font < base ||
 	        (char *)font > end - sizeof (FcFontSet) ||
@@ -873,6 +876,73 @@ FcCacheOffsetsValid (FcCache *cache)
 		    if ((char *)l < last_offset || (char *)l > end - sizeof (*l) ||
 		        (l->next != NULL && !FcIsEncodedOffset (l->next)))
 			return FcFalse;
+		    switch (l->value.type) {
+		    case FcTypeVoid:
+		    case FcTypeInteger:
+		    case FcTypeDouble:
+		    case FcTypeBool:
+		    case FcTypeMatrix:
+		    case FcTypeFTFace:
+			break; /* nop */
+		    case FcTypeString:
+			s = FcValueString (&l->value);
+			if ((intptr_t)s < (intptr_t)&e[j] ||
+			    (intptr_t)&l->value > (intptr_t)end - sizeof (*l) ||
+			    !FcIsEncodedOffset (l->value.u.s)) {
+			    if (FcDebug() & FC_DBG_CACHE) {
+				fprintf (stderr, "Fontconfig warning: invalid cache: broken string pointer\n");
+			    }
+			    return FcFalse;
+			}
+			break;
+		    case FcTypeCharSet:
+			/* FcCharSet might be re-used by FcCharSetFindFrozen
+			 * which would means a pointer might be out of Elts
+			 */
+			if ((intptr_t)&l->value > (intptr_t)end - sizeof (*l) ||
+			    !FcIsEncodedOffset (l->value.u.c)) {
+			    if (FcDebug() & FC_DBG_CACHE) {
+				fprintf (stderr, "Fontconfig warning: invalid cache: broken charset\n");
+			    }
+			    return FcFalse;
+			}
+			break;
+		    case FcTypeLangSet:
+			ls = FcValueLangSet (&l->value);
+			if ((intptr_t)ls < (intptr_t)&e[j] ||
+			    (intptr_t)&l->value > (intptr_t)end - sizeof (*l) ||
+			    !FcIsEncodedOffset (l->value.u.l)) {
+			    if (FcDebug() & FC_DBG_CACHE) {
+				fprintf (stderr, "Fontconfig warning: invalid cache: broken langset\n");
+			    }
+			    return FcFalse;
+			}
+			/* ls->extra isn't serialized. it must be null */
+			if (ls->extra != NULL) {
+			    if (FcDebug() & FC_DBG_CACHE) {
+				fprintf (stderr, "Fontconfig warning: invalid cache: broken langset\n");
+			    }
+			    return FcFalse;
+			}
+			break;
+		    case FcTypeRange:
+			r = FcValueRange (&l->value);
+			if ((intptr_t)r < (intptr_t)&e[j] ||
+			    (intptr_t)&l->value > (intptr_t)end - sizeof (*l) ||
+			    !FcIsEncodedOffset (l->value.u.r)) {
+			    if (FcDebug() & FC_DBG_CACHE) {
+				fprintf (stderr, "Fontconfig warning: invalid cache: broken range\n");
+			    }
+			    return FcFalse;
+			}
+			break;
+		    default:
+			/* just ignore unknown object type for upper-compatible in the future */
+			if (FcDebug() & FC_DBG_CACHEV) {
+			    fprintf (stderr, "Fontconfig warning: invalid cache: unknown object type in pattern: %d\n", l->value.type);
+			}
+			break;
+		    }
 		    last_offset = (char *)l + 1;
 		}
 	    }

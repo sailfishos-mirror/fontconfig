@@ -178,7 +178,7 @@ add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
 c_args = []
 
 deps = [freetype_dep, xml_dep]
-incbase = include_directories('.')
+incbase = include_directories('.', 'fc-lang')
 
 # For compatibility to autoconf (regardless of the usage in fontconfig)
 conf.set_quoted('PACKAGE_NAME', meson.project_name())
