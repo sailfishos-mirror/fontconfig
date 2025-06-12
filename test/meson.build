@@ -90,12 +90,16 @@ if host_machine.system() != 'windows'
                                'out.expected')
   endif
 
-  test('run_test_sh', find_program('run-test.sh'), timeout: 600, env: ['srcdir=@0@'.format(meson.current_source_dir()), 'builddir=@0@'.format(meson.current_build_dir()), 'EXEEXT=@0@'.format(conf.get('EXEEXT')), 'VERBOSE=1'])
-
+  wrapper = find_program('wrapper-script.sh')
   if pytest.found()
     test('pytest', pytest, args: ['--tap'],
          workdir: meson.current_source_dir(),
-         env: ['builddir=@0@'.format(meson.project_build_root())],
+         env: [
+           'builddir=@0@'.format(meson.project_build_root()),
+           'srcdir=@0@'.format(meson.project_source_root()),
+           'EXEEXT=@0@'.format(conf.get('EXEEXT')),
+           'EXE_WRAPPER=@0@'.format(wrapper.full_path())
+         ],
          protocol: 'tap',
          timeout: 600,
          depends: fetch_test_fonts)
@@ -105,11 +109,4 @@ endif
 if jsonc_dep.found()
   test_conf = executable('test-conf', 'test-conf.c',
                          dependencies: [fontconfig_dep, jsonc_dep])
-  test('run_test_conf_sh', find_program('run-test-conf.sh'),
-       timeout: 120,
-       env: [
-         'srcdir=@0@'.format(meson.current_source_dir()),
-         'builddir=@0@'.format(meson.current_build_dir())
-       ],
-       depends: test_conf)
 endif
