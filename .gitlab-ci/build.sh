@@ -221,7 +221,7 @@ elif [ x"$buildsys" == "xmeson" ]; then
     fi
     buildopt+=(--default-library=$type)
     if [ $clean_build -eq 1 ]; then
-        rm -rf $BUILDDIR || :
+        rm -rf "$BUILDDIR" "$PREFIX" || :
     fi
     TASK="meson setup"
     meson setup --prefix="$PREFIX" -D${subprojectname}nls=enabled -D${subprojectname}cache-build=disabled -D${subprojectname}iconv=enabled ${buildopt[*]} "$BUILDDIR" 2>&1 | tee /tmp/fc-build.log
