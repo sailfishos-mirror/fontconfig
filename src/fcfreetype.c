@@ -1526,13 +1526,12 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
 		    }
 		    free (utf8);
 		    if (lang) {
-			/* pad lang list with 'und' to line up with elt */
-			while (*nlangp < *np) {
-			    if (!FcPatternObjectAddString (pat, objlang, (FcChar8 *)"und"))
-				goto bail1;
-			    ++*nlangp;
-			}
 			if (!FcPatternObjectAddString (pat, objlang, lang))
+			    goto bail1;
+			++*nlangp;
+		    } else {
+			/* Add und as a fallback */
+			if (!FcPatternObjectAddString (pat, objlang, (FcChar8 *)"und"))
 			    goto bail1;
 			++*nlangp;
 		    }
