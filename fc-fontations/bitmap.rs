@@ -22,7 +22,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-use skrifa::FontRef;
+use skrifa::{bitmap::BitmapFormat, FontRef};
 
 use skrifa::bitmap::BitmapStrikes;
 
@@ -32,7 +32,11 @@ use fc_fontations_bindgen::fcint::{FC_ANTIALIAS_OBJECT, FC_PIXEL_SIZE_OBJECT};
 pub fn add_pixel_size(pattern: &mut FcPatternBuilder, font: &FontRef) {
     let strikes = BitmapStrikes::new(font);
 
-    let has_strikes = strikes.len() > 0;
+    if let Some(BitmapFormat::Ebdt) = strikes.format() {
+        return;
+    }
+
+    let has_strikes = !strikes.is_empty();
 
     for strike in strikes.iter() {
         pattern.append_element(PatternElement::new(

@@ -41,7 +41,9 @@ fn object_ids_for_name_id(string_id: StringId) -> Option<(i32, i32)> {
         StringId::FAMILY_NAME | StringId::WWS_FAMILY_NAME | StringId::TYPOGRAPHIC_FAMILY_NAME => {
             Some((FC_FAMILY_OBJECT as i32, FC_FAMILYLANG_OBJECT as i32))
         }
-        StringId::FULL_NAME => Some((FC_FULLNAME_OBJECT as i32, FC_FULLNAMELANG_OBJECT as i32)),
+        StringId::FULL_NAME | StringId::COMPATIBLE_FULL_NAME => {
+            Some((FC_FULLNAME_OBJECT as i32, FC_FULLNAMELANG_OBJECT as i32))
+        }
         StringId::POSTSCRIPT_NAME => {
             Some((FC_POSTSCRIPT_NAME_OBJECT as i32, FC_INVALID_OBJECT as i32))
         }
@@ -69,13 +71,37 @@ fn mangle_postscript_name_for_named_instance(
     let instance_ps_name_id = font
         .named_instances()
         .get(named_instance_id as usize)?
-        .postscript_name_id()?;
-    let ps_name = font
-        .localized_strings(instance_ps_name_id)
-        .english_or_first()?
-        .clone()
-        .to_string();
-    CString::new(ps_name).ok()
+        .postscript_name_id();
+
+    if let Some(ps_name_id) = instance_ps_name_id {
+        let ps_name = font
+            .localized_strings(ps_name_id)
+            .english_or_first()?
+            .clone()
+            .to_string();
+        CString::new(ps_name).ok()
+    } else {
+        let instance_subfamily_name_id = font
+            .named_instances()
+            .get(named_instance_id as usize)?
+            .subfamily_name_id();
+        let prefix = font
+            .localized_strings(StringId::VARIATIONS_POSTSCRIPT_NAME_PREFIX)
+            .english_or_first()
+            .or(font
+                .localized_strings(StringId::FAMILY_NAME)
+                .english_or_first())?
+            .to_string()
+            + "-";
+        let subfam = font
+            .localized_strings(instance_subfamily_name_id)
+            .english_or_first()?
+            .to_string();
+
+        let assembled = prefix + &subfam;
+        let assembled = assembled.replace(" ", "");
+        CString::new(assembled).ok()
+    }
 }
 
 fn mangle_subfamily_name_for_named_instance(
@@ -112,19 +138,7 @@ fn mangle_full_name_for_named_instance(font: &FontRef, named_instance_id: i32) -
     CString::new(full_name + &subfam).ok()
 }
 
-fn determine_decorative(object_id: i32, name: &Option<CString>) -> bool {
-    object_id == FC_STYLE_OBJECT as i32
-        && name
-            .as_ref()
-            .is_some_and(|name| name.to_string_lossy().to_lowercase().contains("decorative"))
-}
-
-pub fn add_names(
-    font: &FontRef,
-    instance_mode: InstanceMode,
-    pattern: &mut FcPatternBuilder,
-    had_decorative: &mut bool,
-) {
+pub fn add_names(font: &FontRef, instance_mode: InstanceMode, pattern: &mut FcPatternBuilder) {
     let mut already_encountered_names: HashSet<(i32, String)> = HashSet::new();
     let name_table = font.name();
     if name_table.is_err() {
@@ -140,13 +154,19 @@ pub fn add_names(
             let name = if localized.to_string().is_empty() {
                 None
             } else {
-                CString::new(localized.to_string()).ok()
+                let mut name_trimmed = localized.to_string().trim().to_owned();
+                // PostScript name sanitization.
+                if object_ids.0 == FC_POSTSCRIPT_NAME_OBJECT as i32 {
+                    name_trimmed = name_trimmed.replace(" ", "");
+                }
+                CString::new(name_trimmed).ok()
             };
             let language = localized.language().or(Some("und")).and_then(|lang| {
+                let lang = lang.to_lowercase();
                 let lang = if lang.starts_with("zh") {
                     lang
                 } else {
-                    lang.split('-').next().unwrap_or(lang)
+                    lang.split('-').next().unwrap_or(&lang).to_string()
                 };
                 CString::new(lang).ok()
             });
@@ -172,8 +192,6 @@ pub fn add_names(
                 ) => None,
                 _ => name,
             };
-
-            *had_decorative = determine_decorative(object_ids.0, &name);
 
             if let (Some(name), Some(language)) = (name, language) {
                 let normalized_name = normalize_name(&name);
