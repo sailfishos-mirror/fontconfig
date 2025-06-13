@@ -845,13 +845,6 @@ retry:
 	*outbuf = '\0';
 	goto done;
     }
-#else
-    if (!redecoded) {
-	/* Regard the encoding as UTF-16BE and try again. */
-	redecoded = FcTrue;
-	fromcode = "UTF-16BE";
-	goto retry;
-    }
 #endif
     return 0;
 done:
