@@ -134,7 +134,7 @@ WARNING_CPP_DIRECTIVE="no"
 if test "x$GCC" = "xyes"; then
 	WARN_CFLAGS="-Wall -Wpointer-arith -Wstrict-prototypes \
 	-Wmissing-prototypes -Wmissing-declarations \
-	-Wnested-externs -fno-strict-aliasing"
+	-Wnested-externs"
 	WARNING_CPP_DIRECTIVE="yes"
 elif test "x$SUNCC" = "xyes"; then
 	WARN_CFLAGS="-v -fd"
