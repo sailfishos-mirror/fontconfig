@@ -27,7 +27,7 @@ use skrifa::{bitmap::BitmapFormat, FontRef};
 use skrifa::bitmap::BitmapStrikes;
 
 use crate::pattern_bindings::{FcPatternBuilder, PatternElement};
-use fc_fontations_bindgen::fcint::{FC_ANTIALIAS_OBJECT, FC_PIXEL_SIZE_OBJECT};
+use fcint_bindings::{FC_ANTIALIAS_OBJECT, FC_PIXEL_SIZE_OBJECT};
 
 pub fn add_pixel_size(pattern: &mut FcPatternBuilder, font: &FontRef) {
     let strikes = BitmapStrikes::new(font);

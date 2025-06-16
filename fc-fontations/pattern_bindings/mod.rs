@@ -22,14 +22,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-extern crate fc_fontations_bindgen;
-
 pub mod fc_wrapper;
 
 use std::ffi::CString;
 use std::fmt::Debug;
 
-use fc_fontations_bindgen::fcint::{
+use fcint_bindings::{
     FcPattern, FcPatternObjectAddBool, FcPatternObjectAddCharSet, FcPatternObjectAddDouble,
     FcPatternObjectAddInteger, FcPatternObjectAddLangSet, FcPatternObjectAddRange,
     FcPatternObjectAddString, FC_FAMILY_OBJECT, FC_FILE_OBJECT,
@@ -135,7 +133,11 @@ impl PatternElement {
                 FcPatternObjectAddCharSet(pattern, self.object_id, value.into_raw())
             },
             PatternValue::LangSet(value) => unsafe {
-                FcPatternObjectAddLangSet(pattern, self.object_id, value.into_raw())
+                FcPatternObjectAddLangSet(
+                    pattern,
+                    self.object_id,
+                    value.into_raw() as *const fontconfig_bindings::_FcLangSet,
+                )
             },
         } == 1;
         if pattern_add_success {
@@ -211,15 +213,16 @@ mod test {
         fc_wrapper::FcCharSetWrapper, FcPatternBuilder, FcRangeWrapper, PatternElement,
         PatternValue,
     };
-    use fc_fontations_bindgen::{
-        fcint::{
-            FcPatternObjectGetBool, FcPatternObjectGetCharSet, FcPatternObjectGetDouble,
-            FcPatternObjectGetInteger, FcPatternObjectGetLangSet, FcPatternObjectGetRange,
-            FcPatternObjectGetString, FcRange, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
-            FC_FAMILY_OBJECT, FC_LANG_OBJECT, FC_SLANT_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
-        },
+    use fontconfig_bindings::{
         FcCharSet, FcCharSetAddChar, FcCharSetHasChar, FcLangSet, FcLangSetAdd, FcLangSetHasLang,
         _FcLangResult_FcLangEqual,
+    };
+
+    use fcint_bindings::{
+        FcPatternObjectGetBool, FcPatternObjectGetCharSet, FcPatternObjectGetDouble,
+        FcPatternObjectGetInteger, FcPatternObjectGetLangSet, FcPatternObjectGetRange,
+        FcPatternObjectGetString, FcRange, FC_CHARSET_OBJECT, FC_COLOR_OBJECT, FC_FAMILY_OBJECT,
+        FC_LANG_OBJECT, FC_SLANT_OBJECT, FC_WEIGHT_OBJECT, FC_WIDTH_OBJECT,
     };
 
     #[test]

@@ -25,7 +25,7 @@
 use skrifa::string::LocalizedString;
 use skrifa::{string::StringId, MetadataProvider};
 
-use fc_fontations_bindgen::fcint::{
+use fcint_bindings::{
     FC_FAMILYLANG_OBJECT, FC_FAMILY_OBJECT, FC_FULLNAMELANG_OBJECT, FC_FULLNAME_OBJECT,
     FC_INVALID_OBJECT, FC_POSTSCRIPT_NAME_OBJECT, FC_STYLELANG_OBJECT, FC_STYLE_OBJECT,
 };
