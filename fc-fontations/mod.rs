@@ -40,14 +40,13 @@ use foundries::make_foundry;
 use lang::exclusive_lang;
 use names::add_names;
 
-use fc_fontations_bindgen::{
-    fcint::{
-        FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT,
-        FC_FILE_OBJECT, FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT,
-        FC_FONT_WRAPPER_OBJECT, FC_FOUNDRY_OBJECT, FC_LANG_OBJECT, FC_ORDER_OBJECT,
-        FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT, FC_SYMBOL_OBJECT,
-    },
-    FcFontSet, FcFontSetAdd, FcPattern,
+use fontconfig_bindings::{FcFontSet, FcFontSetAdd, FcPattern};
+
+use fcint_bindings::{
+    FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT, FC_FILE_OBJECT,
+    FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FONT_WRAPPER_OBJECT,
+    FC_FOUNDRY_OBJECT, FC_LANG_OBJECT, FC_ORDER_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
+    FC_SYMBOL_OBJECT,
 };
 
 use font_types::Tag;
@@ -86,10 +85,12 @@ pub unsafe extern "C" fn add_patterns_to_fontset(
     let mut patterns_added: u32 = 0;
     for (font, ttc_index) in fonts {
         for pattern in build_patterns_for_font(&font, font_file, ttc_index) {
-            if FcFontSetAdd(font_set, pattern) == 0 {
-                return 0;
+            unsafe {
+                if FcFontSetAdd(font_set, pattern) == 0 {
+                    return 0;
+                }
+                patterns_added += 1;
             }
-            patterns_added += 1;
         }
     }
 
@@ -241,7 +242,8 @@ fn build_patterns_for_font(
 
         unsafe {
             let langset =
-                FcLangSetWrapper::from_raw(FcFreeTypeLangSet(charset.as_ptr(), exclusive_lang));
+                FcLangSetWrapper::from_raw(FcFreeTypeLangSet(charset.as_ptr(), exclusive_lang)
+                    as *mut fontconfig_bindings::_FcLangSet);
 
             pattern.append_element(PatternElement::new(
                 FC_CHARSET_OBJECT as i32,
@@ -307,7 +309,7 @@ fn build_patterns_for_font(
 #[cfg(test)]
 mod test {
     use crate::add_patterns_to_fontset;
-    use fc_fontations_bindgen::{FcFontSetCreate, FcFontSetDestroy};
+    use fontconfig_bindings::{FcFontSetCreate, FcFontSetDestroy};
     use std::ffi::CString;
 
     #[test]

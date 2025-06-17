@@ -28,17 +28,19 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "bytemuck_derive",
- "fc-fontations-bindgen",
+ "fcint-bindings",
  "font-types",
+ "fontconfig-bindings",
  "libc",
  "read-fonts",
  "skrifa",
 ]
 
 [[package]]
-name = "fc-fontations-bindgen"
+name = "fcint-bindings"
 version = "0.1.0"
 dependencies = [
+ "fontconfig-bindings",
  "libc",
 ]
 
@@ -49,6 +51,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02a596f5713680923a2080d86de50fe472fb290693cf0f701187a1c8b36996b7"
 dependencies = [
  "bytemuck",
+]
+
+[[package]]
+name = "fontconfig-bindings"
+version = "0.1.0"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
