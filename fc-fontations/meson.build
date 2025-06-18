@@ -23,7 +23,7 @@ if (fontations.enabled())
     include_directories: incbase,
     args: [
       '--merge-extern-blocks',
-      '--allowlist-item=(FcPattern.*|FcRange.*|FC_.*_OBJECT|FcCharSet.*|FcFreeTypeLangSet)',
+      '--allowlist-item=(FcPattern.*|FcRange.*|FC_.*_OBJECT|FcCharSet.*|FcLangSetFromCharSet)',
       '--blocklist-type=(FcCharSet|FcLangSet)',
       '--raw-line=#![allow(nonstandard_style,unused)]',
       '--raw-line=extern crate fontconfig_bindings;',

@@ -43,7 +43,7 @@ use names::add_names;
 use fontconfig_bindings::{FcFontSet, FcFontSetAdd, FcPattern};
 
 use fcint_bindings::{
-    FcFreeTypeLangSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT, FC_FILE_OBJECT,
+    FcLangSetFromCharSet, FC_CAPABILITY_OBJECT, FC_CHARSET_OBJECT, FC_COLOR_OBJECT, FC_FILE_OBJECT,
     FC_FONTFORMAT_OBJECT, FC_FONTVERSION_OBJECT, FC_FONT_HAS_HINT_OBJECT, FC_FONT_WRAPPER_OBJECT,
     FC_FOUNDRY_OBJECT, FC_LANG_OBJECT, FC_ORDER_OBJECT, FC_OUTLINE_OBJECT, FC_SCALABLE_OBJECT,
     FC_SYMBOL_OBJECT,
@@ -242,7 +242,7 @@ fn build_patterns_for_font(
 
         unsafe {
             let langset =
-                FcLangSetWrapper::from_raw(FcFreeTypeLangSet(charset.as_ptr(), exclusive_lang)
+                FcLangSetWrapper::from_raw(FcLangSetFromCharSet(charset.as_ptr(), exclusive_lang)
                     as *mut fontconfig_bindings::_FcLangSet);
 
             pattern.append_element(PatternElement::new(
