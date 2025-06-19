@@ -29,7 +29,7 @@ use std::fmt::Debug;
 
 use fcint_bindings::{
     FcPattern, FcPatternObjectAddBool, FcPatternObjectAddCharSet, FcPatternObjectAddDouble,
-    FcPatternObjectAddInteger, FcPatternObjectAddLangSet, FcPatternObjectAddRange,
+    FcPatternObjectAddInteger, FcLangSet, FcPatternObjectAddLangSet, FcPatternObjectAddRange,
     FcPatternObjectAddString, FC_FAMILY_OBJECT, FC_FILE_OBJECT,
 };
 
@@ -136,7 +136,7 @@ impl PatternElement {
                 FcPatternObjectAddLangSet(
                     pattern,
                     self.object_id,
-                    value.into_raw() as *const fontconfig_bindings::_FcLangSet,
+                    value.into_raw() as *const FcLangSet,
                 )
             },
         } == 1;
