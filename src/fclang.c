@@ -91,8 +91,8 @@ FcLangSetBitReset (FcLangSet   *ls,
 }
 
 FcLangSet *
-FcFreeTypeLangSet (const FcCharSet *charset,
-                   const FcChar8   *exclusiveLang)
+FcLangSetFromCharSet (const FcCharSet *charset,
+                      const FcChar8   *exclusiveLang)
 {
     int              i, j;
     FcChar32         missing;

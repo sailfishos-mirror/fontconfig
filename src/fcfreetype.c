@@ -1994,7 +1994,7 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
 	if (ls_share && *ls_share)
 	    ls = FcLangSetCopy (*ls_share);
 	else {
-	    ls = FcFreeTypeLangSet (cs, exclusiveLang);
+	    ls = FcLangSetFromCharSet (cs, exclusiveLang);
 	    if (ls_share)
 		*ls_share = FcLangSetCopy (ls);
 	}

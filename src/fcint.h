@@ -1078,7 +1078,7 @@ struct _FcLangSet {
 };
 
 FcPrivate FcLangSet *
-FcFreeTypeLangSet (const FcCharSet *charset,
+FcLangSetFromCharSet (const FcCharSet *charset,
                    const FcChar8   *exclusiveLang);
 
 FcPrivate FcLangResult
