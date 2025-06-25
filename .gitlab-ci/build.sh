@@ -30,7 +30,7 @@ export MAKE=${MAKE:-make}
 export BUILD_ID=${BUILD_ID:-fontconfig-$$}
 export PREFIX=${PREFIX:-$MyPWD/prefix}
 export BUILDDIR=${BUILDDIR:-$MyPWD/build}
-export CI_PROJECT_URL=${CI_PROJECT_URL:-https://gitlab.freedesktop.org/fontconfig/fontconfig}
+export CI_MERGE_REQUEST_PROJECT_URL=${CI_MERGE_REQUEST_PROJECT_URL:-https://gitlab.freedesktop.org/fontconfig/fontconfig}
 export CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME:-main}
 
 if [ "x$FC_DISTRO_NAME" = "x" ]; then
@@ -60,7 +60,23 @@ do
         't') type=$OPTARG ;;
         'X') backend=$OPTARG ;;
         'h')
-            echo "Usage: $0 [-a ARCH] [-c] [-C] [-e OPT] [-d OPT] [-h] [-I] [-N] [-s BUILDSYS] [-t BUILDTYPE] [-X XMLBACKEND]"
+            set +x
+            echo "Usage: $0 [-a ARCH] [-c] [-C] [-e OPT] [-d OPT] [-h] [-I] [-N] [-O N] [-s BUILDSYS] [-S] [-t BUILDTYPE] [-X XMLBACKEND]"
+            echo "Options:"
+            echo "  -a ARCH        Use ARCH for cross-compile. Depends on BUILDSYS"
+            echo "  -c             Run distcheck"
+            echo "  -C             Do not run unit tests"
+            echo "  -e OPT         Enable OPT feature to build"
+            echo "  -d OPT         Disable OPT feature to build"
+            echo "  -I             Run install"
+            echo "  -N             Do not clean build directory"
+            echo "  -O N           Optimization level to build"
+            echo "  -s BUILDSYS    Use BUILDSYS to build (default: $buildsys)"
+            echo "  -S             Run sub-project build. Take effect on meson only"
+            echo "  -t BUILDTYPE   shared build or static build (default: $type)"
+            echo "  -X XMLBACKEND  Use XMLBACKEND for xml parser library"
+            echo ""
+            echo "FC_BUILD_PLATFORM: Set a platform for cross-compiling, mingw or android"
             exit 1
             ;;
     esac
@@ -178,7 +194,7 @@ elif [ x"$buildsys" == "xmeson" ]; then
         git clone https://gitlab.freedesktop.org/fontconfig/fc-ci-meson-subproject.git
         cd fc-ci-meson-subproject
         pushd subprojects
-        git clone ${CI_PROJECT_URL}.git
+        git clone ${CI_MERGE_REQUEST_PROJECT_URL}.git
         if [ -n "$CI_MERGE_REQUEST_IID" ]; then
             pushd fontconfig
             git fetch origin merge-requests/$CI_MERGE_REQUEST_IID/head:$CI_COMMIT_REF_NAME
