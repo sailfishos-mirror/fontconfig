@@ -2546,6 +2546,11 @@ FcConfigXdgDataDirs (void)
 		e = p + 1;
 	    }
 	    len = strlen ((const char *)s);
+	    if (len == 0) {
+		FcStrFree (s);
+		continue;
+	    }
+
 	    if (s[len - 1] == FC_DIR_SEPARATOR) {
 		do {
 		    len--;
