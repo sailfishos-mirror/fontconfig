@@ -138,6 +138,8 @@ extern pfnSHGetFolderPathA          pSHGetFolderPathA;
 #  include <libintl.h>
 #  define _(x) (dgettext (GETTEXT_PACKAGE, x))
 #else
+/* dgettext macro must be defined after existing declarations */
+#  include <locale.h>
 #  define dgettext(d, s) (s)
 #  define _(x)           (x)
 #endif
