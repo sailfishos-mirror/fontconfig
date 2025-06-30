@@ -2661,7 +2661,7 @@ FcFontCapabilities (FT_Face face)
 	goto bail;
 
     maxsize = (((FT_ULong)gpos_count + (FT_ULong)gsub_count) * OTLAYOUT_LEN +
-               (issilgraphitefont ? strlen(fcSilfCapability) : 0));
+               (issilgraphitefont ? strlen(fcSilfCapability) + 1: 0));
     complex_ = malloc (sizeof (FcChar8) * maxsize);
     if (!complex_)
 	goto bail;
