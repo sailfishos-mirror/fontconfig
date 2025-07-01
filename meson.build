@@ -627,6 +627,8 @@ summary({
 }, section: 'General', bool_yn: true, list_sep: ', ')
 summary({
   'Hinting': preferred_hinting,
+  'Sub Pixel Rendering': preferred_sub_pixel_rendering,
+  'Bitmap': preferred_bitmap,
   'Font directories': fc_fonts_paths,
   'Additional font directories': fc_add_fonts,
 }, section: 'Defaults', bool_yn: true, list_sep: ', ')
