@@ -43,8 +43,8 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  FEDORA_TAG:    '2025-07-02.1-fbde134e0fc2'
-  FREEBSD_TAG:   '2025-07-02.1-7ca268a6b04b'
+  FEDORA_TAG:    '2025-07-02.1-64bf940db86f'
+  FREEBSD_TAG:   '2025-07-02.1-0a70e3d5a7e2'
 
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
   FREEBSD_EXEC:  'bash .gitlab-ci/freebsd-install.sh'
@@ -122,14 +122,14 @@ fedora:41@container-prep:
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
     FDO_DISTRIBUTION_EXEC: $FEDORA_EXEC
 
-freebsd:14.1@container-prep:
+freebsd:14.2@container-prep:
   extends: .fdo.qemu-build@freebsd
   tags:
     - kvm
   stage: prep
   variables:
     GIT_STRATEGY: none
-    FDO_DISTRIBUTION_VERSION: '14.1'
+    FDO_DISTRIBUTION_VERSION: '14.2'
     FDO_DISTRIBUTION_PACKAGES: 'gcc autoconf automake libtool gettext gperf expat libxml2 freetype2 json-c git ninja wget python3 py311-pip pkgconf gmake gettext-runtime'
     FDO_DISTRIBUTION_TAG: $FREEBSD_TAG
     FDO_DISTRIBUTION_EXEC: $FREEBSD_EXEC
@@ -194,13 +194,13 @@ fedora:41@container-clean:
     FDO_DISTRIBUTION_VERSION: '41'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
 
-freebsd:14.1@container-clean:
+freebsd:14.2@container-clean:
   extends:
     - .container-clean
   variables:
     GIT_STRATEGY: none
     CURRENT_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/freebsd/$FDO_DISTRIBUTION_VERSION:$FDO_DISTRIBUTION_TAG
-    FDO_DISTRIBUTION_VERSION: '14.1'
+    FDO_DISTRIBUTION_VERSION: '14.2'
     FDO_DISTRIBUTION_TAG: $FREEBSD_TAG
 
 
@@ -672,7 +672,7 @@ t_fedora:rawhide:android aarch64:
     - 'fedora:rawhide@container-prep'
 
 
-t_freebsd:14.1:standard build:
+t_freebsd:14.2:standard build:
   stage: distro
   extends:
     - .build-in-qemu@template
@@ -680,14 +680,14 @@ t_freebsd:14.1:standard build:
     - .fc_artifacts
   variables:
     FC_DISTRO_NAME: freebsd
-    FDO_DISTRIBUTION_VERSION: '14.1'
+    FDO_DISTRIBUTION_VERSION: '14.2'
     FDO_DISTRIBUTION_TAG: $FREEBSD_TAG
     FC_BUILDSYS: meson
     FC_BUILD_TYPE: shared
     FC_XML_BACKEND: libxml2
     FC_BUILD_NO_CHECK: 1
   needs:
-    - 'freebsd:14.1@container-prep'
+    - 'freebsd:14.2@container-prep'
 
 
 #######################################
