@@ -8,7 +8,7 @@ cidir=$(dirname $0)
 
 case "$OSTYPE" in
     msys) MyPWD=$(pwd -W) ;;
-    *BSD) PATH=$PATH:/usr/local/bin ;&
+    *BSD) PATH=$PATH:/usr/local/bin ;;
     *) MyPWD=$(pwd) ;;
 esac
 enable=()
