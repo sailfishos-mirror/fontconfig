@@ -165,6 +165,8 @@ if [ x"$buildsys" == "xautotools" ]; then
     fi
 elif [ x"$buildsys" == "xmeson" ]; then
     TASK="pip install"
+    python3 -m venv .venv
+    . .venv/bin/activate
     pip install "meson>=1.6.1"
 #   tomli not required for Python >= 3.11
     pip install tomli
@@ -255,6 +257,7 @@ elif [ x"$buildsys" == "xmeson" ]; then
         TASK="meson dist"
         meson dist -C "$BUILDDIR" 2>&1 | tee -a /tmp/fc-build.log
     fi
+    deactivate
 fi
 TASK=
 exit 0
