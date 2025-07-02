@@ -1,11 +1,18 @@
                               Fontconfig
              Font configuration and customization library
-                             Version 2.17
-                              2025-06-27
+                            Version 2.17.1
+                              2025-07-02
 
 
 Check INSTALL for compilation and installation instructions.
 Report bugs to https://gitlab.freedesktop.org/fontconfig/fontconfig/issues/new.
+
+2.17.1
+
+Akira TAGOH (3):
+      Fix a heap buffer overflow
+      meson: Add 'noinstall' to default-hinting, default-sub-pixel-rendering, bitmap-conf build options
+      Bump the libtool version
 
 2.17
 
