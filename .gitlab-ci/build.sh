@@ -101,6 +101,10 @@ clean_exit() {
 
 trap clean_exit INT TERM ABRT EXIT
 
+if [ -f .gitlab-ci/${FC_DISTRO_NAME}-setup.sh ]; then
+    . .gitlab-ci/${FC_DISTRO_NAME}-setup.sh
+fi
+
 if [ x"$buildsys" == "xautotools" ]; then
     if [ $subproject -eq 1 ]; then
         echo "Subproject build not supported in autotools"
