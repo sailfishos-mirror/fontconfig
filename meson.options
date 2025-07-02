@@ -20,13 +20,13 @@ option('fontations', type: 'feature', value: 'disabled',
   description: 'Use Fontations (https://github.com/googlefonts/fontations) for indexing.')
 
 # Defaults
-option('default-hinting', type: 'combo', choices: ['none', 'slight', 'medium', 'full'], value: 'slight',
+option('default-hinting', type: 'combo', choices: ['noinstall', 'none', 'slight', 'medium', 'full'], value: 'slight',
   description: 'Preferred hinting configuration')
 
-option('default-sub-pixel-rendering', type: 'combo', choices: ['none', 'bgr', 'rgb', 'vbgr', 'vrgb'], value: 'none',
+option('default-sub-pixel-rendering', type: 'combo', choices: ['noinstall', 'none', 'bgr', 'rgb', 'vbgr', 'vrgb'], value: 'none',
   description: 'Preferred sub-pixel rendering configuration')
 
-option('bitmap-conf', type: 'combo', choices: ['yes', 'no', 'no-except-emoji'], value: 'no-except-emoji',
+option('bitmap-conf', type: 'combo', choices: ['noinstall', 'yes', 'no', 'no-except-emoji'], value: 'no-except-emoji',
   description: 'What bitmap font related config file enabled by default: See 70-*bitmaps*.conf')
 
 option('default-fonts-dirs', type: 'array', value: ['yes'],
