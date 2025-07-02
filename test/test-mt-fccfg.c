@@ -1,9 +1,12 @@
 /* Copyright (C) 2025 fontconfig Authors */
 /* SPDX-License-Identifier: HPND */
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <fontconfig/fontconfig.h>
 
 #include <stdio.h>
-#define __USE_XOPEN
 #include <pthread.h>
 #include <stdlib.h>
 
@@ -12,6 +15,21 @@
 struct thr_arg_s {
     int thr_num;
 };
+
+#ifdef _WIN32
+int
+setenv (const char *name, const char *value, int o)
+{
+    size_t len = strlen (name) + strlen (value) + 1;
+    char  *s = malloc (len + 1);
+    int    ret;
+
+    snprintf (s, len, "%s=%s", name, value);
+    ret = _putenv (s);
+    free (s);
+    return ret;
+}
+#endif
 
 static void *
 run_test_in_thread (void *arg)
@@ -61,7 +79,7 @@ test (void)
     if (c1 == c2)
 	return 1;
     /* To make visible if we have any references */
-    putenv ("FC_DEBUG=16");
+    setenv ("FC_DEBUG", "16", 1);
     FcFini();
 
     return 0;
