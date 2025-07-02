@@ -47,7 +47,7 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  ALPINE_TAG:    '2025-07-02.2-2e99b6a0d622'
+  ALPINE_TAG:    '2025-07-02.2-44bc6e2a4678'
   FEDORA_TAG:    '2025-07-02.2-594ebb6f3472'
   FREEBSD_TAG:   '2025-07-02.2-6658aea3e577'
 
