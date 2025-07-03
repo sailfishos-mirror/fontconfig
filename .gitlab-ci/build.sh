@@ -8,7 +8,7 @@ cidir=$(dirname $0)
 
 case "$OSTYPE" in
     msys) MyPWD=$(pwd -W) ;;
-    *BSD) PATH=$PATH:/usr/local/bin ;&
+    *BSD) PATH=$PATH:/usr/local/bin ;;
     *) MyPWD=$(pwd) ;;
 esac
 enable=()
@@ -101,6 +101,10 @@ clean_exit() {
 
 trap clean_exit INT TERM ABRT EXIT
 
+if [ -f .gitlab-ci/${FC_DISTRO_NAME}-setup.sh ]; then
+    . .gitlab-ci/${FC_DISTRO_NAME}-setup.sh
+fi
+
 if [ x"$buildsys" == "xautotools" ]; then
     if [ $subproject -eq 1 ]; then
         echo "Subproject build not supported in autotools"
@@ -165,6 +169,8 @@ if [ x"$buildsys" == "xautotools" ]; then
     fi
 elif [ x"$buildsys" == "xmeson" ]; then
     TASK="pip install"
+    python3 -m venv .venv
+    . .venv/bin/activate
     pip install "meson>=1.6.1"
 #   tomli not required for Python >= 3.11
     pip install tomli
@@ -255,6 +261,7 @@ elif [ x"$buildsys" == "xmeson" ]; then
         TASK="meson dist"
         meson dist -C "$BUILDDIR" 2>&1 | tee -a /tmp/fc-build.log
     fi
+    deactivate
 fi
 TASK=
 exit 0
