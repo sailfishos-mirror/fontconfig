@@ -81,29 +81,26 @@ endif
 
 fs = import('fs')
 
-if host_machine.system() != 'windows'
-  if conf.get('FREETYPE_PCF_LONG_FAMILY_NAMES')
-    out_expected = fs.copyfile('out.expected-long-family-names',
-                               'out.expected')
-  else
-    out_expected = fs.copyfile('out.expected-no-long-family-names',
-                               'out.expected')
-  endif
+if conf.get('FREETYPE_PCF_LONG_FAMILY_NAMES')
+  out_expected = fs.copyfile('out.expected-long-family-names',
+                             'out.expected')
+else
+  out_expected = fs.copyfile('out.expected-no-long-family-names',
+                             'out.expected')
+endif
 
-  wrapper = find_program('wrapper-script.sh')
-  if pytest.found()
-    test('pytest', pytest, args: ['--tap'],
-         workdir: meson.current_source_dir(),
-         env: [
-           'builddir=@0@'.format(meson.project_build_root()),
-           'srcdir=@0@'.format(meson.project_source_root()),
-           'EXEEXT=@0@'.format(conf.get('EXEEXT')),
-           'EXE_WRAPPER=@0@'.format(wrapper.full_path())
-         ],
-         protocol: 'tap',
-         timeout: 600,
-         depends: fetch_test_fonts)
-  endif
+if pytest.found()
+  test('pytest', pytest, args: ['--tap'],
+       workdir: meson.current_source_dir(),
+       env: [
+         'builddir=@0@'.format(meson.project_build_root()),
+         'srcdir=@0@'.format(meson.project_source_root()),
+         'EXEEXT=@0@'.format(conf.get('EXEEXT')),
+         'CC=@0@'.format(meson.get_compiler('c').cmd_array()[0]),
+       ],
+       protocol: 'tap',
+       timeout: 600,
+       depends: fetch_test_fonts)
 endif
 
 if jsonc_dep.found()

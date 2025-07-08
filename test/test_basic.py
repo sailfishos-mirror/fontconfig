@@ -231,7 +231,7 @@ def test_multiple_caches(fctest, fcfont):
                                        suffix='.extra.conf',
                                        mode='w',
                                        delete_on_close=False)
-    fctest._extra.append(f'<include ignore_missing="yes">{extraconffile.name}</include>')
+    fctest._extra.append(f'<include ignore_missing="yes">{fctest.convert_path(extraconffile.name)}</include>')
 
     # Set up for generating original caches
     fctest.setup()
@@ -242,7 +242,7 @@ def test_multiple_caches(fctest, fcfont):
     fctest.install_font(fcfont.fonts, '.', epoch)
     if epoch:
         fctest._env['SOURCE_DATE_EPOCH'] = str(epoch)
-    for ret, stdout, stderr in fctest.run_cache([fctest.fontdir.name]):
+    for ret, stdout, stderr in fctest.run_cache([fctest.convert_path(fctest.fontdir.name)]):
         assert ret == 0, stderr
     time.sleep(1)
 
@@ -265,14 +265,14 @@ def test_multiple_caches(fctest, fcfont):
     extraconffile.write(f'''
 <fontconfig>
   <match target="scan">
-    <test name="file"><string>{fctest.fontdir.name}/4x6.pcf</string></test>
+    <test name="file"><string>{fctest.convert_path(fctest.fontdir.name)}/4x6.pcf</string></test>
     <edit name="pixelsize"><int>8</int></edit>
   </match>
 </fontconfig>''')
     extraconffile.close()
     if epoch:
         fctest._env['SOURCE_DATE_EPOCH'] = str(epoch + 1)
-    for ret, stdout, stderr in fctest.run_cache([fctest.fontdir.name]):
+    for ret, stdout, stderr in fctest.run_cache([fctest.convert_path(fctest.fontdir.name)]):
         assert ret == 0, stderr
     if epoch:
         fctest._env['SOURCE_DATE_EPOCH'] = origepoch
@@ -288,7 +288,7 @@ def test_multiple_caches(fctest, fcfont):
                                        delete_on_close=False)
     fctest._cachedir = oldcachedir
     fctest._conffile = mixedconffile
-    fctest._extra.append(f'<cachedir>{newcachedir.name}</cachedir>')
+    fctest._extra.append(f'<cachedir>{fctest.convert_path(newcachedir.name)}</cachedir>')
     fctest.setup()
     l = []
     for ret, stdout, stderr in fctest.run_list(['-', 'family', 'pixelsize']):

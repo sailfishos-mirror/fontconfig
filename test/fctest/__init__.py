@@ -3,7 +3,7 @@
 
 from contextlib import contextmanager
 from itertools import chain
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from tempfile import TemporaryDirectory, NamedTemporaryFile
 from typing import Iterator, Self
 import logging
@@ -19,6 +19,7 @@ logging.basicConfig(level=logging.DEBUG)
 class FcTest:
 
     def __init__(self):
+        self._with_fontations = False
         self.logger = logging.getLogger()
         self._env = os.environ.copy()
         self._fontdir = TemporaryDirectory(prefix='fontconfig.',
@@ -29,17 +30,32 @@ class FcTest:
                                             suffix='.host.conf',
                                             mode='w',
                                             delete_on_close=False)
-        self._builddir = self._env.get('builddir', 'build')
+        self._builddir = self._env.get('builddir', str(Path(__file__).parents[2] / 'build'))
         self._srcdir = self._env.get('srcdir', '.')
         self._exeext = self._env.get('EXEEXT',
                                      '.exe' if sys.platform == 'win32' else '')
-        self._exewrapper = self._env.get('EXE_WRAPPER', None)
-        if not self._exewrapper:
-            raise RuntimeError('No exe wrapper')
+        self._drive = PureWindowsPath(self._env.get('SystemDrive', '')).drive
+        self._exewrapper = ''
+        if self._exeext and sys.platform != 'win32':
+            self._exewrapper = shutil.which('wine')
+            if not self._exewrapper:
+                raise RuntimeError('No runner available')
+            self._drive = 'z:'
+            cc = self._env.get('CC', 'cc')
+            res = subprocess.run([cc, '-print-sysroot'], capture_output=True)
+            sysroot = res.stdout.decode('utf-8').rstrip()
+            if res.returncode != 0 or not sysroot:
+                raise RuntimeError('Unable to get sysroot')
+            sysroot = Path(sysroot) / 'mingw' / 'bin'
+            self._env['WINEPATH'] = ';'.join(
+                [
+                    self.convert_path(self._builddir),
+                    self.convert_path(sysroot)
+                ])
         self._bwrap = shutil.which('bwrap')
         def bin_path(bin):
             fn = bin + self._exeext
-            return Path(self.builddir) / bin / fn
+            return self.convert_path(Path(self.builddir) / bin / fn)
         self._fccache = bin_path('fc-cache')
         self._fccat = bin_path('fc-cat')
         self._fclist = bin_path('fc-list')
@@ -87,14 +103,22 @@ class FcTest:
     def remapdir(self):
         return [x for x in self._extra if re.search(r'\b<remap-dir\b', x)]
 
+    @property
+    def with_fontations(self):
+        return self._with_fontations
+
+    @with_fontations.setter
+    def with_fontations(self, v: bool) -> None:
+        self._with_fontations = v
+
     @remapdir.setter
     def remapdir(self, v: str) -> None:
         self._extra = [x for x in self._extra if not re.search(r'\b<remap-dir\b', x)]
         self._extra += [f'<remap-dir as-path="{self.fontdir.name}">{v}</remap-dir>']
 
     def config(self) -> str:
-        return self.__conf_templ.format(fontdir=self.fontdir.name,
-                                        cachedir=self.cachedir.name,
+        return self.__conf_templ.format(fontdir=self.convert_path(self.fontdir.name),
+                                        cachedir=self.convert_path(self.cachedir.name),
                                         extra=self.extra)
 
     def setup(self):
@@ -113,7 +137,7 @@ class FcTest:
             self._conffile.close()
             conf = self._conffile.name
 
-        self._env['FONTCONFIG_FILE'] = conf
+        self._env['FONTCONFIG_FILE'] = self.convert_path(conf)
 
     def install_font(self, files, dest, time=None):
         if not isinstance(files, list):
@@ -217,6 +241,8 @@ class FcTest:
             boxed += self.__bind
             if debug:
                 boxed += ['--setenv', 'FC_DEBUG', str(debug)]
+            if self.with_fontations:
+                boxed += ['--setenv', 'FC_FONTATIONS', '1']
             boxed += cmd
             self.logger.info(boxed)
             res = subprocess.run(boxed, capture_output=True,
@@ -225,6 +251,9 @@ class FcTest:
             origdebug = self._env.get('FC_DEBUG')
             if debug:
                 self._env['FC_DEBUG'] = str(debug)
+            origfontations = self._env.get('FC_FONTATIONS')
+            if self.with_fontations:
+                self._env['FC_FONTATIONS'] = '1'
             self.logger.info(cmd)
             res = subprocess.run(cmd, capture_output=True,
                                  env=self._env)
@@ -233,6 +262,11 @@ class FcTest:
                     self._env['FC_DEBUG'] = origdebug
                 else:
                     del self._env['FC_DEBUG']
+            if self.with_fontations:
+                if origfontations:
+                    self._env['FC_FONTATIONS'] = origfontations
+                else:
+                    del self._env['FC_FONTATIONS']
         yield res.returncode, res.stdout.decode('utf-8'), res.stderr.decode('utf-8')
 
     def run_cache(self, args, debug=False) -> Iterator[[int, str, str]]:
@@ -263,6 +297,12 @@ class FcTest:
         for c in Path(self.cachedir.name).glob('*cache*'):
             yield c
 
+    def convert_path(self, path) -> str:
+        winpath = PureWindowsPath(path)
+        if not winpath.drive and self._drive:
+            return str(PureWindowsPath(self._drive) / '/' / winpath).replace('\\', '/')
+        return path
+
 
 class FcTestFont:
 
@@ -285,10 +325,23 @@ class FcTestFont:
         return self._fonts
 
 
+class FcExternalTestFont:
+
+    def __init__(self):
+        fctest = FcTest()
+        self._fonts = [str(fn) for fn in (Path(fctest.builddir) / "testfonts").glob('**/*.ttf')]
+
+    @property
+    def fonts(self):
+        return self._fonts
+
+
 if __name__ == '__main__':
     f = FcTest()
     print(f.fontdir.name)
     print(f.cachedir.name)
     print(f._conffile.name)
-    print(f.config)
+    print(f.config())
     f.setup()
+    f = FcExternalTestFont()
+    print(f.fonts)
