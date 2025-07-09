@@ -1209,6 +1209,7 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
 
     FcBool   symbol = FcFalse;
     FT_Error ftresult;
+    FcChar8 *canon_file = NULL;
 
     FcInitDebug(); /* We might be called with no initizalization whatsoever. */
 
@@ -1713,7 +1714,8 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
 	    goto bail1;
     }
 
-    if (file && *file && !FcPatternObjectAddString (pat, FC_FILE_OBJECT, file))
+    canon_file = FcStrCanonFilename(file);
+    if (canon_file && *canon_file && !FcPatternObjectAddString (pat, FC_FILE_OBJECT, canon_file))
 	goto bail1;
 
     if (!FcPatternObjectAddInteger (pat, FC_INDEX_OBJECT, id))
@@ -2106,6 +2108,8 @@ bail1:
 	free (name_mapping);
     if (foundry_)
 	free (foundry_);
+    if (canon_file)
+	free (canon_file);
 bail0:
     return NULL;
 }
