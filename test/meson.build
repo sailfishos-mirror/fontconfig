@@ -81,35 +81,29 @@ endif
 
 fs = import('fs')
 
-if host_machine.system() != 'windows'
-  if conf.get('FREETYPE_PCF_LONG_FAMILY_NAMES')
-    out_expected = fs.copyfile('out.expected-long-family-names',
-                               'out.expected')
-  else
-    out_expected = fs.copyfile('out.expected-no-long-family-names',
-                               'out.expected')
-  endif
+if conf.get('FREETYPE_PCF_LONG_FAMILY_NAMES')
+  out_expected = fs.copyfile('out.expected-long-family-names',
+                             'out.expected')
+else
+  out_expected = fs.copyfile('out.expected-no-long-family-names',
+                             'out.expected')
+endif
 
-  test('run_test_sh', find_program('run-test.sh'), timeout: 600, env: ['srcdir=@0@'.format(meson.current_source_dir()), 'builddir=@0@'.format(meson.current_build_dir()), 'EXEEXT=@0@'.format(conf.get('EXEEXT')), 'VERBOSE=1'])
-
-  if pytest.found()
-    test('pytest', pytest, args: ['--tap'],
-         workdir: meson.current_source_dir(),
-         env: ['builddir=@0@'.format(meson.project_build_root())],
-         protocol: 'tap',
-         timeout: 600,
-         depends: fetch_test_fonts)
-  endif
+if pytest.found()
+  test('pytest', pytest, args: ['--tap'],
+       workdir: meson.current_source_dir(),
+       env: [
+         'builddir=@0@'.format(meson.project_build_root()),
+         'srcdir=@0@'.format(meson.project_source_root()),
+         'EXEEXT=@0@'.format(conf.get('EXEEXT')),
+         'CC=@0@'.format(meson.get_compiler('c').cmd_array()[0]),
+       ],
+       protocol: 'tap',
+       timeout: 600,
+       depends: fetch_test_fonts)
 endif
 
 if jsonc_dep.found()
   test_conf = executable('test-conf', 'test-conf.c',
                          dependencies: [fontconfig_dep, jsonc_dep])
-  test('run_test_conf_sh', find_program('run-test-conf.sh'),
-       timeout: 120,
-       env: [
-         'srcdir=@0@'.format(meson.current_source_dir()),
-         'builddir=@0@'.format(meson.current_build_dir())
-       ],
-       depends: test_conf)
 endif
