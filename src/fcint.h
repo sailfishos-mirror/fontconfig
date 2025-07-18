@@ -455,9 +455,12 @@ struct _FcCache {
     intptr_t     dir;           /* offset to dir name */
     intptr_t     dirs;          /* offset to subdirs */
     int          dirs_count;    /* number of subdir strings */
+    int          pad1;
     intptr_t     set;           /* offset to font set */
     int          checksum;      /* checksum of directory state */
+    int          pad2;
     int64_t      checksum_nano; /* checksum of directory state */
+    int64_t      fc_version;    /* fontconfig version */
 };
 
 #undef FcCacheDir

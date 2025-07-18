@@ -164,3 +164,86 @@ def test_md5_consistency(fctest, fcfont):
     # Make sure they are totally different but same filename
     assert cache_files_before == cache_files_after
     assert cmp_cache_before != cmp_cache_after
+
+
+@pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
+@pytest.mark.skipif(not shutil.which('bwrap'), reason='No bwrap installed')
+def test_gen_testcache(fctest, fcfont):
+    testexe = Path(fctest.builddir) / 'test' / ('test-gen-testcache' + fctest._exeext)
+    if not testexe.exists():
+        testexe = Path(fctest.builddir) / 'test' / ('test_gen_testcache' + fctest._exeext)
+        if not testexe.exists():
+            raise RuntimeError('No test case for gen-testcache')
+
+    fctest.setup()
+    fctest.install_font(fcfont.fonts, '.')
+    for ret, stdout, stderr in fctest.run(testexe, [fctest.fontdir.name]):
+        assert ret == 0, stderr
+        cache_files1 = [f for f in fctest.cache_files()]
+        assert len(cache_files1) == 1, cache_files1
+        time.sleep(1)
+        # Update mtime
+        Path(fctest.fontdir.name).touch()
+        cache_stat1 = [f.stat() for f in fctest.cache_files()]
+        fctest.logger.info(cache_files1)
+
+    time.sleep(1)
+    basedir = tempfile.TemporaryDirectory(prefix='fontconfig.',
+                                          suffix='.base')
+    with fctest.sandboxed(basedir.name) as f:
+        for ret, stdout, stderr in f.run_match([]):
+            assert ret == 0, stderr
+            assert "Fontconfig warning" in stderr, stderr
+            f.logger.info(stdout)
+            f.logger.info(stderr)
+
+    cache_stat2 = [f.stat() for f in fctest.cache_files()]
+    cache_files2 = [f for f in fctest.cache_files()]
+    assert len(cache_stat2) == 1, cache_stat2
+    assert cache_files1 == cache_files2, cache_files2
+    # ignore st_atime
+    cmp_cache_before = [attrgetter('st_mode', 'st_ino', 'st_dev', 'st_nlink', 'st_uid', 'st_gid', 'st_size', 'st_mtime', 'st_ctime')(st) for st in cache_stat1]
+    cmp_cache_after = [attrgetter('st_mode', 'st_ino', 'st_dev', 'st_nlink', 'st_uid', 'st_gid', 'st_size', 'st_mtime', 'st_ctime')(st) for st in cache_stat2]
+    assert cmp_cache_before == cmp_cache_after
+
+
+@pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
+@pytest.mark.skipif(not shutil.which('bwrap'), reason='No bwrap installed')
+def test_gen_testcache_no_check(fctest, fcfont):
+    testexe = Path(fctest.builddir) / 'test' / ('test-gen-testcache' + fctest._exeext)
+    if not testexe.exists():
+        testexe = Path(fctest.builddir) / 'test' / ('test_gen_testcache' + fctest._exeext)
+        if not testexe.exists():
+            raise RuntimeError('No test case for gen-testcache')
+
+    fctest.env['FONTCONFIG_NO_CHECK_CACHE_VERSION'] = '1'
+    fctest.setup()
+    fctest.install_font(fcfont.fonts, '.')
+    for ret, stdout, stderr in fctest.run(testexe, [fctest.fontdir.name]):
+        assert ret == 0, stderr
+        cache_files1 = [f for f in fctest.cache_files()]
+        assert len(cache_files1) == 1, cache_files1
+        time.sleep(1)
+        # Update mtime
+        Path(fctest.fontdir.name).touch()
+        cache_stat1 = [f.stat() for f in fctest.cache_files()]
+        fctest.logger.info(cache_files1)
+
+    time.sleep(1)
+    basedir = tempfile.TemporaryDirectory(prefix='fontconfig.',
+                                          suffix='.base')
+    with fctest.sandboxed(basedir.name) as f:
+        for ret, stdout, stderr in f.run_match([]):
+            assert ret == 0, stderr
+            assert "Fontconfig warning" not in stderr, stderr
+            f.logger.info(stdout)
+            f.logger.info(stderr)
+
+    cache_stat2 = [f.stat() for f in fctest.cache_files()]
+    cache_files2 = [f for f in fctest.cache_files()]
+    assert len(cache_stat2) == 1, cache_stat2
+    assert cache_files1 == cache_files2, cache_files2
+    # ignore st_atime
+    cmp_cache_before = [attrgetter('st_mode', 'st_ino', 'st_dev', 'st_nlink', 'st_uid', 'st_gid', 'st_size', 'st_mtime', 'st_ctime')(st) for st in cache_stat1]
+    cmp_cache_after = [attrgetter('st_mode', 'st_ino', 'st_dev', 'st_nlink', 'st_uid', 'st_gid', 'st_size', 'st_mtime', 'st_ctime')(st) for st in cache_stat2]
+    assert cmp_cache_before != cmp_cache_after

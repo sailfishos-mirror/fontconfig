@@ -25,7 +25,7 @@ curversion = fc_version_minor - 1
 libversion = '@0@.@1@.0'.format(soversion, curversion)
 defversion = '@0@.@1@'.format(curversion, fc_version_micro)
 osxversion = curversion + 1
-cacheversion = '9'
+cacheversion = '10'
 
 freetype_req = '>= 21.0.15'
 freetype_req_cmake = '>= 2.8.1'
@@ -34,6 +34,10 @@ cc = meson.get_compiler('c')
 math_dep = cc.find_library('m', required: false)
 
 conf = configuration_data()
+
+conf.set('FC_VERSION_MAJOR', fc_version_major)
+conf.set('FC_VERSION_MINOR', fc_version_minor)
+conf.set('FC_VERSION_MICRO', fc_version_micro)
 
 freetype_dep = dependency('freetype2', method: 'pkg-config', version: freetype_req, required: false)
 

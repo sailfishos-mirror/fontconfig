@@ -68,8 +68,16 @@ dnl Initialize libtool
 LT_PREREQ([2.2])
 LT_INIT([disable-static win32-dll])
 
+dnl fc version
+eval `echo $VERSION |
+	awk -F. '{ printf ("major=%d\nminor=%d\nrevision=%d\n",
+			   $1, $2, $3); }'`
+AC_DEFINE_UNQUOTED([FC_VERSION_MAJOR], [$major], [major version])
+AC_DEFINE_UNQUOTED([FC_VERSION_MINOR], [$minor], [minor version])
+AC_DEFINE_UNQUOTED([FC_VERSION_MICRO], [$revision], [revision])
+
 dnl cache version
-CACHE_VERSION=9
+CACHE_VERSION=10
 AC_SUBST(CACHE_VERSION)
 
 dnl libtool versioning

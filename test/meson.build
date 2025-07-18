@@ -23,6 +23,9 @@ tests = [
   ['test-family-matching.c'],
   ['test-ptrlist.c', {'include_directories': include_directories('../src'), 'dependencies': libintl_dep}],
 ]
+tests_build_only = [
+  ['test-gen-testcache.c', {'include_directories': include_directories('../src'), 'dependencies': libintl_dep}],
+]
 tests_not_parallel = []
 
 if host_machine.system() != 'windows'
@@ -50,7 +53,7 @@ if get_option('fontations').enabled()
   link_with_libs += [fc_fontations]
 endif
 
-foreach test_data : tests + tests_not_parallel
+foreach test_data : tests + tests_not_parallel + tests_build_only
   fname = test_data[0]
   opts = test_data.length() > 1 ? test_data[1] : {}
   extra_c_args = opts.get('c_args', [])
@@ -66,10 +69,12 @@ foreach test_data : tests + tests_not_parallel
     dependencies: extra_deps,
   )
 
-  if test_data in tests
-    test(test_name, exe, timeout: 600, is_parallel: true)
-  else
-    test(test_name, exe, timeout: 600, is_parallel: false)
+  if test_data not in tests_build_only
+    if test_data in tests
+      test(test_name, exe, timeout: 600, is_parallel: true)
+    else
+      test(test_name, exe, timeout: 600, is_parallel: false)
+    endif
   endif
 endforeach
 
