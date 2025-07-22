@@ -2080,6 +2080,8 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
     FcCharSetDestroy (cs);
     if (foundry_)
 	free (foundry_);
+    if (canon_file)
+	free (canon_file);
 
     if (mmvar) {
 #ifdef HAVE_FT_DONE_MM_VAR
