@@ -28,9 +28,9 @@ use std::ffi::CString;
 use std::fmt::Debug;
 
 use fcint_bindings::{
-    FcPattern, FcPatternObjectAddBool, FcPatternObjectAddCharSet, FcPatternObjectAddDouble,
-    FcPatternObjectAddInteger, FcLangSet, FcPatternObjectAddLangSet, FcPatternObjectAddRange,
-    FcPatternObjectAddString, FC_FAMILY_OBJECT, FC_FILE_OBJECT,
+    FcLangSet, FcPattern, FcPatternObjectAddBool, FcPatternObjectAddCharSet,
+    FcPatternObjectAddDouble, FcPatternObjectAddInteger, FcPatternObjectAddLangSet,
+    FcPatternObjectAddRange, FcPatternObjectAddString, FC_FAMILY_OBJECT, FC_FILE_OBJECT,
 };
 
 use fc_wrapper::{FcCharSetWrapper, FcLangSetWrapper, FcPatternWrapper, FcRangeWrapper};
