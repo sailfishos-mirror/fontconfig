@@ -237,13 +237,13 @@ fn build_patterns_for_font(
 
     // CharSet and Langset.
     if let Some(charset) = charset::make_charset(font) {
-        let exclusive_lang =
-            exclusive_lang(font).map_or(std::ptr::null(), |lang| lang.as_bytes_with_nul().as_ptr());
+        let exclusive_lang = exclusive_lang(font);
 
         unsafe {
-            let langset =
-                FcLangSetWrapper::from_raw(FcLangSetFromCharSet(charset.as_ptr(), exclusive_lang)
-                    as *mut fontconfig_bindings::_FcLangSet);
+            let langset = FcLangSetWrapper::from_raw(FcLangSetFromCharSet(
+                charset.as_ptr(),
+                exclusive_lang.map_or(std::ptr::null(), |lang| lang.as_bytes_with_nul().as_ptr()),
+            ));
 
             pattern.append_element(PatternElement::new(
                 FC_CHARSET_OBJECT as i32,
