@@ -242,7 +242,9 @@ fn build_patterns_for_font(
         unsafe {
             let langset = FcLangSetWrapper::from_raw(FcLangSetFromCharSet(
                 charset.as_ptr(),
-                exclusive_lang.map_or(std::ptr::null(), |lang| lang.as_bytes_with_nul().as_ptr()),
+                exclusive_lang
+                    .as_ref()
+                    .map_or(std::ptr::null(), |lang| lang.as_bytes_with_nul().as_ptr()),
             ));
 
             pattern.append_element(PatternElement::new(
