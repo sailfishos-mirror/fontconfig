@@ -116,6 +116,10 @@ class FcTest:
         self._extra = [x for x in self._extra if not re.search(r'\b<remap-dir\b', x)]
         self._extra += [f'<remap-dir as-path="{self.fontdir.name}">{v}</remap-dir>']
 
+    @property
+    def env(self):
+        return self._env
+
     def config(self) -> str:
         return self.__conf_templ.format(fontdir=self.convert_path(self.fontdir.name),
                                         cachedir=self.convert_path(self.cachedir.name),

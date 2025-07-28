@@ -70,3 +70,9 @@ lib_fontconfig_kwargs = {
   'link_with': [pattern_lib],
 }
 
+fcarch = executable('fcarch', ['fcarch.c', 'fcarch.h', fcstdint_h, fclang_h],
+  include_directories: [incbase, incsrc],
+  c_args: c_args,
+  dependencies: [libintl_dep],
+  install: false,
+  install_tag: 'runtime')
