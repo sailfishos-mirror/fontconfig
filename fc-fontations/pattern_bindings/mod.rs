@@ -127,16 +127,16 @@ impl PatternElement {
                 FcPatternObjectAddDouble(pattern, self.object_id, value)
             },
             PatternValue::Range(value) => unsafe {
-                FcPatternObjectAddRange(pattern, self.object_id, value.into_raw())
+                FcPatternObjectAddRange(pattern, self.object_id, value.as_ptr())
             },
             PatternValue::CharSet(value) => unsafe {
-                FcPatternObjectAddCharSet(pattern, self.object_id, value.into_raw())
+                FcPatternObjectAddCharSet(pattern, self.object_id, value.as_ptr())
             },
             PatternValue::LangSet(value) => unsafe {
                 FcPatternObjectAddLangSet(
                     pattern,
                     self.object_id,
-                    value.into_raw() as *const FcLangSet,
+                    value.as_ptr() as *const FcLangSet,
                 )
             },
         } == 1;
