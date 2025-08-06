@@ -3267,8 +3267,17 @@ _FcConfigParse (FcConfig      *config,
 
     filename = FcConfigGetFilename (config, name);
     if (!filename) {
-	FcStrBufString (&reason, (FcChar8 *)"No such file: ");
-	FcStrBufString (&reason, name ? name : (FcChar8 *)"(null)");
+	FcStrBufString (&reason, (FcChar8 *)"File not found");
+	if (name) {
+	    FcStrBufString (&reason, (FcChar8 *)": ");
+	    FcStrBufString (&reason, name);
+	} else {
+	    FcChar8 *e = (FcChar8 *)getenv ("FONTCONFIG_FILE");
+	    if (e) {
+	        FcStrBufString (&reason, (FcChar8 *)": ");
+	        FcStrBufString (&reason, e);
+	    }
+	}
 	goto bail0;
     }
     realfilename = FcConfigRealFilename (config, name);
