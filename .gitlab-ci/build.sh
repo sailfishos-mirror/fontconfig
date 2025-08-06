@@ -155,13 +155,13 @@ if [ x"$buildsys" == "xautotools" ]; then
     ../autogen.sh --prefix="$PREFIX" --disable-cache-build ${buildopt[*]} 2>&1 | tee /tmp/fc-build.log
     TASK="make"
     $MAKE V=1 2>&1 | tee -a /tmp/fc-build.log
-    if [ $disable_check -eq 0 ]; then
-        TASK="make check"
-        $MAKE check V=1 2>&1 | tee -a /tmp/fc-build.log
-    fi
     if [ $enable_install -eq 1 ]; then
         TASK="make install"
         $MAKE install V=1 2>&1 | tee -a /tmp/fc-build.log
+    fi
+    if [ $disable_check -eq 0 ]; then
+        TASK="make check"
+        $MAKE check V=1 2>&1 | tee -a /tmp/fc-build.log
     fi
     if [ $distcheck -eq 1 ]; then
         TASK="make distcheck"
@@ -249,13 +249,13 @@ elif [ x"$buildsys" == "xmeson" ]; then
     meson setup --prefix="$PREFIX" -D${subprojectname}nls=enabled -D${subprojectname}cache-build=disabled -D${subprojectname}iconv=enabled ${buildopt[*]} "$BUILDDIR" 2>&1 | tee /tmp/fc-build.log
     TASK="meson compile"
     meson compile -v -C "$BUILDDIR" 2>&1 | tee -a /tmp/fc-build.log
-    if [ $disable_check -eq 0 ]; then
-        TASK="meson test"
-        meson test -v -C "$BUILDDIR" 2>&1 | tee -a /tmp/fc-build.log
-    fi
     if [ $enable_install -eq 1 ]; then
         TASK="meson install"
         meson install -C "$BUILDDIR" 2>&1 | tee -a /tmp/fc-build.log
+    fi
+    if [ $disable_check -eq 0 ]; then
+        TASK="meson test"
+        meson test -v -C "$BUILDDIR" 2>&1 | tee -a /tmp/fc-build.log
     fi
     if [ $distcheck -eq 1 ]; then
         TASK="meson dist"
