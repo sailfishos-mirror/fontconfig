@@ -2031,7 +2031,7 @@ FcConfigSubstituteWithPat (FcConfig   *config,
     }
 
     if (FcDebug() & FC_DBG_EDIT) {
-	printf ("FcConfigSubstitute ");
+	printf ("FcConfigSubstitute(%s) ", kind == FcMatchPattern ? "Pattern" : kind == FcMatchFont ? "Font" : kind == FcMatchScan ? "Scan" : "Unknown");
 	FcPatternPrint (p);
     }
 
