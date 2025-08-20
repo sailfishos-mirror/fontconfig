@@ -64,8 +64,8 @@ if (fontations.enabled())
     ],
     rust_abi: 'c',
     dependencies: [
-      dependency('skrifa-0.31-rs'),
-      dependency('read-fonts-0.29-rs'),
+      dependency('skrifa-0.34-rs'),
+      dependency('read-fonts-0.32-rs'),
       dependency('font-types-0.9-rs'),
       dependency('libc-0.2-rs'),
     ],
