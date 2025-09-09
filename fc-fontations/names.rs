@@ -27,7 +27,12 @@ use skrifa::{string::StringId, MetadataProvider};
 
 use fcint_bindings::{
     FC_FAMILYLANG_OBJECT, FC_FAMILY_OBJECT, FC_FULLNAMELANG_OBJECT, FC_FULLNAME_OBJECT,
-    FC_INVALID_OBJECT, FC_POSTSCRIPT_NAME_OBJECT, FC_STYLELANG_OBJECT, FC_STYLE_OBJECT,
+    FC_GENERIC_FAMILY_OBJECT, FC_INVALID_OBJECT, FC_POSTSCRIPT_NAME_OBJECT, FC_STYLELANG_OBJECT,
+    FC_STYLE_OBJECT,
+};
+use fontconfig_bindings::{
+    FC_FAMILY_EMOJI, FC_FAMILY_MATH, FC_FAMILY_MONO, FC_FAMILY_SANS, FC_FAMILY_SERIF,
+    FC_FAMILY_UNKNOWN,
 };
 
 use crate::{name_records::FcSortedNameRecords, FcPatternBuilder, InstanceMode, PatternElement};
@@ -138,6 +143,23 @@ fn mangle_full_name_for_named_instance(font: &FontRef, named_instance_id: i32) -
     CString::new(full_name + &subfam).ok()
 }
 
+fn get_generic_family(s: &str) -> i32 {
+    [
+        ("mono", FC_FAMILY_MONO),
+        ("sans", FC_FAMILY_SANS),
+        ("serif", FC_FAMILY_SERIF),
+        ("emoji", FC_FAMILY_EMOJI),
+        ("math", FC_FAMILY_MATH),
+    ]
+    .into_iter()
+    .find_map(|(font_sub_name, generic_family_id)| {
+        s.to_lowercase()
+            .contains(font_sub_name)
+            .then_some(generic_family_id)
+    })
+    .unwrap_or(FC_FAMILY_UNKNOWN) as i32
+}
+
 pub fn add_names(font: &FontRef, instance_mode: InstanceMode, pattern: &mut FcPatternBuilder) {
     let mut already_encountered_names: HashSet<(i32, String)> = HashSet::new();
     let name_table = font.name();
@@ -145,6 +167,7 @@ pub fn add_names(font: &FontRef, instance_mode: InstanceMode, pattern: &mut FcPa
         return;
     }
     let name_table = name_table.unwrap();
+    let mut generic_family = FC_FAMILY_UNKNOWN as i32;
 
     for name_record in FcSortedNameRecords::new(&name_table) {
         let string_id = name_record.name_id();
@@ -193,6 +216,13 @@ pub fn add_names(font: &FontRef, instance_mode: InstanceMode, pattern: &mut FcPa
                 _ => name,
             };
 
+            if object_ids.0 == FC_FAMILY_OBJECT as i32 {
+                if let Some(s) = &name {
+                    if generic_family == FC_FAMILY_UNKNOWN as i32 {
+                        generic_family = get_generic_family(s.as_c_str().to_str().unwrap());
+                    }
+                }
+            }
             if let (Some(name), Some(language)) = (name, language) {
                 let normalized_name = normalize_name(&name);
                 if already_encountered_names.contains(&(object_ids.0, normalized_name.clone())) {
@@ -207,4 +237,8 @@ pub fn add_names(font: &FontRef, instance_mode: InstanceMode, pattern: &mut FcPa
             }
         }
     }
+    pattern.append_element(PatternElement::new(
+        FC_GENERIC_FAMILY_OBJECT as i32,
+        generic_family.into(),
+    ));
 }
