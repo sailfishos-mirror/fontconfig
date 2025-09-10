@@ -171,10 +171,10 @@ static const FcConstant _FcBaseConstants[] = {
     { (FC8) "extraexpanded",  "width",          FC_WIDTH_EXTRAEXPANDED  },
     { (FC8) "ultraexpanded",  "width",          FC_WIDTH_ULTRAEXPANDED  },
 
-    { (FC8) "proportional",   "spacing",        FC_PROPORTIONAL         },
-    { (FC8) "dual",           "spacing",        FC_DUAL                 },
-    { (FC8) "mono",           "spacing",        FC_MONO                 },
-    { (FC8) "charcell",       "spacing",        FC_CHARCELL             },
+    { (FC8) "proportional",   "spacing",        FC_SPACING_PROPORTIONAL },
+    { (FC8) "dual",           "spacing",        FC_SPACING_DUAL         },
+    { (FC8) "mono",           "spacing",        FC_SPACING_MONO         },
+    { (FC8) "charcell",       "spacing",        FC_SPACING_CHARCELL     },
 
     { (FC8) "unknown",        "rgba",           FC_RGBA_UNKNOWN         },
     { (FC8) "rgb",            "rgba",           FC_RGBA_RGB             },
