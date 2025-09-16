@@ -62,6 +62,7 @@ if (fontations.enabled())
       pattern_lib,
       fontations_query_lib,
     ],
+    rust_args: ['-Dunsafe-op-in-unsafe-fn', '-Dwarnings'],
     rust_abi: 'c',
     dependencies: [
       dependency('skrifa-0.34-rs'),

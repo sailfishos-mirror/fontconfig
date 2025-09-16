@@ -69,8 +69,10 @@ use instance_enumerate::{all_instances, fonts_and_indices};
 /// # Safety
 /// The `font_file` pointer must be a valid, null-terminated C string.
 unsafe fn font_path_from_c_str(font_file: *const libc::c_char) -> Option<std::path::PathBuf> {
-    let font_path_os_str = OsStr::from_bytes(CStr::from_ptr(font_file).to_bytes());
-    path::absolute(Path::new(font_path_os_str)).ok()
+    unsafe {
+        let font_path_os_str = OsStr::from_bytes(CStr::from_ptr(font_file).to_bytes());
+        path::absolute(Path::new(font_path_os_str)).ok()
+    }
 }
 
 #[no_mangle]
