@@ -577,7 +577,7 @@ yes)
 	if test "$os_win32" = "yes"; then
 		default_fonts="WINDOWSFONTDIR,WINDOWSUSERFONTDIR"
 	elif test "$os_darwin" = "yes"; then
-		default_fonts="/System/Library/Fonts,/Library/Fonts,~/Library/Fonts,/System/Library/Assets/com_apple_MobileAsset_Font3,/System/Library/Assets/com_apple_MobileAsset_Font4"
+		default_fonts="/System/Library/Fonts,/Library/Fonts,~/Library/Fonts,/System/Library/Assets,/System/Library/AssetsV2"
 	elif test "$os_android" = "yes"; then
 		default_fonts="/system/fonts,/product/fonts"
 	else
