@@ -200,7 +200,7 @@ elif [ x"$buildsys" == "xmeson" ]; then
             rm -rf fc-ci-meson-subproject
         fi
         TASK="git clone"
-        git clone https://gitlab.freedesktop.org/fontconfig/fc-ci-meson-subproject.git
+        git clone https://gitlab.freedesktop.org/fontconfig/fontconfig-ci/fc-ci-meson-subproject.git
         cd fc-ci-meson-subproject
         pushd subprojects
         git clone ${CI_MERGE_REQUEST_PROJECT_URL}.git
