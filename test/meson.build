@@ -112,3 +112,9 @@ if jsonc_dep.found()
   test_conf = executable('test-conf', 'test-conf.c',
                          dependencies: [fontconfig_dep, jsonc_dep])
 endif
+
+test_const_name = executable('test_const_name', test_const_name_c,
+                             include_directories: [incbase],
+                             link_with: libfontconfig,
+                  )
+test('test_const_name', test_const_name)

@@ -63,7 +63,7 @@ fcobjshash_h = custom_target('fcobjshash.h',
   command: [gperf, '--pic', '-m', '100', '@INPUT@', '--output-file', '@OUTPUT@']
 )
 
-lib_fontconfig_sources = [fc_sources, alias_headers, ft_alias_headers, fccase_h, fclang_h, fcobjshash_h, fcstdint_h]
+lib_fontconfig_sources = [fc_sources, alias_headers, ft_alias_headers, fccase_h, fcconst_h, fclang_h, fcobjshash_h, fcstdint_h]
 lib_fontconfig_kwargs = {
   'include_directories': incbase,
   'dependencies': [deps, math_dep],
