@@ -1,7 +1,7 @@
 
 win_export_args = []
 # Define FcPublic appropriately for exports on windows
-if host_machine.system() == 'windows'
+if host_machine.system() == 'windows' and get_option('default_library') != 'static'
   win_export_args += '-DFcPublic=__declspec(dllexport)'
   win_export_args += '-DDLL_EXPORT'
 endif
