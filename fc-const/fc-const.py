@@ -101,7 +101,7 @@ def gen_decl_baseconstobj(max_objs):
 def gen_baseconstobj(objs, enum_list):
     body, max_objs = gen_baseconstobj_body(objs, enum_list)
     decl = gen_decl_baseconstobj(max_objs)
-    return decl + body + ['};', '', '#define NUM_FC_CONST_OBJS (sizeof (_FcBaseConstantObjects) / sizeof (_FcBaseConstantObjects[0]))']
+    return decl + body + ['};', '', '#define NUM_FC_CONST_OBJS (sizeof (_FcBaseConstantObjects) / sizeof (_FcBaseConstantObjects[0]))', '']
 
 
 def gen_body(lfile, bfile):
