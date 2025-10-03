@@ -332,6 +332,8 @@ class FcBrokenFont:
     def __init__(self, srcdir='.'):
         fctest = FcTest()
         p = Path(srcdir)
+        if (p / 'test').exists():
+            p = p / 'test'
         candidates = [ "broken_cff_major.otf", "no_family_name.ttf", "no_family_name_serif.ttf" ]
         self._fonts = []
         for f in candidates:
@@ -366,4 +368,3 @@ if __name__ == '__main__':
     print(f.fonts)
     f = FcBrokenFont()
     print(f.fonts)
-
