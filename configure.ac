@@ -194,7 +194,9 @@ AC_TYPE_PID_T
 # Checks for library functions.
 AC_FUNC_VPRINTF
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([link mkstemp mkostemp _mktemp_s mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink fstatvfs fstatfs lstat strerror strerror_r])
+AC_CHECK_FUNCS([link mkstemp _mktemp_s mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink fstatvfs fstatfs lstat strerror strerror_r])
+
+AC_CHECK_DECL([mkostemp],[AC_DEFINE_UNQUOTED([HAVE_MKOSTEMP],[1],[Define to 1 if you have the 'mkostemp' function.])],[],[#include <stdlib.h>])
 
 AC_SEARCH_LIBS([fabs], [m], [], [AC_MSG_ERROR([unable to find the fabs() function])])
 
