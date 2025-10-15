@@ -118,7 +118,6 @@ check_headers = [
 check_funcs = [
   ['link'],
   ['mkstemp'],
-  ['mkostemp'],
   ['_mktemp_s'],
   ['mkdtemp'],
   ['getopt'],
@@ -156,7 +155,8 @@ check_freetype_funcs = [
 ]
 
 check_header_symbols = [
-  ['posix_fadvise', 'fcntl.h']
+  ['posix_fadvise', 'fcntl.h'],
+  ['mkostemp', 'stdlib.h'],
 ]
 
 check_struct_members = [
