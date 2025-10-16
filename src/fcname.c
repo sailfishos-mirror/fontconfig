@@ -308,7 +308,7 @@ FcNameConvert (FcType type, const char *object, FcChar8 *string)
 	    v.u.i = atoi ((char *)string);
 	break;
     case FcTypeString:
-	v.u.s = FcStrdup (string);
+	v.u.s = FcStrCopy (string);
 	if (!v.u.s)
 	    v.type = FcTypeVoid;
 	break;

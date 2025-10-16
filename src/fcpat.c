@@ -100,7 +100,7 @@ FcValueSave (FcValue v)
 {
     switch ((int)v.type) {
     case FcTypeString:
-	v.u.s = FcStrdup (v.u.s);
+	v.u.s = FcStrCopy (v.u.s);
 	if (!v.u.s)
 	    v.type = FcTypeVoid;
 	break;

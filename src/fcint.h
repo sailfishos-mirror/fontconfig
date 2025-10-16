@@ -148,7 +148,6 @@ extern pfnSHGetFolderPathA          pSHGetFolderPathA;
 
 FC_ASSERT_STATIC (sizeof (FcRef) == sizeof (int));
 
-#define FcStrdup(s)                    ((FcChar8 *)strdup ((const char *)(s)))
 #define FcFree(s)                      (free ((FcChar8 *)(s)))
 
 /*
