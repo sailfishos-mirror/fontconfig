@@ -33,7 +33,18 @@
 FcChar8 *
 FcStrCopy (const FcChar8 *s)
 {
-    return FcStrdup (s);
+#ifdef HAVE_STRDUP
+    return (FcChar8 *)strdup ((const char *)s);
+#else
+    FcChar8 *ret;
+    size_t len = strlen ((const char *)s) + 1;
+
+    ret = malloc (len);
+    if (!ret)
+        return NULL;
+
+    return memcpy (ret, s, len);
+#endif
 }
 
 static FcChar8 *

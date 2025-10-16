@@ -144,6 +144,7 @@ check_funcs = [
   ['dcgettext'],
   ['gettext'],
   ['localtime_r'],
+  ['strdup'],
 ]
 
 check_freetype_funcs = [
