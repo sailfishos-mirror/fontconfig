@@ -63,7 +63,7 @@ FcObjectSetAdd (FcObjectSet *os, const char *object)
     low = 0;
     mid = 0;
     c = 1;
-    object = FcStrCopy ((const FcChar8 *)object);
+    object = (const char *)FcStrCopy ((const FcChar8 *)object);
     while (low <= high) {
 	mid = (low + high) >> 1;
 	c = os->objects[mid] - object;
