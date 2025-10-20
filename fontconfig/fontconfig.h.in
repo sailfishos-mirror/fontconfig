@@ -238,6 +238,8 @@ typedef enum _FcType {
     FcTypeRange
 } FcType;
 
+typedef int FcObject;
+
 typedef struct _FcMatrix {
     double xx, xy, yx, yy;
 } FcMatrix;
@@ -312,9 +314,11 @@ typedef struct _FcFontSet {
 } FcFontSet;
 
 typedef struct _FcObjectSet {
-    int          nobject;
+    int          nobject; /* deprecated */
     int          sobject;
-    const char **objects;
+    const char **objects; /* deprecated */
+    int          nobjIds;
+    FcObject    *objIds;
 } FcObjectSet;
 
 typedef enum _FcMatchKind {
