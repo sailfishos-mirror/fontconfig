@@ -205,8 +205,6 @@ typedef struct _FcValueList {
 
 #define FcValueListNext(vl) FcPointerMember (vl, next, FcValueList)
 
-typedef int FcObject;
-
 /* The 1024 is to leave some room for future added internal objects, such
  * that caches from newer fontconfig can still be used with older fontconfig
  * without getting confused. */

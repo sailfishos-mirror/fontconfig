@@ -578,10 +578,9 @@ FcPatternEqualSubset (const FcPattern *pai, const FcPattern *pbi, const FcObject
     FcPatternElt *ea, *eb;
     int           i;
 
-    for (i = 0; i < os->nobject; i++) {
-	FcObject object = FcObjectFromName (os->objects[i]);
-	ea = FcPatternObjectFindElt (pai, object);
-	eb = FcPatternObjectFindElt (pbi, object);
+    for (i = 0; i < os->nobjIds; i++) {
+	ea = FcPatternObjectFindElt (pai, os->objIds[i]);
+	eb = FcPatternObjectFindElt (pbi, os->objIds[i]);
 	if (ea) {
 	    if (!eb)
 		return FcFalse;
@@ -1245,9 +1244,8 @@ FcPatternFilter (FcPattern *p, const FcObjectSet *os)
     if (!ret)
 	return NULL;
 
-    for (i = 0; i < os->nobject; i++) {
-	FcObject object = FcObjectFromName (os->objects[i]);
-	e = FcPatternObjectFindElt (p, object);
+    for (i = 0; i < os->nobjIds; i++) {
+	e = FcPatternObjectFindElt (p, os->objIds[i]);
 	if (e) {
 	    for (v = FcPatternEltValues (e); v; v = FcValueListNext (v)) {
 		if (!FcPatternObjectAddWithBinding (ret, e->object,
