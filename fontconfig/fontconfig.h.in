@@ -684,13 +684,6 @@ FcDirCacheLoadFile (const FcChar8 *cache_file, struct stat *file_stat);
 FcPublic void
 FcDirCacheUnload (FcCache *cache);
 
-/* fcfreetype.c */
-FcPublic FcPattern *
-FcFreeTypeQuery (const FcChar8 *file, unsigned int id, FcBlanks *blanks, int *count);
-
-FcPublic unsigned int
-FcFreeTypeQueryAll (const FcChar8 *file, unsigned int id, FcBlanks *blanks, int *count, FcFontSet *set);
-
 /* fcfs.c */
 
 FcPublic FcFontSet *
