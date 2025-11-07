@@ -200,6 +200,12 @@ else
   conf.set('EXEEXT', '')
 endif
 
+if host_machine.system() == 'sunos'
+  if not cc.has_header_symbol('string.h', 'strdup')
+    add_project_arguments('-D__EXTENSIONS__', language: 'c')
+  endif
+endif
+
 i18n = import('i18n')
 gettext_args = [ '--msgid-bugs-address=@0@'.format(conf.get('PACKAGE_BUGREPORT')) ]
 
