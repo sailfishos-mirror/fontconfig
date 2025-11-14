@@ -906,6 +906,9 @@ FcNameGetConstantFor (const FcChar8 *string, const char *object);
 FcPublic FcBool
 FcNameConstant (const FcChar8 *string, int *result);
 
+FcPublic const FcChar8 *
+FcNameGetConstantNameFrom (const char *object, int value);
+
 FcPublic FcPattern *
 FcNameParse (const FcChar8 *name);
 
@@ -1194,6 +1197,13 @@ FcPublic FcBool
 FcConfigParseAndLoadFromMemory (FcConfig      *config,
                                 const FcChar8 *buffer,
                                 FcBool         complain);
+
+/* fcconffile.c */
+FcPublic FcChar8 *
+FcConfigFileGenerate (FcConfig      *config,
+                      FcPattern     *pat,
+                      const FcChar8 *font_path);
+
 
 _FCFUNCPROTOEND
 

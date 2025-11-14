@@ -136,6 +136,7 @@ check_funcs = [
   ['strerror'],
   ['strerror_r'],
   ['mmap'],
+  ['vasprintf'],
   ['vprintf'],
   ['vsnprintf'],
   ['vsprintf'],
@@ -330,6 +331,9 @@ if cc.links(files('meson-cc-tests/solaris-atomic-operations.c'), name: 'Solaris 
   conf.set('HAVE_SOLARIS_ATOMIC_OPS', 1)
 endif
 
+if cc.links(files('meson-cc-tests/c99-vsnprint-test.c'), name: 'C99 compliant vsnprintf()')
+  conf.set('HAVE_C99_VSNPRINTF', 1)
+endif
 
 prefix = get_option('prefix')
 
@@ -568,6 +572,7 @@ if not get_option('tools').disabled()
   subdir('fc-cache')
   subdir('fc-cat')
   subdir('fc-conflist')
+  subdir('fc-genconf')
   subdir('fc-list')
   subdir('fc-match')
   subdir('fc-pattern')
