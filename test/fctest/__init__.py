@@ -58,6 +58,7 @@ class FcTest:
             return self.convert_path(Path(self.builddir) / bin / fn)
         self._fccache = bin_path('fc-cache')
         self._fccat = bin_path('fc-cat')
+        self._fcgenconf = bin_path('fc-genconf')
         self._fclist = bin_path('fc-list')
         self._fcmatch = bin_path('fc-match')
         self._fcpattern = bin_path('fc-pattern')
@@ -278,6 +279,9 @@ class FcTest:
 
     def run_cat(self, args, debug=False) -> Iterator[[int, str, str]]:
         return self.run(self._fccat, args, debug)
+
+    def run_genconf(self, args, debug=False) -> Iterator[[int, str, str]]:
+        return self.run(self._fcgenconf, args, debug)
 
     def run_list(self, args, debug=False) -> Iterator[[int, str, str]]:
         return self.run(self._fclist, args, debug)
