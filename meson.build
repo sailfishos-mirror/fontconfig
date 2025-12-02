@@ -41,6 +41,9 @@ conf.set('FC_VERSION_MICRO', fc_version_micro)
 
 freetype_dep = dependency('freetype2', method: 'pkg-config', version: freetype_req, required: false)
 
+# Preparation for enabling a FreeType-less build, for now, default enable.
+conf.set('ENABLE_FREETYPE', 1)
+
 # Give another shot using CMake
 if not freetype_dep.found()
   freetype_dep = dependency('freetype', method: 'cmake', version: freetype_req_cmake,

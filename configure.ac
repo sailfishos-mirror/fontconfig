@@ -76,6 +76,9 @@ AC_DEFINE_UNQUOTED([FC_VERSION_MAJOR], [$major], [major version])
 AC_DEFINE_UNQUOTED([FC_VERSION_MINOR], [$minor], [minor version])
 AC_DEFINE_UNQUOTED([FC_VERSION_MICRO], [$revision], [revision])
 
+dnl Preparation for enabling a FreeType-less build, for now, default enable.
+AC_DEFINE_UNQUOTED([ENABLE_FREETYPE], [1], [Enable building with FreeType.])
+
 dnl cache version
 CACHE_VERSION=11
 AC_SUBST(CACHE_VERSION)
