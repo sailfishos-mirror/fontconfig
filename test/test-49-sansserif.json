@@ -59,7 +59,7 @@
       },
       "result": {
         "genericfamily": ["monospace", "sans-serif"],
-        "family": ["monospace", "sans-serif"]
+        "family": ["monospace"]
       }
     }
   ]
