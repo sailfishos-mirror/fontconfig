@@ -628,22 +628,23 @@ process_pattern (FcConfig  *config,
 		FcValue v1, v2;
 		FcValueBinding b1, b2;
 
-	        fprintf (stderr, "E: object (%s) mismatched:\n", obj);
-		fprintf (stderr, "   actual result: %d\n    ", vc1);
+	        printf ("E: object (%s) mismatched:\n", obj);
+		printf ("   actual result: %d\n    ", vc1);
 		for (i = 0; i < vc1; i++) {
 		    if (FcPatternIterGetValue (query, &iter1, i, &v1, &b1) != FcResultMatch)
 			v1.type = FcTypeVoid;
 		    FcValuePrint (v1);
-		    fprintf (stderr, " ");
+		    printf (" ");
 		}
-		fprintf (stderr, "\n");
-	        fprintf (stderr, "   expected result: %d\n    ", vc2);
+		printf ("\n");
+	        printf ("   expected result: %d\n    ", vc2);
 		for (i = 0; i < vc1; i++) {
 		    if (FcPatternIterGetValue (result, &iter2, i, &v2, &b2) != FcResultMatch)
 			v2.type = FcTypeVoid;
 		    FcValuePrint (v2);
-		    fprintf (stderr, " ");
+		    printf (" ");
 		}
+		printf ("\n");
 	        fail++;
 	        goto bail;
 	    }
