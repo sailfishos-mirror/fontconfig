@@ -32,7 +32,9 @@
 #  include "fontconfig/fcfontations.h"
 #endif
 
+#if ENABLE_FREETYPE
 #include "fontconfig/fcfreetype.h"
+#endif
 
 FcBool
 FcFileIsDir (const FcChar8 *file)

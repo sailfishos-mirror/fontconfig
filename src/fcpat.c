@@ -24,6 +24,8 @@
 
 #if ENABLE_FREETYPE
 #include "fcftint.h"
+#else
+typedef struct FT_FaceRec_* FT_Face;
 #endif
 
 /* Objects MT-safe for readonly access. */
