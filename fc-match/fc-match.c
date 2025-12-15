@@ -119,7 +119,7 @@ main (int argc, char **argv)
     int            sort = 0, all = 0;
     const FcChar8 *format = NULL;
     FcChar8       *format_optarg = NULL;
-    int            i;
+    int            i, err = 0;
     FcObjectSet   *os = 0;
     FcFontSet     *fs;
     FcPattern     *pat;
@@ -242,6 +242,8 @@ main (int argc, char **argv)
 		if (s) {
 		    printf ("%s", s);
 		    FcStrFree (s);
+		} else {
+		    err = 1;
 		}
 	    }
 
@@ -260,5 +262,5 @@ main (int argc, char **argv)
 	format_optarg = NULL;
     }
 
-    return 0;
+    return err;
 }

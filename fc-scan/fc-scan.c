@@ -190,6 +190,9 @@ main (int argc, char **argv)
 	    if (s) {
 		printf ("%s", s);
 		FcStrFree (s);
+	    } else {
+		i = 0;
+		break;
 	    }
 	} else {
 	    FcPatternPrint (pat);
