@@ -41,7 +41,7 @@ def test_genconf(fctest, fcfont, font_file):
             assert f, stdout
             if not g or g == '0':
                 # fallback if missing
-                g = 'sans-serif'
+                g = '2'
                 fmt = ':family=sans-serif'
             else:
                 fmt = f':genericfamily={g}'
@@ -53,3 +53,8 @@ def test_genconf(fctest, fcfont, font_file):
         assert ret == 0, stderr
         if Path(stdout.strip().splitlines()[0]).name != font_path.name:
             assert ret == 0, stderr
+
+    for ret, stdout, stderr in fctest.run_scan(['-f', '%{genericfamily}\n', font_file]):
+        assert ret == 0, stderr
+        for l in stdout.strip().splitlines():
+            assert g == l, stdout
