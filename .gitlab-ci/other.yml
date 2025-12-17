@@ -59,8 +59,8 @@ meson vs2019 x86:
 .meson macos test:
   stage: "distro"
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-ci.yml
-  # As of 2024-11-21, this is a Mac OS 15 Sequia image on Apple silicon.
-  image: "registry.freedesktop.org/gstreamer/gstreamer/macos-arm64/15-sequoia:2024-10-28.0"
+  # As of 2025-12-17, this is a Mac OS version 26 Tahoe image.
+  image: "registry.freedesktop.org/gstreamer/gstreamer/macos-arm64/26-tahoe:2025-09-30.0"
   tags:
     - gst-mac-arm
   artifacts:
