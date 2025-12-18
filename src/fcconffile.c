@@ -107,6 +107,55 @@ FcConfigFileGenerateGenericAlias (FcConfig  *config,
     return ret;
 }
 
+static FcBool
+FcConfigFileGenerateGenericFamily (FcConfig  *config,
+                                   FcPattern *pat,
+                                   FcPattern *font,
+                                   FcStrBuf  *buf)
+{
+    FcChar8              *family = NULL, *file = NULL;
+    const FcChar8        *gf;
+    int                   generic_family = FC_FAMILY_UNKNOWN;
+    FcBool                ret = FcTrue;
+
+    if (FcPatternObjectGetString (font, FC_FILE_OBJECT, 0, &file) != FcResultMatch) {
+	fprintf (stderr, "Fontconfig warning: no file object in the font metadata\n");
+	return FcFalse;
+    }
+    if (FcPatternObjectGetString (font, FC_FAMILY_OBJECT, 0, &family) != FcResultMatch) {
+	fprintf(stderr, "Fontconfig warning: %s: no family object in the font metadata\n", file);
+	return FcFalse;
+    }
+    FcPatternObjectGetInteger (font, FC_GENERIC_FAMILY_OBJECT, 0, &generic_family);
+    if (generic_family == FC_FAMILY_UNKNOWN) {
+	/* fallback to the value that is given by users */
+	FcPatternObjectGetInteger (pat, FC_GENERIC_FAMILY_OBJECT, 0, &generic_family);
+    }
+    gf = FcNameGetConstantNameFromObject (FC_GENERIC_FAMILY_OBJECT,
+                                          generic_family);
+    if (!gf) {
+	fprintf (stderr, "Fontconfig warning: %s: Unable to determine generic family from either of font nor pattern\n", file);
+	return FcFalse;
+    }
+
+    if (!FcStrBufFormat (buf,
+	                 "  <match target=\"scan\">\n"
+	                 "    <test name=\"family\">\n"
+	                 "      <string>%s</string>\n"
+	                 "    </test>\n"
+	                 "    <edit name=\"genericfamily\" mode=\"assign_replace\">\n"
+	                 "      <const>%s</const>\n"
+	                 "    </edit>\n"
+	                 "  </match>\n",
+	                 family, gf)) {
+	ret = FcFalse;
+	goto bail;
+    }
+ bail:
+
+    return ret;
+}
+
 FcChar8 *
 FcConfigFileGenerate (FcConfig      *config,
                       FcPattern     *pat,
@@ -160,6 +209,11 @@ FcConfigFileGenerate (FcConfig      *config,
 	    if (!FcHashTableFind (record, family, (void **)&p)) {
 		FcPatternReference (p);
 		FcHashTableReplace (record, (void *)family, (void *)p);
+		if (!FcConfigFileGenerateGenericFamily (config, pat, p, &buf)) {
+		    FcStrBufDestroy (&buf);
+		    FcStrBufInit (&buf, NULL, 0);
+		    goto bail;
+		}
 		if (!FcConfigFileGenerateGenericAlias (config, pat, p, &buf)) {
 		    FcStrBufDestroy (&buf);
 		    FcStrBufInit (&buf, NULL, 0);
