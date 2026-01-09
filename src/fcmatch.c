@@ -1157,6 +1157,10 @@ FcFontSetSort (FcConfig   *config,
     if (!nnodes)
 	return FcFontSetCreate();
 
+    if (!config)
+	config = FcConfigGetCurrent();
+    FcConfigReference (config);
+
     for (nPatternLang = 0;
          FcPatternGet (p, FC_LANG, nPatternLang, &patternLang) == FcResultMatch;
          nPatternLang++)
@@ -1190,7 +1194,7 @@ FcFontSetSort (FcConfig   *config,
 	    /* TODO: Should we check a FcPattern in FcFontSet?
 	     * This way may not work if someone has own list of application fonts
 	     * That said, just to reduce the cost for lookup so far.
-             */
+	     */
 	    if (config->prefer_app_fonts && s != config->fonts[FcSetApplication]) {
 		newp->score[PRI_ORDER] += 1000;
 	    }
@@ -1275,6 +1279,8 @@ FcFontSetSort (FcConfig   *config,
 	    FcPatternPrint (ret->fonts[0]);
 	}
     }
+    if (config)
+	FcConfigDestroy (config);
 
     return ret;
 
@@ -1283,6 +1289,8 @@ bail2:
 bail1:
     free (nodes);
 bail0:
+    if (config)
+	FcConfigDestroy (config);
     return 0;
 }
 
