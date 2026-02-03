@@ -481,7 +481,7 @@ elements hold either true or false.  An important limitation exists in
 the parsing of floating point numbers -- fontconfig requires that
 the mantissa start with a digit, not a decimal point, so insert a leading
 zero for purely fractional values (e.g. use 0.5 instead of .5 and -0.5
-instead of -.5).
+instead of -.5). also xsi:nil attribute is supported to indicate an empty element.
   </para></refsect2>
   <refsect2><title><literal>&lt;matrix&gt;</literal></title><para>
 This element holds four numerical expressions of an affine transformation.
@@ -494,11 +494,11 @@ representation.
   </para></refsect2>
   <refsect2><title><literal>&lt;charset&gt;</literal></title><para>
 This element holds at least one <literal>&lt;int&gt;</literal> element of
-an Unicode code point or more.
+an Unicode code point or more. also xsi:nil attribute is supported to indicate an empty element.
   </para></refsect2>
   <refsect2><title><literal>&lt;langset&gt;</literal></title><para>
 This element holds at least one <literal>&lt;string&gt;</literal> element of
-a RFC-3066-style languages or more.
+a RFC-3066-style languages or more. also xsi:nil attribute is supported to indicate an empty element.
   </para></refsect2>
   <refsect2><title><literal>&lt;name&gt;</literal></title><para>
 Holds a property name.  Evaluates to the first value from the property of
@@ -510,7 +510,8 @@ explicitly choose which pattern to use.  It is an error to use a target
 of 'font' in a match that has target="pattern".
   </para></refsect2>
   <refsect2><title><literal>&lt;const&gt;</literal></title><para>
-Holds the name of a constant; these are always integers and serve as
+Holds the name of a constant. also xsi:nil attribute is supported to indicate an empty element;
+ these are always integers and serve as
 symbolic names for common font values:
     <programlisting>
 Constant        Property        Value
