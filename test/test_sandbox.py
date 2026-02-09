@@ -9,6 +9,7 @@ import os
 import pytest
 import re
 import shutil
+import subprocess
 import tempfile
 import time
 import types
@@ -24,8 +25,24 @@ def fcfont():
     return FcTestFont()
 
 
+def cond_bwrap():
+    bwrap = shutil.which('bwrap')
+    if bwrap and not (os.getenv('FC_DISABLE_BWRAP') == '1'):
+        res = subprocess.run(
+            [bwrap, '--dev-bind', '/', '/', 'true'], capture_output=True
+        )
+        return res.returncode == 0
+    else:
+        return False
+
+
+check_bwrap = pytest.mark.skipif(
+    not cond_bwrap(), reason='No bwrap installed or not executable'
+)
+
+
 @pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
-@pytest.mark.skipif(not shutil.which('bwrap'), reason='No bwrap installed')
+@check_bwrap
 def test_bz106618(fctest, fcfont):
     fctest.setup()
     fctest.install_font(fcfont.fonts, '.')
@@ -68,7 +85,7 @@ def test_bz106618(fctest, fcfont):
 
 
 @pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
-@pytest.mark.skipif(not shutil.which('bwrap'), reason='No bwrap installed')
+@check_bwrap
 def test_different_content(fctest, fcfont):
     '''
     Make sure if fontdir where sandbox has own fonts is handled
@@ -137,7 +154,7 @@ def test_different_content(fctest, fcfont):
 
 
 @pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
-@pytest.mark.skipif(not shutil.which('bwrap'), reason='No bwrap installed')
+@check_bwrap
 def test_md5_consistency(fctest, fcfont):
     fctest.setup()
     fctest.install_font(fcfont.fonts[0], 'sub')
@@ -167,7 +184,7 @@ def test_md5_consistency(fctest, fcfont):
 
 
 @pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
-@pytest.mark.skipif(not shutil.which('bwrap'), reason='No bwrap installed')
+@check_bwrap
 def test_gen_testcache(fctest, fcfont):
     testexe = Path(fctest.builddir) / 'test' / ('test-gen-testcache' + fctest._exeext)
     if not testexe.exists():
@@ -208,7 +225,7 @@ def test_gen_testcache(fctest, fcfont):
 
 
 @pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
-@pytest.mark.skipif(not shutil.which('bwrap'), reason='No bwrap installed')
+@check_bwrap
 def test_gen_testcache_no_check(fctest, fcfont):
     testexe = Path(fctest.builddir) / 'test' / ('test-gen-testcache' + fctest._exeext)
     if not testexe.exists():
