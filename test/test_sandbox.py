@@ -27,7 +27,7 @@ def fcfont():
 
 def cond_bwrap():
     bwrap = shutil.which('bwrap')
-    if bwrap:
+    if bwrap and not (os.getenv('FC_DISABLE_BWRAP') == '1'):
         res = subprocess.run(
             [bwrap, '--dev-bind', '/', '/', 'true'], capture_output=True
         )

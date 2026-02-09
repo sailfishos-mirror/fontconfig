@@ -103,6 +103,7 @@ if pytest.found()
          'srcdir=@0@'.format(meson.project_source_root()),
          'EXEEXT=@0@'.format(conf.get('EXEEXT')),
          'CC=@0@'.format(meson.get_compiler('c').cmd_array()[0]),
+         'FC_DISABLE_BWRAP=@0@'.format((not get_option('tests-bwrap').allowed()).to_int()),
        ],
        protocol: 'tap',
        timeout: 600,
