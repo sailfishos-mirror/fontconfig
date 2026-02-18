@@ -47,9 +47,9 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  ALPINE_TAG:    '2025-09-04.1-defffbf2f2ca'
-  FEDORA_TAG:    '2025-09-04.1-de17cce5fecc'
-  FREEBSD_TAG:   '2025-09-04.1-7e1243fad943'
+  ALPINE_TAG:    '2026-02-18.1-4aa5be9a2c52'
+  FEDORA_TAG:    '2026-02-18.1-fefdf6cc9f26'
+  FREEBSD_TAG:   '2026-02-18.1-28827a5b8d84'
 
   ALPINE_EXEC:   'bash .gitlab-ci/alpine-install.sh'
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
@@ -114,7 +114,7 @@ fedora:rawhide@container-prep:
   variables:
     GIT_STRATEGY: none
     FDO_DISTRIBUTION_VERSION: 'rawhide'
-    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan'
+    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan mingw64-json-c'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
     FDO_DISTRIBUTION_EXEC: $FEDORA_EXEC
 
