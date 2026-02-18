@@ -24,6 +24,8 @@
 
 #include "fcint.h"
 
+#include <locale.h>
+
 static double
 FcCompareNumber (const FcValue *value1, const FcValue *value2, FcValue *bestValue)
 {
@@ -751,6 +753,7 @@ FcFontRenderPrepare (FcConfig  *config,
 		double      num;
 		FcChar8     temp[128];
 		const char *tag = "    ";
+
 		assert (v.type == FcTypeDouble);
 		num = v.u.d;
 		if (variations.len)
@@ -769,7 +772,22 @@ FcFontRenderPrepare (FcConfig  *config,
 		    tag = "opsz";
 		    break;
 		}
-		sprintf ((char *)temp, "%4s=%g", tag, num);
+#ifdef _WIN32
+		{
+		    _locale_t loc = _create_locale (LC_NUMERIC, "C");
+		    _sprintf_l ((char *)temp, "%4s=%g", loc, tag, num);
+		    _free_locale (loc);
+		}
+#else
+		{
+		    locale_t loc;
+		    loc = newlocale (LC_NUMERIC_MASK, "POSIX", (locale_t)0);
+		    uselocale (loc);
+		    sprintf ((char *)temp, "%4s=%g", tag, num);
+		    uselocale (LC_GLOBAL_LOCALE);
+		    freelocale (loc);
+		}
+#endif
 		FcStrBufString (&variations, temp);
 	    }
 	} else {
