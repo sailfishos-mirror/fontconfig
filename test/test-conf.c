@@ -31,6 +31,7 @@
 #include <json.h>
 #include <locale.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 struct _FcConfig {
@@ -46,6 +47,19 @@ struct _FcConfig {
     FcFontSet *rejectPatterns;
     FcFontSet *fonts[FcSetApplication + 1];
 };
+
+#ifdef _WIN32
+int
+setenv (const char *name, const char *value, int overwrite)
+{
+    if (!overwrite) {
+        char *s = getenv (name);
+        if (s)
+            return 0;
+    }
+    return _putenv_s (name, value);
+}
+#endif
 
 static void
 apply_config (FcConfig *config, json_object *obj)
