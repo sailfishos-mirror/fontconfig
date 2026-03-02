@@ -47,9 +47,9 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  ALPINE_TAG:    '2026-03-04.1-3687d79de713'
-  FEDORA_TAG:    '2026-03-04.1-ca4d2c4fc815'
-  FREEBSD_TAG:   '2026-03-04.1-028d170776a0'
+  ALPINE_TAG:    '2026-03-05.1-b214cb641fa8'
+  FEDORA_TAG:    '2026-03-05.1-2265a0ca848d'
+  FREEBSD_TAG:   '2026-03-05.1-e11b0bec7c2f'
 
   ALPINE_EXEC:   'bash .gitlab-ci/alpine-install.sh'
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
@@ -270,6 +270,7 @@ freebsd:14.3@container-clean:
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
+      buildopt+=(-O g)
       export buildopt
     - "scp -r $(pwd) vm:"
     - echo "CI_JOB_ID=\"$CI_JOB_ID\"" > fcenv
@@ -319,6 +320,7 @@ freebsd:14.3@container-clean:
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
+      buildopt+=(-O g)
       bash .gitlab-ci/build.sh ${buildopt[@]}
   variables:
     FC_BUILDSYS: autotools
