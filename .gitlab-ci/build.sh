@@ -72,7 +72,7 @@ do
             echo "  -C             Do not run unit tests"
             echo "  -e OPT         Enable OPT feature to build"
             echo "  -d OPT         Disable OPT feature to build"
-            echo "  -I             Run install"
+            echo "  -I             Do not run install process"
             echo "  -N             Do not clean build directory"
             echo "  -O N           Optimization level to build"
             echo "  -s BUILDSYS    Use BUILDSYS to build (default: $buildsys)"
