@@ -191,7 +191,8 @@ packages:
         "cargo",
         "bindgen-cli",
         "libasan",
-        "libubsan"
+        "libubsan",
+        "libabigail",
       ]
     needed_for:
       rawhide:
