@@ -1,4 +1,5 @@
 conf_files = [
+  '05-macos.conf',
   '05-reset-dirs-sample.conf',
   '09-autohint-if-no-hinting.conf',
   '10-autohint.conf',
@@ -49,6 +50,7 @@ preferred_sub_pixel_rendering = get_option('default-sub-pixel-rendering')
 preferred_bitmap = get_option('bitmap-conf')
 
 conf_links = [
+  '05-macos.conf',
   '10-scale-bitmap-fonts.conf',
   '10-yes-antialias.conf',
   '11-lcdfilter-default.conf',
