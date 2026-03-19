@@ -65,9 +65,9 @@ if (fontations.enabled())
     rust_args: ['-Dunsafe-op-in-unsafe-fn', '-Dwarnings'],
     rust_abi: 'c',
     dependencies: [
-      dependency('skrifa-0.39-rs'),
-      dependency('read-fonts-0.36-rs'),
-      dependency('font-types-0.10-rs'),
+      dependency('skrifa-0.40-rs'),
+      dependency('read-fonts-0.37-rs'),
+      dependency('font-types-0.11-rs'),
       dependency('libc-0.2-rs'),
     ],
     install: true,
