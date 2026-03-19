@@ -208,6 +208,7 @@ check-ci-script:
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
+      buildopt+=(-O g)
       export buildopt
     - "scp -r $(pwd) vm:"
     - echo "CI_JOB_ID=\"$CI_JOB_ID\"" > fcenv
@@ -257,6 +258,7 @@ check-ci-script:
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
+      buildopt+=(-O g)
       bash .gitlab-ci/build.sh ${buildopt[@]}
   variables:
     FC_BUILDSYS: autotools
@@ -282,6 +284,9 @@ check-ci-script:
       - build*/fontconfig*/_build
       - build*/meson-logs/*
       - build*/meson-dist/*
+      - build*/fontconfig/fontconfig.h
+      - build*/libfontconfig.so*
+      - build*/src/.libs/libfontconfig.so*
       - prefix*
     reports:
       junit: build*/meson-logs/testlog.junit.xml
@@ -388,6 +393,54 @@ clang-format:
     - build-{{test.parent}}
     {% endif %}
 {% endfor %}
+
+abicheck:
+  stage: test
+  extends:
+    - .fdo.distribution-image@fedora
+    - .fc_artifacts
+  variables:
+    FC_DISTRO_NAME: fedora
+    FDO_DISTRIBUTION_VERSION: rawhide
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+  needs:
+    - fedora:rawhide@container-prep
+    - build-meson shared libxml2
+  script:
+    - |
+      pip install junit_xml
+      export builddir=($(pwd)/build-fontconfig-*)
+      sh .gitlab-ci/abicheck.sh "${builddir[0]}"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  artifacts:
+    reports:
+      junit: build*/abidiff.xml
+
+
+apicheck:
+  stage: test
+  extends:
+    - .fdo.distribution-image@fedora
+    - .fc_artifacts
+  variables:
+    FC_DISTRO_NAME: fedora
+    FDO_DISTRIBUTION_VERSION: rawhide
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+  needs:
+    - fedora:rawhide@container-prep
+    - build-meson shared libxml2
+  script:
+    - |
+      pip install junit_xml
+      export builddir=($(pwd)/build-fontconfig-*)
+      python3 .gitlab-ci/apicheck.py -f .gitlab-ci/symbol.list -o "${builddir[0]}/apicheck.xml" "${builddir[0]}/libfontconfig.so" src/fcint.h "${builddir[0]}/fontconfig/fontconfig.h" fontconfig/fcfontations.h fontconfig/fcfreetype.h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  artifacts:
+    reports:
+      junit: build*/apicheck.xml
+
 
 #######################################
 #                                     #

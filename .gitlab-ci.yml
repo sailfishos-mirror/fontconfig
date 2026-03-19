@@ -47,9 +47,9 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  ALPINE_TAG:    '2026-03-04.1-3687d79de713'
-  FEDORA_TAG:    '2026-03-04.1-ca4d2c4fc815'
-  FREEBSD_TAG:   '2026-03-04.1-028d170776a0'
+  ALPINE_TAG:    '2026-03-05.1-f0d3b7185d3f'
+  FEDORA_TAG:    '2026-03-05.1-2dc24f894f7e'
+  FREEBSD_TAG:   '2026-03-05.1-0f55cddeb102'
 
   ALPINE_EXEC:   'bash .gitlab-ci/alpine-install.sh'
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
@@ -114,7 +114,7 @@ fedora:rawhide@container-prep:
   variables:
     GIT_STRATEGY: none
     FDO_DISTRIBUTION_VERSION: 'rawhide'
-    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan mingw64-json-c'
+    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan libabigail mingw64-json-c'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
     FDO_DISTRIBUTION_EXEC: $FEDORA_EXEC
 
@@ -124,7 +124,7 @@ fedora:42@container-prep:
   variables:
     GIT_STRATEGY: none
     FDO_DISTRIBUTION_VERSION: '42'
-    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan'
+    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan libabigail'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
     FDO_DISTRIBUTION_EXEC: $FEDORA_EXEC
 
@@ -134,7 +134,7 @@ fedora:41@container-prep:
   variables:
     GIT_STRATEGY: none
     FDO_DISTRIBUTION_VERSION: '41'
-    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan'
+    FDO_DISTRIBUTION_PACKAGES: '@buildsys-build autoconf automake clang-devel clang-tools-extra curl libtool gettext gettext-devel gperf expat-devel libxml2-devel freetype-devel json-c-devel git git-clang-format docbook-utils docbook-utils-pdf bubblewrap ninja-build wget python3-pip mingw64-expat mingw64-gcc mingw64-gettext mingw64-freetype mingw64-libxml2 rust cargo bindgen-cli libasan libubsan libabigail'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
     FDO_DISTRIBUTION_EXEC: $FEDORA_EXEC
 
@@ -270,6 +270,7 @@ freebsd:14.3@container-clean:
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
+      buildopt+=(-O g)
       export buildopt
     - "scp -r $(pwd) vm:"
     - echo "CI_JOB_ID=\"$CI_JOB_ID\"" > fcenv
@@ -319,6 +320,7 @@ freebsd:14.3@container-clean:
       buildopt+=(-s $FC_BUILDSYS)
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
+      buildopt+=(-O g)
       bash .gitlab-ci/build.sh ${buildopt[@]}
   variables:
     FC_BUILDSYS: autotools
@@ -344,6 +346,9 @@ freebsd:14.3@container-clean:
       - build*/fontconfig*/_build
       - build*/meson-logs/*
       - build*/meson-dist/*
+      - build*/fontconfig/fontconfig.h
+      - build*/libfontconfig.so*
+      - build*/src/.libs/libfontconfig.so*
       - prefix*
     reports:
       junit: build*/meson-logs/testlog.junit.xml
@@ -613,6 +618,54 @@ ASAN/UBSAN:
     FC_BUILD_ASAN: address,undefined
   needs:
     - fedora:rawhide@container-prep
+
+abicheck:
+  stage: test
+  extends:
+    - .fdo.distribution-image@fedora
+    - .fc_artifacts
+  variables:
+    FC_DISTRO_NAME: fedora
+    FDO_DISTRIBUTION_VERSION: rawhide
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+  needs:
+    - fedora:rawhide@container-prep
+    - build-meson shared libxml2
+  script:
+    - |
+      pip install junit_xml
+      export builddir=($(pwd)/build-fontconfig-*)
+      sh .gitlab-ci/abicheck.sh "${builddir[0]}"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  artifacts:
+    reports:
+      junit: build*/abidiff.xml
+
+
+apicheck:
+  stage: test
+  extends:
+    - .fdo.distribution-image@fedora
+    - .fc_artifacts
+  variables:
+    FC_DISTRO_NAME: fedora
+    FDO_DISTRIBUTION_VERSION: rawhide
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+  needs:
+    - fedora:rawhide@container-prep
+    - build-meson shared libxml2
+  script:
+    - |
+      pip install junit_xml
+      export builddir=($(pwd)/build-fontconfig-*)
+      python3 .gitlab-ci/apicheck.py -f .gitlab-ci/symbol.list -o "${builddir[0]}/apicheck.xml" "${builddir[0]}/libfontconfig.so" src/fcint.h "${builddir[0]}/fontconfig/fontconfig.h" fontconfig/fcfontations.h fontconfig/fcfreetype.h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  artifacts:
+    reports:
+      junit: build*/apicheck.xml
+
 
 #######################################
 #                                     #

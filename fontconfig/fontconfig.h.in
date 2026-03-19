@@ -940,7 +940,7 @@ FcValueSave (FcValue v);
 FcPublic void
 FcPatternDestroy (FcPattern *p);
 
-int
+FcPublic int
 FcPatternObjectCount (const FcPattern *pat);
 
 FcPublic FcBool

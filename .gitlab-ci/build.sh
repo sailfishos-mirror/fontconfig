@@ -32,6 +32,7 @@ export MAKE=${MAKE:-make}
 export BUILD_ID=${BUILD_ID:-fontconfig-$$}
 export PREFIX=${PREFIX:-$MyPWD/prefix}
 export BUILDDIR=${BUILDDIR:-$MyPWD/build}
+export BUILDLOG=${BUILDLOG:-${BUILDDIR}/fc-build.log}
 export CI_MERGE_REQUEST_PROJECT_URL=${CI_MERGE_REQUEST_PROJECT_URL:-https://gitlab.freedesktop.org/fontconfig/fontconfig}
 export CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME:-main}
 
@@ -100,7 +101,7 @@ clean_exit() {
     if [ -n "$TASK" ]; then
         echo "Aborting from \"$TASK\" with the exit code $rc"
     fi
-    mv /tmp/fc-build.log . || :
+    mv /tmp/fc-build.log "${BUILDLOG}" || :
     exit "$rc"
 }
 
