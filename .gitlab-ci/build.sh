@@ -212,8 +212,8 @@ elif [ "$buildsys" == "meson" ]; then
         git clone "${CI_MERGE_REQUEST_PROJECT_URL}.git"
         if [ -n "$CI_MERGE_REQUEST_IID" ]; then
             pushd fontconfig
-            git fetch origin "merge-requests/$CI_MERGE_REQUEST_IID/head:$CI_COMMIT_REF_NAME"
-            git switch "$CI_COMMIT_REF_NAME"
+            git fetch origin "merge-requests/$CI_MERGE_REQUEST_IID/head:mr-$CI_MERGE_REQUEST_IID"
+            git switch "mr-$CI_MERGE_REQUEST_IID"
             popd
         else
             # use main branch instead
