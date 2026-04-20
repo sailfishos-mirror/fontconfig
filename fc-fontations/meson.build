@@ -2,6 +2,7 @@ fontations = get_option('fontations')
 
 if (fontations.enabled())
   rust = import('rust')
+  cargo = rust.workspace()
 
   generated_fontconfig = rust.bindgen(
     input: fontconfig_h,
@@ -34,18 +35,17 @@ if (fontations.enabled())
     c_args: ['-DBINDGEN_IGNORE_VISIBILITY=1', '-DFC_NO_MT=1'],
   )
 
-  fontations_bindings_lib = static_library(
-    'fontconfig_bindings',
-    sources: [generated_fontconfig],
-    rust_abi: 'rust',
-  )
+  fontconfig_bindings_pkg = cargo.package('fontconfig-bindings')
+  fontconfig_bindings_lib = fontconfig_bindings_pkg.library(
+    structured_sources(generated_fontconfig))
+  fontconfig_bindings_pkg.override_dependency(
+    declare_dependency(link_with: fontconfig_bindings_lib))
 
-  fcint_bindings_lib = static_library(
-    'fcint_bindings',
-    sources: [generated_fcint],
-    rust_abi: 'rust',
-    link_with: [fontations_bindings_lib],
-  )
+  fcint_bindings_pkg = cargo.package('fcint-bindings')
+  fcint_bindings_lib = fcint_bindings_pkg.library(
+    structured_sources(generated_fcint))
+  fcint_bindings_pkg.override_dependency(
+    declare_dependency(link_with: fcint_bindings_lib))
 
   fontations_query_lib = static_library(
     'fc_fontations_query',
@@ -53,25 +53,11 @@ if (fontations.enabled())
     sources: ['../src/fcfontations.c', fcstdint_h, fclang_h, alias_headers],
   )
 
-  fc_fontations = static_library(
-    'fc_fontations',
-    sources: ['mod.rs'],
+  fc_fontations = cargo.package().library(
     link_with: [
-      fontations_bindings_lib,
-      fcint_bindings_lib,
       pattern_lib,
       fontations_query_lib,
     ],
-    rust_args: ['-Dunsafe-op-in-unsafe-fn', '-Dwarnings'],
-    rust_abi: 'c',
-    dependencies: [
-      dependency('skrifa-0.40-rs'),
-      dependency('read-fonts-0.37-rs'),
-      dependency('font-types-0.11-rs'),
-      dependency('libc-0.2-rs'),
-    ],
     install: true,
-
   )
-
 endif

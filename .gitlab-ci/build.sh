@@ -180,7 +180,7 @@ elif [ "$buildsys" == "meson" ]; then
     python3 -m venv .venv
     # shellcheck source=/dev/null
     . .venv/bin/activate
-    pip install "meson==1.10.1"
+    pip install "meson>=1.11.0"
 #   tomli not required for Python >= 3.11
     pip install tomli
     pip install pytest pytest-tap requests
