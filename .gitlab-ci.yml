@@ -47,9 +47,9 @@ variables:
 # changing these will force rebuilding the associated image
 # Note: these tags have no meaning and are not tied to a particular
 # fontconfig version
-  ALPINE_TAG:    '2026-04-27.1-4cdb2241724d'
-  FEDORA_TAG:    '2026-04-27.1-8aa997a7deec'
-  FREEBSD_TAG:   '2026-04-27.1-914edb6cad41'
+  ALPINE_TAG:    '2026-04-28.1-e9bf16a53810'
+  FEDORA_TAG:    '2026-04-28.1-7ed21c6d3b95'
+  FREEBSD_TAG:   '2026-04-28.1-f8c9e1738a0d'
 
   ALPINE_EXEC:   'bash .gitlab-ci/alpine-install.sh'
   FEDORA_EXEC:   'bash .gitlab-ci/fedora-install.sh'
@@ -146,7 +146,7 @@ freebsd:14.3@container-prep:
   variables:
     GIT_STRATEGY: none
     FDO_DISTRIBUTION_VERSION: '14.3'
-    FDO_DISTRIBUTION_PACKAGES: 'gcc autoconf automake libtool gettext gperf expat libxml2 freetype2 json-c git ninja wget python3 py311-pip pkgconf gmake gettext-runtime'
+    FDO_DISTRIBUTION_PACKAGES: 'gcc gettext gperf expat libxml2 freetype2 json-c git wget python3 py311-pip pkgconf gmake gettext-runtime ninja'
     FDO_DISTRIBUTION_TAG: $FREEBSD_TAG
     FDO_DISTRIBUTION_EXEC: $FREEBSD_EXEC
 
@@ -277,9 +277,8 @@ freebsd:14.3@container-clean:
     - echo "CI_JOB_NAME=\"$CI_JOB_NAME\"" >> fcenv
     - echo "BUILD_ID=\"$BUILD_ID\"" >> fcenv
     - echo "MAKEFLAGS=\"$MAKEFLAGS\"" >> fcenv
-    - echo "MAKE=\"$MAKE\"" >> fcenv
     - "scp fcenv vm:~/$CI_PROJECT_NAME/.gitlab-ci/fcenv"
-    - /app/vmctl exec "cd $CI_PROJECT_NAME ; bash .gitlab-ci/build.sh ${buildopt[@]}" && touch .success || true
+    - /app/vmctl exec "cd $CI_PROJECT_NAME ; python3 .gitlab-ci/build.py ${buildopt[@]}" && touch .success || true
     - scp -r vm:$CI_PROJECT_NAME/build $BUILDDIR
 
     - *check_tainted
@@ -321,7 +320,13 @@ freebsd:14.3@container-clean:
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
       buildopt+=(-O g)
-      bash .gitlab-ci/build.sh ${buildopt[@]}
+      export buildopt
+    - echo "CI_JOB_ID=\"$CI_JOB_ID\"" > fcenv
+    - echo "CI_JOB_NAME=\"$CI_JOB_NAME\"" >> fcenv
+    - echo "BUILD_ID=\"$BUILD_ID\"" >> fcenv
+    - echo "MAKEFLAGS=\"$MAKEFLAGS\"" >> fcenv
+    - cp fcenv .gitlab-ci/fcenv
+    - $FC_BUILD_SH python3 .gitlab-ci/build.py ${buildopt[@]}
   variables:
     FC_BUILDSYS: autotools
     FC_XML_BACKEND: expat

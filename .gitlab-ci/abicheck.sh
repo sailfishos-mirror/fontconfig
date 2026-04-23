@@ -43,7 +43,13 @@ fi
 
 # assume that the targeted build directory is up-to-date.
 if [ ! -d "$newbuilddir" ]; then
-    "$cihomedir/build.sh" "$@"
+    buildcmd=(python3 $cihomedir/build.py)
+    if [ ! -f "$cihomedir/build.py" ]; then
+        buildcmd=($cihomedir/build.sh)
+    else
+        buildcmd=(python3 $cihomedir/build.py)
+    fi
+    ${buildcmd[@]} "$@"
 fi
 copyresult "$newbuilddir" "new"
 
@@ -58,8 +64,13 @@ git fetch origin main
 
 git worktree add -b "abicheck_main_$curbranch" "$basebuilddir" FETCH_HEAD
 pushd "$basebuilddir"
+if [ ! -f "$cihomedir/build.py" ]; then
+    buildcmd=($cihomedir/build.sh)
+else
+    buildcmd=(python3 $cihomedir/build.py)
+fi
 # Do not run unit tests because main branch should be passed by CI
-BUILDLOG="$newbuilddir/fc-basebuild.log" BUILDDIR="$basebuilddir/build" "$cihomedir/build.sh" -C "$@"
+BUILDLOG="$newbuilddir/fc-basebuild.log" BUILDDIR="$basebuilddir/build" ${buildcmd[@]} -C "$@"
 popd
 
 copyresult "$basebuilddir/build" "old"

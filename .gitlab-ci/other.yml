@@ -87,20 +87,25 @@ meson vs2019 x86:
     - cargo install bindgen-cli
     - rustc --version
     - bindgen --version
+    # PyYAML is required for build.py to read build.yaml
+    - pip3 install PyYAML
   script:
-    - CERT_PATH=$(python3 -m certifi) && export SSL_CERT_FILE=${CERT_PATH} && export REQUESTS_CA_BUNDLE=${CERT_PATH} && meson setup -Diconv=enabled $MESON_FONTATIONS_ARG build
-    - meson compile --verbose -C build
-    - meson test -C build
+    # build.py handles all remaining setup automatically:
+    # - Creates venv with meson, certifi, ninja, etc.
+    # - Installs Rust via rustup
+    # - Configures SSL certificates
+    # - Runs meson setup, compile, and test
+    - echo $BUILD_PY_ARGS | xargs python3 .gitlab-ci/build.py -V -d nls -d iconv
 
 meson macos test:
   extends: ".meson macos test"
   variables:
-    MESON_FONTATIONS_ARG: "-Dfontations=disabled"
+    BUILD_PY_ARGS: -d fontations
 
 meson macos test fontations:
   extends: ".meson macos test"
   variables:
-    MESON_FONTATIONS_ARG: "-Dfontations=enabled"
+    BUILD_PY_ARGS: -e fontations
 
 # msys infrastructure is a bit broken, disable for now
 meson msys2:

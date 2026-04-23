@@ -215,9 +215,8 @@ check-ci-script:
     - echo "CI_JOB_NAME=\"$CI_JOB_NAME\"" >> fcenv
     - echo "BUILD_ID=\"$BUILD_ID\"" >> fcenv
     - echo "MAKEFLAGS=\"$MAKEFLAGS\"" >> fcenv
-    - echo "MAKE=\"$MAKE\"" >> fcenv
     - "scp fcenv vm:~/$CI_PROJECT_NAME/.gitlab-ci/fcenv"
-    - /app/vmctl exec "cd $CI_PROJECT_NAME ; bash .gitlab-ci/build.sh ${buildopt[@]}" && touch .success || true
+    - /app/vmctl exec "cd $CI_PROJECT_NAME ; python3 .gitlab-ci/build.py ${buildopt[@]}" && touch .success || true
     - scp -r vm:$CI_PROJECT_NAME/build $BUILDDIR
 
     - *check_tainted
@@ -259,7 +258,13 @@ check-ci-script:
       buildopt+=(-t $FC_BUILD_TYPE)
       buildopt+=(-X $FC_XML_BACKEND)
       buildopt+=(-O g)
-      bash .gitlab-ci/build.sh ${buildopt[@]}
+      export buildopt
+    - echo "CI_JOB_ID=\"$CI_JOB_ID\"" > fcenv
+    - echo "CI_JOB_NAME=\"$CI_JOB_NAME\"" >> fcenv
+    - echo "BUILD_ID=\"$BUILD_ID\"" >> fcenv
+    - echo "MAKEFLAGS=\"$MAKEFLAGS\"" >> fcenv
+    - cp fcenv .gitlab-ci/fcenv
+    - $FC_BUILD_SH python3 .gitlab-ci/build.py ${buildopt[@]}
   variables:
     FC_BUILDSYS: autotools
     FC_XML_BACKEND: expat

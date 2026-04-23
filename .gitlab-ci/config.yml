@@ -1,4 +1,4 @@
-.default_tag: &default_tag "2026-04-27.1"
+.default_tag: &default_tag "2026-04-28.1"
 
 build_patterns:
   - name: "autotools shared expat"
@@ -203,9 +203,6 @@ packages:
     needed:
       [
         "gcc",
-        "autoconf",
-        "automake",
-        "libtool",
         "gettext",
         "gperf",
         "expat",
@@ -213,11 +210,11 @@ packages:
         "freetype2",
         "json-c",
         "git",
-        "ninja",
         "wget",
         "python3",
         "py311-pip",
         "pkgconf",
         "gmake",
         "gettext-runtime",
+        "ninja",
       ]
