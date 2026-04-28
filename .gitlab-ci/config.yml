@@ -1,4 +1,4 @@
-.default_tag: &default_tag "2026-03-05.1"
+.default_tag: &default_tag "2026-04-27.1"
 
 build_patterns:
   - name: "autotools shared expat"
@@ -88,8 +88,8 @@ distributions:
     qemu_based: false
     versions:
       - "rawhide"
-      - "42"
-      - "41"
+      - "44"
+      - "43"
     builds:
       - name: "standard build"
         upload: "rawhide"

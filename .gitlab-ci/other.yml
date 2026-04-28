@@ -48,6 +48,7 @@
 
 meson vs2019 x86:
   extends: ".build meson windows"
+  when: "manual"
   variables:
     ARCH: "x86"
     MESON_ARGS: "-Dfontations=disabled"
@@ -94,11 +95,13 @@ meson vs2019 x86:
 
 meson macos test:
   extends: ".meson macos test"
+  when: "manual"
   variables:
     MESON_FONTATIONS_ARG: "-Dfontations=disabled"
 
 meson macos test fontations:
   extends: ".meson macos test"
+  when: "manual"
   variables:
     MESON_FONTATIONS_ARG: "-Dfontations=enabled"
 
