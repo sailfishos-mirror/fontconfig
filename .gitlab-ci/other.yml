@@ -87,40 +87,25 @@ meson vs2019 x86:
     - cargo install bindgen-cli
     - rustc --version
     - bindgen --version
+    # PyYAML is required for build.py to read build.yaml
+    - pip3 install PyYAML
   script:
-    - CERT_PATH=$(python3 -m certifi) && export SSL_CERT_FILE=${CERT_PATH} && export REQUESTS_CA_BUNDLE=${CERT_PATH} && meson setup -Diconv=enabled $MESON_FONTATIONS_ARG build
-    - meson compile --verbose -C build
-    - meson test -C build
+    # build.py handles all remaining setup automatically:
+    # - Creates venv with meson, certifi, ninja, etc.
+    # - Installs Rust via rustup
+    # - Configures SSL certificates
+    # - Runs meson setup, compile, and test
+    - echo $BUILD_PY_ARGS | xargs python3 .gitlab-ci/build.py -V -d nls -d iconv
 
 meson macos test:
   extends: ".meson macos test"
   variables:
-    MESON_FONTATIONS_ARG: "-Dfontations=disabled"
+    BUILD_PY_ARGS: -d fontations
 
 meson macos test fontations:
   extends: ".meson macos test"
   variables:
-    MESON_FONTATIONS_ARG: "-Dfontations=enabled"
-
-# msys infrastructure is a bit broken, disable for now
-meson msys2:
-  extends: ".build meson windows"
-  when: "manual"
-  allow_failure: true
-  script:
-    # For some reason, options are separated by newline instead of space, so we
-    # have to replace them first.
-    # - $env:MESON_ARGS = $env:MESON_ARGS.replace("`n"," ")
-
-    - $env:PATH += ";C:\msys64\usr\bin;C:\msys64\mingw64/bin;C:\msys64\mingw32/bin"
-    # XXX: Copied from https://gitlab.freedesktop.org/gstreamer/gst-ci/blob/master/gitlab/ci_template.yml#L487
-    # For some reason docker build hangs if this is included in the image, needs more troubleshooting
-    - C:\msys64\usr\bin\bash -c "pacman-key --init && pacman-key --populate msys2 && pacman-key --refresh-keys || true"
-    - C:\msys64\usr\bin\bash -c "pacman -Syuu --noconfirm"
-    - C:\msys64\usr\bin\bash -c "pacman -Sy --noconfirm --needed mingw-w64-x86_64-toolchain ninja"
-    - C:\msys64\usr\bin\bash -c "meson build $env:MESON_ARGS &&
-      ninja -C build &&
-      ninja -C build test"
+    BUILD_PY_ARGS: -e fontations
 
 MinGW dllexport static:
   stage: test
@@ -134,8 +119,10 @@ MinGW dllexport static:
     - export ARCH=x86_64
     - apt-get update -qq
     - apt-get install -qqy --no-install-recommends git pkgconf ninja-build pipx
-    - FC_BUILD_PLATFORM=mingw PREFIX=/packaging bash .gitlab-ci/build.sh -a x86_64-w64-mingw32-clang -d doc -d nls -d iconv -d tools -t static -C
+    - FC_BUILD_PLATFORM=mingw PREFIX=/packaging python3 .gitlab-ci/build.py -a x86_64-w64-mingw32-clang -d doc -d nls -d iconv -d tools -t static -C
     - cd /packaging
+    - |
+      mkdir -p /packaging/bin || :
     - |-
       cat <<_E_> test.c
       #include <fontconfig/fontconfig.h>
