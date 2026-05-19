@@ -356,14 +356,15 @@ msys2:latest@container-clean:
       if [ -n "$FC_BUILD_SH" ]; then
         echo "FC_BUILD_SH: ${FC_BUILD_SH[@]}"
         echo "MSYSTEM: $MSYSTEM"
+        echo "CI_PROJECT_DIR: $CI_PROJECT_DIR"
+        fc_parent_builddir=$(dirname $CI_PROJECT_DIR)
         # Expects the target is MSYS2 so far.
-        mkdir ~/.wine/drive_c/msys64/builds
+        mkdir -p ~/.wine/drive_c/msys64/$fc_parent_builddir
         CWD=$(pwd)
-        cd /builds
-        mv /builds/fontconfig ~/.wine/drive_c/msys64/builds/
+        mv $CI_PROJECT_DIR ~/.wine/drive_c/msys64/$fc_parent_builddir/
         echo "${FC_BUILD_SH[@]} 'cd \$1; shift; python3 .gitlab-ci/build.py \"\$@\"' -- \"$CWD\" \"${buildopt[@]}\""
         ${FC_BUILD_SH[@]} 'cd $1; shift; python3 .gitlab-ci/build.py "$@"' -- "$CWD" "${buildopt[@]}"
-        mv ~/.wine/drive_c/msys64/builds/fontconfig /builds
+        mv ~/.wine/drive_c/msys64/$CI_PROJECT_DIR $fc_parent_builddir/
         cd $CWD
       else
         echo python3 .gitlab-ci/build.py ${buildopt[@]}
