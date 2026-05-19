@@ -4,6 +4,7 @@ set -ex
 set -o pipefail
 
 cihomedir=$(dirname "$0")
+shift
 basedir=$(realpath "$cihomedir/..")
 newbuilddir=${1-$(realpath "$basedir/build")}
 basebuilddir=$(realpath "$basedir/.build.base")
