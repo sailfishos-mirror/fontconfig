@@ -1,5 +1,4 @@
 conf_files = [
-  '05-macos.conf',
   '05-reset-dirs-sample.conf',
   '09-autohint-if-no-hinting.conf',
   '10-autohint.conf',
@@ -50,7 +49,6 @@ preferred_sub_pixel_rendering = get_option('default-sub-pixel-rendering')
 preferred_bitmap = get_option('bitmap-conf')
 
 conf_links = [
-  '05-macos.conf',
   '10-scale-bitmap-fonts.conf',
   '10-yes-antialias.conf',
   '11-lcdfilter-default.conf',
@@ -72,6 +70,11 @@ conf_links = [
   '80-delicious.conf',
   '90-synthetic.conf',
 ]
+
+if host_machine.system() == 'darwin'
+  conf_files += '05-macos.conf'
+  conf_links += '05-macos.conf'
+endif
 
 if preferred_hinting != 'noinstall'
   conf_links += '10-hinting-@0@.conf'.format(preferred_hinting)
