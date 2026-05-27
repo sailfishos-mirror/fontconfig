@@ -104,7 +104,7 @@ TESTS += test-name-parse
 
 if ENABLE_JSONC
 check_PROGRAMS += test-conf
-test_conf_CFLAGS = $(JSONC_CFLAGS)
+test_conf_CFLAGS = $(JSONC_CFLAGS) -DSRCDIR="\"$(abs_srcdir)\""
 test_conf_LDADD = $(top_builddir)/src/libfontconfig.la $(JSONC_LIBS)
 endif
 
