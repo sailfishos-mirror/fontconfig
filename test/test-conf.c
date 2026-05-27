@@ -53,9 +53,9 @@ int
 setenv (const char *name, const char *value, int overwrite)
 {
     if (!overwrite) {
-        char *s = getenv (name);
-        if (s)
-            return 0;
+	char *s = getenv (name);
+	if (s)
+	    return 0;
     }
     return _putenv_s (name, value);
 }
@@ -108,6 +108,48 @@ build_env (FcConfig *config, json_object *root)
 	}
     }
     return FcTrue;
+}
+
+static FcBool
+build_config (FcConfig *config, json_object *obj)
+{
+    int    n, i;
+    FcBool ret = FcTrue;
+
+    n = json_object_array_length (obj);
+    for (i = 0; i < n; i++) {
+	json_object   *o = json_object_array_get_idx (obj, i);
+	char          *allocated = NULL;
+	const char    *s;
+	const FcChar8 *m;
+
+	if (json_object_get_type (o) != json_type_string) {
+	    fprintf (stderr, "W: Invalid config item\n");
+	    continue;
+	}
+	s = json_object_get_string (o);
+	if ((m = FcStrStr ((const FcChar8 *)s, (const FcChar8 *)"%test%")) != 0) {
+	    size_t root_len = strlen (SRCDIR);
+	    size_t len = strlen (s);
+
+	    allocated = malloc (root_len + len);
+	    if (!allocated)
+		return FcFalse;
+	    strcpy (allocated, SRCDIR);
+	    allocated[root_len] = '/';
+	    strcpy (&allocated[root_len + 1], (const char *)&m[6]);
+	    s = allocated;
+	}
+	ret = FcConfigParseAndLoad (config, (const FcChar8 *)s, FcTrue);
+	if (allocated) {
+	    free (allocated);
+	    allocated = NULL;
+	}
+	if (!ret)
+	    goto bail;
+    }
+bail:
+    return ret;
 }
 
 static FcPattern *
@@ -416,7 +458,7 @@ bail:
 static FcBool
 build_fonts (FcConfig *config, json_object *root)
 {
-    json_object *fonts, *filter, *appfonts;
+    json_object *fonts, *filter, *appfonts, *cfg_xml;
     FcFontSet   *fs;
     FcPattern   *filterpat;
 
@@ -447,6 +489,14 @@ build_fonts (FcConfig *config, json_object *root)
 	if (config->fonts[FcSetApplication])
 	    FcFontSetDestroy (config->fonts[FcSetApplication]);
 	config->fonts[FcSetApplication] = fs;
+    }
+    if (json_object_object_get_ex (root, "load_xml", &cfg_xml)) {
+	if (json_object_get_type (cfg_xml) != json_type_array) {
+	    fprintf (stderr, "W: Invalid load_xml defined\n");
+	    return FcFalse;
+	}
+	if (!build_config (config, cfg_xml))
+	    return FcFalse;
     }
 
     return FcTrue;
@@ -695,7 +745,7 @@ process_pattern (FcConfig  *config,
 	    }
 	}
     } while (FcPatternIterNext (result, &iter2));
- bail:
+bail:
     return fail;
 }
 

@@ -112,7 +112,8 @@ endif
 
 if jsonc_dep.found()
   test_conf = executable('test-conf', 'test-conf.c',
-                         dependencies: [fontconfig_dep, jsonc_dep])
+                         dependencies: [fontconfig_dep, jsonc_dep],
+                         c_args: ['-DSRCDIR="@0@"'.format(meson.current_source_dir())])
 endif
 
 test_const_name = executable('test_const_name', test_const_name_c,

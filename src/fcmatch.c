@@ -165,6 +165,41 @@ FcCompareBool (const FcValue *v1, const FcValue *v2, FcValue *bestValue)
 }
 
 static double
+FcCompareEqual (const FcValue *value1, const FcValue *value2, FcValue *bestValue)
+{
+    double v1, v2, v;
+
+    switch ((int)value1->type) {
+    case FcTypeInteger:
+	v1 = (double)value1->u.i;
+	break;
+    case FcTypeDouble:
+	v1 = value1->u.d;
+	break;
+    case FcTypeBool:
+	return FcCompareBool (value1, value2, bestValue);
+    default:
+	return -1.0;
+    }
+    switch ((int)value2->type) {
+    case FcTypeInteger:
+	v2 = (double)value2->u.i;
+	break;
+    case FcTypeDouble:
+	v2 = value2->u.d;
+	break;
+    case FcTypeBool:
+	return FcCompareBool (value1, value2, bestValue);
+    default:
+	return -1.0;
+    }
+    v = !(v1 == v2);
+    *bestValue = FcValueCanonicalize (value2);
+
+    return v;
+}
+
+static double
 FcCompareCharSet (const FcValue *v1, const FcValue *v2, FcValue *bestValue)
 {
     *bestValue = FcValueCanonicalize (v2); /* TODO Improve. */
@@ -296,6 +331,7 @@ FcCompareFilename (const FcValue *v1, const FcValue *v2, FcValue *bestValue)
 #define PRI_FcCompareFamily(n)     PRI1 (n)
 #define PRI_FcCompareString(n)     PRI1 (n)
 #define PRI_FcCompareNumber(n)     PRI1 (n)
+#define PRI_FcCompareEqual(n)      PRI1 (n)
 #define PRI_FcCompareBool(n)       PRI1 (n)
 #define PRI_FcCompareFilename(n)   PRI1 (n)
 #define PRI_FcCompareCharSet(n)    PRI1 (n)
