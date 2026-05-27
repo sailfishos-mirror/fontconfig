@@ -1,0 +1,38 @@
+{
+  "fonts": [
+    {
+      "family": "Noto Sans",
+      "style": "Regular",
+      "file": "/path/to/NotoSans.ttf",
+      "fontversion": 1,
+      "genericfamily": 1
+    },
+    {
+      "family": "Lato",
+      "style": "Regular",
+      "file": "/path/to/Lato.ttf",
+      "fontversion": 1,
+      "genericfamily": 0
+    }
+  ],
+  "load_xml": [
+    "conf.d/48-guessfamily.conf",
+    "conf.d/49-sansserif.conf",
+    "conf.d/60-latin.conf",
+    "%test%/test-issue-525.conf",
+  ],
+  "tests": [
+    {
+      "method": "match",
+      "query": {
+        "family": "system-ui"
+      },
+      "result": {
+        "family": "Lato",
+        "style": "Regular",
+        "file": "/path/to/Lato.ttf",
+        "fontversion": 1
+      }
+    }
+  ]
+}
