@@ -5,7 +5,7 @@
       "style": "Regular",
       "file": "/path/to/NotoSans.ttf",
       "fontversion": 1,
-      "genericfamily": 1
+      "genericfamily": 2
     },
     {
       "family": "Lato",
@@ -18,14 +18,14 @@
   "load_xml": [
     "conf.d/48-guessfamily.conf",
     "conf.d/49-sansserif.conf",
-    "%test%/test-issue-525.conf",
+    "%test%/test-issue-525-2.conf",
     "conf.d/60-latin.conf",
   ],
   "tests": [
     {
       "method": "match",
       "query": {
-        "family": "system-ui"
+        "family": "-apple-system",
       },
       "result": {
         "family": "Lato",
