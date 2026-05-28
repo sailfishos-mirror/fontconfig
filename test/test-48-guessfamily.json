@@ -5,28 +5,28 @@
       "style": "Regular",
       "file": "/path/to/LiberationMono-Regular.ttf",
       "fontversion": 1,
-      "genericfamily": 3
+      "genericfamily": "monospace"
     },
     {
       "family": "Liberation Sans",
       "style": "Regular",
       "file": "/path/to/LiberationSans-Regular.ttf",
       "fontversion": 1,
-      "genericfamily": 2
+      "genericfamily": "sans-serif"
     },
     {
       "family": "Liberation Serif",
       "style": "Regular",
       "file": "/path/to/LiberationSerif-Regular.ttf",
       "fontversion": 1,
-      "genericfamily": 1
+      "genericfamily": "serif"
     },
     {
       "family": "Noto Sans Mono",
       "style": "Regular",
       "file": "/path/to/NotoSansMono-Regular.ttf",
       "fontversion": 1,
-      "genericfamily": 3
+      "genericfamily": "monospace"
     },
   ],
   "tests": [
@@ -40,7 +40,7 @@
         "style": "Regular",
         "file": "/path/to/LiberationMono-Regular.ttf",
         "fontversion": 1,
-        "genericfamily": 3
+        "genericfamily": "monospace"
       }
     },
     {
@@ -53,7 +53,7 @@
         "style": "Regular",
         "file": "/path/to/LiberationSans-Regular.ttf",
         "fontversion": 1,
-        "genericfamily": 2
+        "genericfamily": "sans-serif"
       }
     },
     {
@@ -66,7 +66,7 @@
         "style": "Regular",
         "file": "/path/to/LiberationSerif-Regular.ttf",
         "fontversion": 1,
-        "genericfamily": 1
+        "genericfamily": "serif"
       }
     },
     {
@@ -79,7 +79,7 @@
         "style": "Regular",
         "file": "/path/to/LiberationSans-Regular.ttf",
         "fontversion": 1,
-        "genericfamily": 2
+        "genericfamily": "sans-serif"
       }
     },
     {
