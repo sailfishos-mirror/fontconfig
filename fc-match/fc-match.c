@@ -183,6 +183,7 @@ main (int argc, char **argv)
     if (!pat)
 	return 1;
 
+    FcConfigSetWarningFlags (NULL, -1, FcTrue);
     FcConfigSubstitute (0, pat, FcMatchPattern);
     FcConfigSetDefaultSubstitute (0, pat);
 

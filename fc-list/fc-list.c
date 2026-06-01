@@ -159,6 +159,7 @@ main (int argc, char **argv)
     i = 1;
 #endif
 
+    FcConfigSetWarningFlags (NULL, -1, FcTrue);
     if (argv[i]) {
 	pat = FcNameParse ((FcChar8 *)argv[i]);
 	if (!pat) {

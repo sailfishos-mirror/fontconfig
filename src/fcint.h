@@ -628,6 +628,8 @@ struct _FcConfig {
     FcStrSet *default_langs; /* String sets of the default languages */
     FcChar8  *prgname;       /* Program name of current process */
     FcChar8  *desktop_name;  /* Current desktop name */
+
+    int warns; /* Bitfield of warning flags (FC_WARN_*) controlling which warnings to emit */
 };
 
 typedef struct _FcFileTime {
