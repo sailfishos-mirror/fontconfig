@@ -898,6 +898,10 @@ is used to control the use of mmap(2) for the cache files if available. this tak
 <emphasis>SOURCE_DATE_EPOCH</emphasis>
 is used to ensure <literal>fc-cache(1)</literal> generates files in a deterministic manner in order to support reproducible builds. When set to a numeric representation of UNIX timestamp, fontconfig will prefer this value over using the modification timestamps of the input files in order to identify which cache files require regeneration. If <literal>SOURCE_DATE_EPOCH</literal> is not set (or is newer than the mtime of the directory), the existing behaviour is unchanged.
   </para>
+  <para>
+<emphasis>FONTCONFIG_WARN_INVALID_ATTRS</emphasis>
+is used to get back the invalid attribute warning for config files.
+  </para>
 </refsect1>
 <refsect1><title>See Also</title>
   <para>

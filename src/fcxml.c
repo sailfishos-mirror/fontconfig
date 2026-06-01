@@ -1194,7 +1194,9 @@ FcPStackPush (FcConfigParse *parse, FcElement element, const XML_Char **attr)
 static FcBool
 FcPStackPop (FcConfigParse *parse)
 {
-    FcPStack *old;
+    FcPStack     *old;
+    static FcBool retrieved = FcFalse;
+    const char   *env = NULL;
 
     if (!parse->pstack) {
 	FcConfigMessage (parse, FcSevereError, "mismatching element");
@@ -1204,13 +1206,25 @@ FcPStackPop (FcConfigParse *parse)
     /* Don't check the attributes for FcElementNone */
     if (parse->pstack->element != FcElementNone &&
         parse->pstack->attr) {
-	/* Warn about unused attrs. */
-	FcChar8 **attrs = parse->pstack->attr;
-	while (*attrs) {
-	    if (attrs[0][0]) {
-		FcConfigMessage (parse, FcSevereWarning, "invalid attribute '%s'", attrs[0]);
+	if (!retrieved) {
+	    FcBool flag = FcFalse;
+
+	    env = getenv ("FONTCONFIG_WARN_INVALID_ATTRS");
+	    if (env && FcNameBool ((const FcChar8 *)env, &flag)) {
+		retrieved = FcTrue;
+		FcConfigSetWarningFlags (parse->config, FC_WARN_INVALID_ATTR, flag);
 	    }
-	    attrs += 2;
+	}
+	/* Warn only when a flag is turned on */
+	if (FcConfigGetWarningFlags (parse->config) & FC_WARN_INVALID_ATTR) {
+	    /* Warn about unused attrs. */
+	    FcChar8 **attrs = parse->pstack->attr;
+	    while (*attrs) {
+		if (attrs[0][0]) {
+		    FcConfigMessage (parse, FcSevereWarning, "invalid attribute '%s'", attrs[0]);
+		}
+		attrs += 2;
+	    }
 	}
     }
 
@@ -1735,7 +1749,7 @@ FcParseLangSet (FcConfigParse *parse)
 	}
 	FcVStackPopAndDestroy (parse);
     }
- bail:
+bail:
     if (n > 0)
 	FcVStackPushLangSet (parse, langset);
     else
