@@ -77,4 +77,4 @@ popd
 copyresult "$basebuilddir/build" "old"
 cp -L "$basebuilddir/build/libfontconfig-old.so" "$newbuilddir"
 
-abidiff --no-added-syms "$newbuilddir/libfontconfig-old.so" "$newbuilddir/libfontconfig-new.so" | python3 ./.gitlab-ci/abidiff2xml.py -o "$newbuilddir/abidiff.xml" -
+abidiff --no-added-syms --suppressions $cihomedir/.abidiff "$newbuilddir/libfontconfig-old.so" "$newbuilddir/libfontconfig-new.so" | python3 ./.gitlab-ci/abidiff2xml.py -o "$newbuilddir/abidiff.xml" -
