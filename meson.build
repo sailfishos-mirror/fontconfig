@@ -1,5 +1,5 @@
 project('fontconfig', 'c',
-  version: '2.18.0',
+  version: '2.18.1',
   meson_version : '>= 1.11.0',
   default_options: [
     'c_std=c11,c99',

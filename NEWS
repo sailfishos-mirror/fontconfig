@@ -1,11 +1,32 @@
                               Fontconfig
              Font configuration and customization library
-                             Version 2.18
-                              2026-05-21
+                            Version 2.18.1
+                              2026-06-02
 
 
 Check INSTALL for compilation and installation instructions.
 Report bugs to https://gitlab.freedesktop.org/fontconfig/fontconfig/issues/new.
+
+2.18.1
+
+Akira TAGOH (11):
+      ci: Fix wrong short options for glab
+      Fix not matching with a font family name
+      test-conf: Add a feature to load a certain config for testing
+      test: Add comprehensive documentation for test-conf JSON format
+      Fix another font matching issue
+      Do not set 'sans-serif' for default genericfamily
+      test: use const instead of number for genericfamily
+      meson: force enabling HAVE_C99_VSNPRINTF
+      Disable invalid attribute warning by default
+      ci: Add .abidiff for suppression
+      Workaround :-prefixed filename used in Qt
+
+Jan Alexander Steffens (heftig) (1):
+      meson: Only install 05-macos.conf on darwin
+
+Marcus Spencer (1):
+      Fix a null pointer dereference when computing a pattern from an FT_Face that has no family
 
 2.18
 
