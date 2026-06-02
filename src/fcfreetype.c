@@ -1714,7 +1714,13 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
 	    goto bail1;
     }
 
-    canon_file = FcStrCanonFilename(file);
+    /* Qt6 seems using :-prefixing to take care of some special case.
+     * Do not call FcStrCanonFilename not to break that
+     */
+    if (file[0] != ':')
+	canon_file = FcStrCanonFilename (file);
+    else
+	canon_file = file;
     if (canon_file && *canon_file && !FcPatternObjectAddString (pat, FC_FILE_OBJECT, canon_file))
 	goto bail1;
 
@@ -2114,7 +2120,7 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
     FcCharSetDestroy (cs);
     if (foundry_)
 	free (foundry_);
-    if (canon_file)
+    if (canon_file && canon_file != file)
 	free (canon_file);
 
     if (mmvar) {
