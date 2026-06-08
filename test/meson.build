@@ -96,7 +96,7 @@ else
 endif
 
 if pytest.found()
-  test('pytest', pytest, args: ['--tap'],
+  test('pytest', pytest, args: ['--tap', '--assert=plain'],
        workdir: meson.current_source_dir(),
        env: [
          'builddir=@0@'.format(meson.project_build_root()),
