@@ -2,3 +2,5 @@
 __pycache__
 /prefix*
 /build*
+/target*
+/subprojects/*/
