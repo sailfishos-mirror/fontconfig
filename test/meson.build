@@ -1,16 +1,20 @@
-fetch_test_fonts = custom_target(
-  'fetch_test_fonts',
-  output: 'testfonts',
-  command: [
-    python3,
-    join_paths(meson.project_source_root(), 'build-aux', 'fetch-testfonts.py'),
-    '--target-dir',
-    '@BUILD_ROOT@/testfonts',
-    '--try-symlink',
-  ],
-  build_by_default: false,
-  build_always_stale: true,
-)
+if get_option('tests-external-fonts').allowed()
+  fetch_test_fonts = custom_target(
+    'fetch_test_fonts',
+    output: 'testfonts',
+    command: [
+      python3,
+      join_paths(meson.project_source_root(), 'build-aux', 'fetch-testfonts.py'),
+      '--target-dir',
+      '@BUILD_ROOT@/testfonts',
+      '--try-symlink',
+    ],
+    build_by_default: false,
+    build_always_stale: true,
+  )
+else
+  fetch_test_fonts = []
+endif
 
 tests = [
   ['test-bz89617.c', {'c_args': ['-DSRCDIR="@0@"'.format(meson.current_source_dir())]}],
@@ -96,7 +100,11 @@ else
 endif
 
 if pytest.found()
-  test('pytest', pytest, args: ['--tap', '--assert=plain'],
+  pytest_args = ['--tap', '--assert=plain']
+  if not get_option('tests-external-fonts').allowed()
+    pytest_args += ['-m', 'not network']
+  endif
+  test('pytest', pytest, args: pytest_args,
        workdir: meson.current_source_dir(),
        env: [
          'builddir=@0@'.format(meson.project_build_root()),

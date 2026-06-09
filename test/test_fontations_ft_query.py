@@ -47,6 +47,7 @@ def compare_fontations_freetype(fctest, font_file, ret_code_behavior: RetCodeBeh
     ), f"FreeType and Fontations fc-query result must match. Fontations: {result_fontations}, FreeType: {result_freetype}"
 
 
+@pytest.mark.network
 @pytest.mark.parametrize("font_file", FcExternalTestFont().fonts)
 def test_fontations_freetype_fcquery_equal(fctest, font_file):
     fctest.logger.info(f'Testing with: {font_file}')

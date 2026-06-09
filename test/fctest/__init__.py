@@ -362,6 +362,8 @@ class FcExternalTestFont:
     def __init__(self):
         fctest = FcTest()
         self._fonts = [str(fn) for fn in (Path(fctest.builddir) / "testfonts").glob('**/*.ttf')]
+        if not self._fonts:
+            raise RuntimeError("No external test fonts available. Run with -Dtests-external-fonts=enabled to fetch them.")
 
     @property
     def fonts(self):

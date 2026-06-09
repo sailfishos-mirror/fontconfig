@@ -17,6 +17,7 @@ def fcfont():
     return FcTestFont()
 
 
+@pytest.mark.network
 @pytest.mark.parametrize("font_file", FcExternalTestFont().fonts)
 def test_genconf(fctest, fcfont, font_file):
     font_path = Path(font_file)
