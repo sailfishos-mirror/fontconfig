@@ -246,6 +246,9 @@ class FcTest:
                      '--proc', '/proc',
                      # Use fresh tmpfs to avoid unexpected references
                      '--tmpfs', '/tmp',
+                     # Bind a builddir here to avoid a situation where
+                     # it is cleaned up by the above option when it is under /tmp
+                     '--ro-bind', self._builddir, self._builddir,
                      '--setenv', 'FONTCONFIG_FILE', self._env['FONTCONFIG_FILE']]
             boxed += self.__bind
             if debug:
