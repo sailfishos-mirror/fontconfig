@@ -110,6 +110,7 @@ class Build:
         os.environ.setdefault("CI_MERGE_REQUEST_PROJECT_URL", "https://gitlab.freedesktop.org/fontconfig/fontconfig")
         os.environ.setdefault("CI_COMMIT_REF_NAME", "main")
         os.environ.setdefault("BUILDLOG", str(pathlib.Path(os.environ["BUILDDIR"]) / "fc-build.log"))
+        os.environ.setdefault("SOURCE_DATE_EPOCH", str(int(time.time())))
 
         self.builddir = pathlib.Path(os.environ["BUILDDIR"])
         self.prefix = pathlib.Path(os.environ["PREFIX"])
