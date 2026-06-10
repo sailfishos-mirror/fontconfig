@@ -139,6 +139,24 @@ build_config (FcConfig *config, json_object *obj)
 	    allocated[root_len] = '/';
 	    strcpy (&allocated[root_len + 1], (const char *)&m[6]);
 	    s = allocated;
+	} else if (strstr (s, "..") != 0) {
+	    fprintf (stderr, "W: the path traversal sequences are not allowed\n");
+	    continue;
+	} else if (s[0] != '/') {
+	    /* need to resolve a relative path without depending on the default config */
+	    size_t root_len = strlen (SRCDIR);
+	    size_t len = strlen (s);
+
+	    allocated = malloc (root_len + 4 /* /../ */ + len + 1);
+	    if (!allocated)
+		return FcFalse;
+	    strcpy (allocated, SRCDIR);
+	    allocated[root_len] = '/';
+	    allocated[root_len + 1] = '.';
+	    allocated[root_len + 2] = '.';
+	    allocated[root_len + 3] = '/';
+	    strcpy (&allocated[root_len + 4], (const char *)s);
+	    s = allocated;
 	}
 	ret = FcConfigParseAndLoad (config, (const FcChar8 *)s, FcTrue);
 	if (allocated) {
