@@ -100,7 +100,7 @@ else
 endif
 
 if pytest.found()
-  pytest_args = ['--tap', '--assert=plain']
+  pytest_args = ['--tap', '-vv', '--assert=plain']
   if not get_option('tests-external-fonts').allowed()
     pytest_args += ['-m', 'not network']
   endif

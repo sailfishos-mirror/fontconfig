@@ -2,7 +2,7 @@
 # Copyright (C) 2025 Google LLC.
 # SPDX-License-Identifier: HPND
 
-from fctest import FcTest, FcExternalTestFont, FcBrokenFont
+from fctest import FcTest, FcExternalTestFont, FcBrokenFont, pytest_generate_tests
 from pathlib import Path
 from enum import Enum
 import pytest
@@ -47,12 +47,10 @@ def compare_fontations_freetype(fctest, font_file, ret_code_behavior: RetCodeBeh
     ), f"FreeType and Fontations fc-query result must match. Fontations: {result_fontations}, FreeType: {result_freetype}"
 
 
-@pytest.mark.network
-@pytest.mark.parametrize("font_file", FcExternalTestFont().fonts)
-def test_fontations_freetype_fcquery_equal(fctest, font_file):
-    fctest.logger.info(f'Testing with: {font_file}')
+def test_fontations_freetype_fcquery_equal(fctest, parametrized_external_font):
+    fctest.logger.info(f'Testing with: {parametrized_external_font}')
     compare_fontations_freetype(
-        fctest, font_file, RetCodeBehavior.MUST_BE_ZERO)
+        fctest, parametrized_external_font, RetCodeBehavior.MUST_BE_ZERO)
 
 
 @pytest.mark.parametrize("font_file", FcBrokenFont().fonts)
