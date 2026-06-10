@@ -20,6 +20,7 @@ def fcfont():
     return FcTestFont()
 
 
+@pytest.mark.network
 @pytest.mark.skipif(not not os.getenv('EXEEXT'), reason='not working on Win32')
 def test_crbug1004254(fctest, fcfont):
     builddir = Path(fctest.builddir)

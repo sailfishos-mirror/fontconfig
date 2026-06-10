@@ -1,7 +1,7 @@
 # Copyright (C) 2025 fontconfig Authors
 # SPDX-License-Identifier: HPND
 
-from fctest import FcTest, FcExternalTestFont, FcTestFont
+from fctest import FcTest, FcExternalTestFont, FcTestFont, pytest_generate_tests
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 import pytest
@@ -17,12 +17,8 @@ def fcfont():
     return FcTestFont()
 
 
-@pytest.mark.parametrize("font_file", FcExternalTestFont().fonts)
-def test_genconf(fctest, fcfont, font_file):
-    font_path = Path(font_file)
-
-    if not font_path.exists():
-        pytest.skip(f"Font file not found: {font_file}")
+def test_genconf(fctest, fcfont, parametrized_external_font):
+    font_path = Path(parametrized_external_font)
 
     extraconffile = NamedTemporaryFile(prefix='fontconfig.',
                                        suffix='.extra.conf',
@@ -31,10 +27,10 @@ def test_genconf(fctest, fcfont, font_file):
     fctest._extra.append(f'<include ignore_missing="yes">{fctest.convert_path(extraconffile.name)}</include>')
     fctest.setup()
     fctest.install_font(fcfont.fonts, '.')
-    fctest.install_font(font_file, '.')
+    fctest.install_font(parametrized_external_font, '.')
 
     f = g = fmt = None
-    for ret, stdout, stderr in fctest.run_query(['-f', '%{family}:%{genericfamily}\n', font_file]):
+    for ret, stdout, stderr in fctest.run_query(['-f', '%{family}:%{genericfamily}\n', parametrized_external_font]):
         assert ret == 0, stderr
         for l in stdout.strip().splitlines():
             f, g = l.split(':')
@@ -46,7 +42,7 @@ def test_genconf(fctest, fcfont, font_file):
             else:
                 fmt = f':genericfamily={g}'
 
-    for ret, stdout, stderr in fctest.run_genconf(['-g', g, '-f', f, '-o', extraconffile.name, font_file]):
+    for ret, stdout, stderr in fctest.run_genconf(['-g', g, '-f', f, '-o', extraconffile.name, parametrized_external_font]):
         assert ret == 0, stderr
 
     for ret, stdout, stderr in fctest.run_match(['-f', '%{file}\n', fmt]):
@@ -54,7 +50,7 @@ def test_genconf(fctest, fcfont, font_file):
         if Path(stdout.strip().splitlines()[0]).name != font_path.name:
             assert ret == 0, stderr
 
-    for ret, stdout, stderr in fctest.run_scan(['-f', '%{genericfamily}\n', font_file]):
+    for ret, stdout, stderr in fctest.run_scan(['-f', '%{genericfamily}\n', parametrized_external_font]):
         assert ret == 0, stderr
         for l in stdout.strip().splitlines():
             assert g == l, stdout

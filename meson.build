@@ -643,6 +643,7 @@ summary({
   'Documentation': (doc_targets.length() > 0 ? doc_targets : false),
   'NLS': not opt_nls.disabled(),
   'Tests': not get_option('tests').disabled(),
+  'Tests (external fonts)': get_option('tests-external-fonts').allowed(),
   'Pytest': pytest.found(),
   'Tools': not get_option('tools').disabled(),
   'iconv': found_iconv == 1,

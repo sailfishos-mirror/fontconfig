@@ -53,11 +53,14 @@ if (fontations.enabled())
     sources: ['../src/fcfontations.c', fcstdint_h, fclang_h, alias_headers],
   )
 
+  rust_args_list = ['--check-cfg', 'cfg(skip_external_fonts)']
+  if not get_option('tests-external-fonts').allowed()
+    rust_args_list += ['--cfg', 'skip_external_fonts']
+  endif
+
   fc_fontations = cargo.package().library(
-    link_with: [
-      pattern_lib,
-      fontations_query_lib,
-    ],
+    link_with: [pattern_lib, fontations_query_lib],
     install: true,
+    rust_args: rust_args_list,
   )
 endif
