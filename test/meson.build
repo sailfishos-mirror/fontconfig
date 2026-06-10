@@ -6,7 +6,7 @@ if get_option('tests-external-fonts').allowed()
       python3,
       join_paths(meson.project_source_root(), 'build-aux', 'fetch-testfonts.py'),
       '--target-dir',
-      '@BUILD_ROOT@/testfonts',
+      '@0@/testfonts'.format(meson.project_build_root()),
       '--try-symlink',
     ],
     build_by_default: false,
