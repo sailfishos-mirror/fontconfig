@@ -1,0 +1,138 @@
+# Font families for monospace generic family
+Andale Mono
+AR PL New Sung Mono
+Bitstream Vera Sans Mono
+Consolas
+Courier
+Courier New
+Courier Std
+Cumberland
+Cumberland AMT
+DejaVu Sans Mono
+Fixedsys
+FreeMono
+GF Zemen Unicode
+HanyiSong  # FIXME: serif
+Hapax Berbère  # FIXME: sans-serif
+Hasida
+Inconsolata
+IPAGothic  # FIXME: sans-serif
+IPAMonaGothic  # FIXME: sans-serif
+Liberation Mono
+LKLUG  # FIXME: sans-serif
+Lohit Bengali  # FIXME: sans-serif
+Lohit Devanagari  # FIXME: sans-serif
+Lohit Gujarati  # FIXME: sans-serif
+Lohit Hindi  # FIXME: sans-serif
+Lohit Kannada  # FIXME: sans-serif
+Lohit Kashmiri  # FIXME: sans-serif
+Lohit Konkani  # FIXME: sans-serif
+Lohit Maithili  # FIXME: sans-serif
+Lohit Malayalam  # FIXME: sans-serif
+Lohit Marathi  # FIXME: sans-serif
+Lohit Nepali  # FIXME: sans-serif
+Lohit Odia  # FIXME: sans-serif
+Lohit Punjabi  # FIXME: sans-serif
+Lohit Sindhi  # FIXME: sans-serif
+Lohit Tamil  # FIXME: sans-serif
+Lohit Telugu  # FIXME: sans-serif
+Luxi Mono
+Meera  # FIXME: sans-serif
+MingLiu  # FIXME: serif
+Miriam Mono
+MS Gothic  # FIXME: sans-serif
+NanumGothic  # FIXME: sans-serif
+NanumGothicCoding
+Nimbus Mono
+Nimbus Mono L
+Nimbus Mono PS
+Noto Sans Mono
+Noto Sans Mono CJK KR
+NSimSun  # FIXME: serif
+Terminal
+TlwgMono
+TlwgTypewriter
+TlwgTypist
+TlwgTypo
+UmePlus Gothic  # FIXME: sans-serif
+VL Gothic  # FIXME: sans-serif
+ZYSong18030  # FIXME: serif
+AR PL UKai HK  # FIXME: cursive
+AR PL UKai TW  # FIXME: cursive
+Adwaita Mono
+Anka/Coder
+Anka/Coder Condensed
+Anka/Coder Narrow
+Anonymous Pro
+Arundina Sans Mono
+B612 Mono
+Baekmuk Gulim
+Cascadia Code
+Cascadia Code NF
+Cascadia Code PL
+Cascadia Mono
+Cascadia Mono NF
+Cascadia Mono PL
+Clean
+Console
+Cousine
+Droid Sans Mono
+Fangsong ti  # FIXME: fangsong
+Fira Code
+Fixed
+Geist Mono
+Hack
+IBM 3270
+Inconsolata Bold
+Inconsolata Regular
+Intel One Mono
+Khmer OS Battambang
+Khmer OS Bokor
+Khmer OS Content
+Khmer OS Muol
+Khmer OS Muol Light
+Khmer OS Muol Pali
+Khmer OS Siemreap
+Khmer OS System
+Linux Libertine Mono
+LucidaTypewriter
+Mint Mono
+Mint Mono 35
+MotoyaLCedar
+MotoyaLMaru
+NanumGothic_Coding
+NotCourierSans
+Overpass Mono
+Oxygen Mono
+PT Mono
+Padauk  # FIXME: sans-serif
+ProggySquareTTSZ
+ProggyTinyTTSZ
+Red Hat Mono
+Roboto Mono
+Source Code Pro
+Source Code VF
+Source Han Code JP
+Source Han Mono
+Source Han Mono HC
+Source Han Mono K
+Source Han Mono SC
+Source Han Mono TC
+Source Han Sans CN  # FIXME: sans-serif
+Source Han Sans TW  # FIXME: sans-serif
+Terminus
+Terminus (TTF)
+UnShinmun
+UnTaza
+Vazirmatn
+WenQuanYi Micro Hei Mono
+WenQuanYi Zen Hei Sharp  # FIXME: sans-serif
+Hermit
+JetBrains Mono
+Noto Sans Mono CJK HK
+Noto Sans Mono CJK JP
+Noto Sans Mono CJK SC
+Noto Sans Mono CJK TC
+RIT Meera New  # FIXME: sans-serif
+TeX Gyre Cursor
+Miriam Mono CLM

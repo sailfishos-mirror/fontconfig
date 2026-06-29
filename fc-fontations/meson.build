@@ -10,7 +10,7 @@ if (fontations.enabled())
     include_directories: incbase,
     args: [
       '--merge-extern-blocks',
-      '--allowlist-item=(FcCharSet.*|FC_(SLANT|WEIGHT|WIDTH)_.*|FcFontSet(Add|Create|Destroy).*|FcLangSet(Create|Destroy|Copy|Add|HasLang)|FcWeightFromOpenType.*|FC_SPACING_.*|FC_FAMILY_(UNKNOWN|SANS|SERIF|MONO|EMOJI|MATH))',
+      '--allowlist-item=(FcCharSet.*|FC_(SLANT|WEIGHT|WIDTH)_.*|FcFontSet(Add|Create|Destroy).*|FcLangSet(Create|Destroy|Copy|Add|HasLang)|FcWeightFromOpenType.*|FC_SPACING_.*|FC_FAMILY_.*)',
       '--raw-line=#![allow(nonstandard_style,unused)]',
     ],
     # FC_NO_MT=1 is added here to reduce required headers in bindings generation.
@@ -24,7 +24,7 @@ if (fontations.enabled())
     include_directories: incbase,
     args: [
       '--merge-extern-blocks',
-      '--allowlist-item=(FcPattern.*|FcRange.*|FC_.*_OBJECT|FcCharSet.*|FcLangSetFromCharSet)',
+      '--allowlist-item=(FcPattern.*|FcRange.*|FC_.*_OBJECT|FcCharSet.*|FcLangSetFromCharSet|FcGenericAliasGetClassification)',
       '--blocklist-type=(FcCharSet|FcLangSet)',
       '--raw-line=#![allow(nonstandard_style,unused)]',
       '--raw-line=extern crate fontconfig_bindings;',

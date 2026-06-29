@@ -529,6 +529,7 @@ tools_man_pages = []
 subdir('fc-case')
 subdir('fc-lang')
 subdir('fc-const')
+subdir('fc-genericfamily')
 subdir('src')
 
 if get_option('fontations').enabled()

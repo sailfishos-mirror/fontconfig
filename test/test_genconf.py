@@ -20,37 +20,49 @@ def fcfont():
 def test_genconf(fctest, fcfont, parametrized_external_font):
     font_path = Path(parametrized_external_font)
 
-    extraconffile = NamedTemporaryFile(prefix='fontconfig.',
-                                       suffix='.extra.conf',
-                                       mode='w',
-                                       delete_on_close=False)
-    fctest._extra.append(f'<include ignore_missing="yes">{fctest.convert_path(extraconffile.name)}</include>')
+    extraconffile = NamedTemporaryFile(
+        prefix="fontconfig.", suffix=".extra.conf", mode="w", delete_on_close=False
+    )
+    fctest._extra.append(
+        f'<include ignore_missing="yes">{fctest.convert_path(extraconffile.name)}</include>'
+    )
     fctest.setup()
-    fctest.install_font(fcfont.fonts, '.')
-    fctest.install_font(parametrized_external_font, '.')
+    fctest.install_font(fcfont.fonts, ".")
+    fctest.install_font(parametrized_external_font, ".")
 
-    f = g = fmt = None
-    for ret, stdout, stderr in fctest.run_query(['-f', '%{family}:%{genericfamily}\n', parametrized_external_font]):
+    gl = []
+    f = fmt = None
+    for ret, stdout, stderr in fctest.run_query(
+        ["-f", "%{family}:%{genericfamily}\n", parametrized_external_font]
+    ):
         assert ret == 0, stderr
         for l in stdout.strip().splitlines():
-            f, g = l.split(':')
+            f, g = l.split(":")
             assert f, stdout
-            if not g or g == '0':
+            if not g or g == "0":
                 # fallback if missing
-                g = '2'
-                fmt = ':family=sans-serif'
+                gl = ["2"]
+                fmt = ":family=sans-serif"
             else:
-                fmt = f':genericfamily={g}'
+                for gg in g.split(","):
+                    gl += [gg]
+                fmt = f":genericfamily={','.join(g)}"
 
-    for ret, stdout, stderr in fctest.run_genconf(['-g', g, '-f', f, '-o', extraconffile.name, parametrized_external_font]):
+    for ret, stdout, stderr in fctest.run_genconf(
+        [item for s in gl for item in ("-g", s)]
+        + ["-f", f, "-o", extraconffile.name, parametrized_external_font]
+    ):
         assert ret == 0, stderr
 
-    for ret, stdout, stderr in fctest.run_match(['-f', '%{file}\n', fmt]):
+    for ret, stdout, stderr in fctest.run_match(["-f", "%{file}\n", fmt]):
         assert ret == 0, stderr
         if Path(stdout.strip().splitlines()[0]).name != font_path.name:
             assert ret == 0, stderr
 
-    for ret, stdout, stderr in fctest.run_scan(['-f', '%{genericfamily}\n', parametrized_external_font]):
+    for ret, stdout, stderr in fctest.run_scan(
+        ["-f", "%{genericfamily}\n", parametrized_external_font]
+    ):
         assert ret == 0, stderr
         for l in stdout.strip().splitlines():
-            assert g == l, stdout
+            l = l.split(",")
+            assert gl == l, stdout
