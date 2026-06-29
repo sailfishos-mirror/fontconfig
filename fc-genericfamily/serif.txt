@@ -238,3 +238,5 @@ PakType Naskh Basic Wide
 GB_SS_GB18030
 GB_SS_GB18030_Extended
 GB_SS_GB18030_ExtendedK
+# Nerd Fonts - Nerd Font serif variants
+Tinos Nerd Font

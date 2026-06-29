@@ -312,3 +312,8 @@ TeX Gyre Heros
 TeX Gyre Heros Cn
 URW Gothic
 Madan2
+# Nerd Fonts - sans-serif variants
+Ubuntu
+Ubuntu Condensed
+# Nerd Fonts - Nerd Font sans-serif variants
+Ubuntu Nerd Font

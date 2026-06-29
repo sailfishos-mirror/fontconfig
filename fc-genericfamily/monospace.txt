@@ -136,3 +136,115 @@ Noto Sans Mono CJK TC
 RIT Meera New  # FIXME: sans-serif
 TeX Gyre Cursor
 Miriam Mono CLM
+# Nerd Fonts - patched programming fonts
+Agave
+AurulentSansMono
+BigBlueTerminal
+CodeNewRoman
+ComicShannsMono
+DaddyTimeMono
+EnvyCodeR
+FantasqueSansMono
+Fira Mono
+Go Mono
+Gohu
+Hasklig
+HeavyData
+iA Writer Mono
+iA Writer Duo
+iA Writer Quattro
+IBM Plex Mono
+Inconsolata Go
+InconsolataGo
+InconsolataLGC
+Iosevka
+Iosevka Term
+IosevkaTerm
+Lekton
+Lilex
+Meslo
+Monofur
+Monoid
+Mononoki
+M+ 1m
+M+ 1mn
+M+ 2m
+MPlus
+OpenDyslexic
+OpenDyslexicMono
+ProFont
+ProggyClean
+ShareTechMono
+Share Tech Mono
+Space Mono
+SpaceMono
+Victor Mono
+VictorMono
+# Nerd Fonts - Nerd Font variants (with NF suffix)
+3270 Nerd Font
+3270 Nerd Font Mono
+Agave Nerd Font
+Agave Nerd Font Mono
+AnonymicePro Nerd Font
+AnonymicePro Nerd Font Mono
+Arimo Nerd Font
+AurulentSansMono Nerd Font
+BigBlueTerminal Nerd Font
+BitstreamVeraSansMono Nerd Font
+CaskaydiaCove Nerd Font
+CaskaydiaCove Nerd Font Mono
+CodeNewRoman Nerd Font
+CodeNewRoman Nerd Font Mono
+ComicShannsMono Nerd Font
+Cousine Nerd Font
+DaddyTimeMono Nerd Font
+DejaVuSansM Nerd Font
+DejaVuSansMono Nerd Font
+DroidSansM Nerd Font
+DroidSansMono Nerd Font
+EnvyCodeR Nerd Font
+FantasqueSansMono Nerd Font
+FiraCode Nerd Font
+FiraCode Nerd Font Mono
+FiraMono Nerd Font
+GeistMono Nerd Font
+Go Mono Nerd Font
+GoMono Nerd Font
+Gohu Nerd Font
+Hasklug Nerd Font
+HeavyData Nerd Font
+Hurmit Nerd Font
+iM Writing Nerd Font
+iM Writing Nerd Font Mono
+IBM 3270 Nerd Font
+IBMPlexMono Nerd Font
+Inconsolata Nerd Font
+InconsolataGo Nerd Font
+InconsolataLGC Nerd Font
+Iosevka Nerd Font
+Iosevka Nerd Font Mono
+IosevkaTerm Nerd Font
+JetBrainsMono Nerd Font
+Lekton Nerd Font
+LiberationMono Nerd Font
+Lilex Nerd Font
+Meslo Nerd Font
+Monofur Nerd Font
+Monoid Nerd Font
+Mononoki Nerd Font
+MPlus Nerd Font
+NotoMono Nerd Font
+OpenDyslexic Nerd Font
+OpenDyslexicMono Nerd Font
+Overpass Nerd Font
+ProggyClean Nerd Font
+ProFont Nerd Font
+RobotoMono Nerd Font
+ShareTechMono Nerd Font
+SourceCodePro Nerd Font
+SpaceMono Nerd Font
+Terminess Nerd Font
+Tinos Nerd Font
+Ubuntu Nerd Font
+UbuntuMono Nerd Font
+VictorMono Nerd Font
