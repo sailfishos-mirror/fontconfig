@@ -905,6 +905,7 @@ fc-cat/Makefile
 fc-conflist/Makefile
 fc-const/Makefile
 fc-genconf/Makefile
+fc-genericfamily/Makefile
 fc-list/Makefile
 fc-match/Makefile
 fc-pattern/Makefile

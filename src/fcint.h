@@ -1235,6 +1235,10 @@ FcFontSetSerialize (FcSerialize *serialize, const FcFontSet *s);
 FcPrivate FcFontSet *
 FcFontSetDeserialize (const FcFontSet *set);
 
+/* fcgenericalias.c */
+FcPrivate uint32_t
+FcGenericAliasGetClassification (const char *family);
+
 /* fcplist.c */
 FcPrivate FcPtrList *
 FcPtrListCreate (FcDestroyFunc func);
