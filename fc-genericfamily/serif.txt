@@ -238,5 +238,44 @@ PakType Naskh Basic Wide
 GB_SS_GB18030
 GB_SS_GB18030_Extended
 GB_SS_GB18030_ExtendedK
+# Noto Serif script-specific variants
+Noto Serif Ahom
+Noto Serif Armenian
+Noto Serif Balinese
+Noto Serif Bengali
+Noto Serif Devanagari
+Noto Serif Display
+Noto Serif Dogra
+Noto Serif Ethiopic
+Noto Serif Georgian
+Noto Serif Grantha
+Noto Serif Gujarati
+Noto Serif Gurmukhi
+Noto Serif Hebrew
+Noto Serif Hentaigana
+Noto Serif Kannada
+Noto Serif Khitan Small Script
+Noto Serif Khmer
+Noto Serif Khojki
+Noto Serif Lao
+Noto Serif Makasar
+Noto Serif Malayalam
+Noto Rashi Hebrew
+Noto Serif Myanmar
+Noto Serif NP Hmong
+Noto Serif Old Uyghur
+Noto Serif Oriya
+Noto Serif Ottoman Siyaq
+Noto Serif Sinhala
+Noto Serif Tamil
+Noto Serif Tamil Slanted
+Noto Serif Tangut
+Noto Serif Telugu
+Noto Serif Thai
+Noto Serif Tibetan
+Noto Serif Todhri
+Noto Serif Toto
+Noto Serif Vithkuqi
+Noto Serif Yezidi
 # Nerd Fonts - Nerd Font serif variants
 Tinos Nerd Font
