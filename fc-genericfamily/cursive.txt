@@ -13,5 +13,7 @@ Great Vibes
 Écolier Court
 Noto Kufi Arabic
 Noto Nastaliq Urdu
+Noto Rashi Hebrew
+Noto Traditional Nushu
 Petaluma Script
 TeX Gyre Chorus

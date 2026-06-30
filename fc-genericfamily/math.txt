@@ -7,3 +7,5 @@ Minion Math
 STIX Two Math
 XITS Math
 Noto Sans Math
+Noto Music
+Noto Znamenny Musical Notation
