@@ -12,7 +12,7 @@ endif
 
 docbook2man = find_program('docbook2man', required: get_option('doc-man'))
 docbook2txt = find_program('docbook2txt', required: get_option('doc-txt'))
-docbook2pdf = find_program('docbook2pdf', required: get_option('doc-pdf'))
+docbook2pdf = find_program(['docbook2pdf', 'wkhtmltopdf'], required: get_option('doc-pdf'))
 docbook2html = find_program('docbook2html', required: get_option('doc-html'))
 
 # docbook is very spammy
@@ -132,7 +132,29 @@ if docbook2man.found()
   endforeach
 endif
 
-if docbook2pdf.found()
+if docbook2html.found()
+  doc_targets += ['HTML']
+
+  devel_html = custom_target('devel-html',
+    input: [fontconfig_devel_sgml, funcs_sgml],
+    output: 'fontconfig-devel.html',
+    command: [run_quiet, docbook2html, '--nochunks', '@INPUT0@', '--output', '@OUTDIR@'],
+    build_by_default: true,
+    install_dir: get_option('datadir') / 'doc' / 'fontconfig',
+    install: true,
+    install_tag: 'docs')
+
+  user_html = custom_target('user-html',
+    input: [fontconfig_user_sgml, funcs_sgml],
+    output: 'fontconfig-user.html',
+    command: [run_quiet, docbook2html, '--nochunks', '@INPUT0@', '--output', '@OUTDIR@'],
+    build_by_default: true,
+    install_dir: get_option('datadir') / 'doc' / 'fontconfig',
+    install: true,
+    install_tag: 'docs')
+endif
+
+if docbook2pdf.found() and fs.stem(docbook2pdf.full_path()) == 'docbook2pdf'
   doc_targets += ['PDF']
 
   custom_target('devel-pdf',
@@ -145,9 +167,31 @@ if docbook2pdf.found()
     install_tag: 'docs')
 
   custom_target('user-pdf',
-                input: [fontconfig_user_sgml, funcs_sgml],
+    input: [fontconfig_user_sgml, funcs_sgml],
     output: 'fontconfig-user.pdf',
     command: [run_quiet, docbook2pdf, '@INPUT0@', '--output', '@OUTDIR@'],
+    build_by_default: true,
+    install_dir: get_option('datadir') / 'doc' / 'fontconfig',
+    install: true,
+    install_tag: 'docs')
+endif
+
+if docbook2pdf.found() and fs.stem(docbook2pdf.full_path()) == 'wkhtmltopdf'
+  doc_targets += ['PDF']
+
+  custom_target('devel-pdf',
+    input: [devel_html],
+    output: 'fontconfig-devel.pdf',
+    command: [run_quiet, docbook2pdf, '--encoding', 'utf-8', '@INPUT0@', '@OUTPUT@'],
+    build_by_default: true,
+    install_dir: get_option('datadir') / 'doc' / 'fontconfig',
+    install: true,
+    install_tag: 'docs')
+
+  custom_target('user-pdf',
+    input: [user_html],
+    output: 'fontconfig-user.pdf',
+    command: [run_quiet, docbook2pdf, '--encoding', 'utf-8', '@INPUT0@', '@OUTPUT@'],
     build_by_default: true,
     install_dir: get_option('datadir') / 'doc' / 'fontconfig',
     install: true,
@@ -170,28 +214,6 @@ if docbook2txt.found()
     input: [fontconfig_user_sgml, funcs_sgml],
     output: 'fontconfig-user.txt',
     command: [run_quiet, docbook2txt, '@INPUT0@', '--output', '@OUTDIR@'],
-    build_by_default: true,
-    install_dir: get_option('datadir') / 'doc' / 'fontconfig',
-    install: true,
-    install_tag: 'docs')
-endif
-
-if docbook2html.found()
-  doc_targets += ['HTML']
-
-  custom_target('devel-html',
-    input: [fontconfig_devel_sgml, funcs_sgml],
-    output: 'fontconfig-devel.html',
-    command: [run_quiet, docbook2html, '--nochunks', '@INPUT0@', '--output', '@OUTDIR@'],
-    build_by_default: true,
-    install_dir: get_option('datadir') / 'doc' / 'fontconfig',
-    install: true,
-    install_tag: 'docs')
-
-  custom_target('user-html',
-    input: [fontconfig_user_sgml, funcs_sgml],
-    output: 'fontconfig-user.html',
-    command: [run_quiet, docbook2html, '--nochunks', '@INPUT0@', '--output', '@OUTDIR@'],
     build_by_default: true,
     install_dir: get_option('datadir') / 'doc' / 'fontconfig',
     install: true,
