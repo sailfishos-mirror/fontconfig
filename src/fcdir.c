@@ -337,6 +337,11 @@ FcDirCacheScan (const FcChar8 *dir, FcConfig *config)
     int fd = -1;
 #endif
 
+    if (!FcConfigAcceptFilename (config, dir)) {
+	if (FcDebug() & FC_DBG_CACHE)
+	    printf ("%s: skipping, matching with deny list\n", dir);
+	return NULL;
+    }
     if (sysroot)
 	d = FcStrBuildFilename (sysroot, dir, NULL);
     else

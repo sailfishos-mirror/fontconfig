@@ -568,6 +568,18 @@ return FcFalse if 'pat' is rejected, otherwise FcTrue.
 @SINCE@		2.15.1
 @@
 
+@RET@       FcBool
+@FUNC@      FcConfigAcceptFilename
+@TYPE1@     FcConfig *          @ARG1@      config
+@TYPE2@     const FcChar8 *     @ARG2@      filename
+@PURPOSE@   Test whether the given filename matches deny list
+@DESC@
+fontconfig has the deny list which is built against &lt;rejectfont&gt; directive
+in configuration file. This function tries to match 'filename' with them and
+return FcFalse if 'filename' is rejected, otherwise FcTrue.
+@SINCE@     2.18.2
+@@
+
 @RET@       void
 @FUNC@      FcConfigPreferAppFont
 @TYPE1@     FcConfig *          @ARG1@      config

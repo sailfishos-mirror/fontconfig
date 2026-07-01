@@ -833,10 +833,6 @@ FcConfigGlobAdd (FcConfig      *config,
                  FcBool         accept);
 
 FcPrivate FcBool
-FcConfigAcceptFilename (FcConfig      *config,
-                        const FcChar8 *filename);
-
-FcPrivate FcBool
 FcConfigPatternsAdd (FcConfig  *config,
                      FcPattern *pattern,
                      FcBool     accept);

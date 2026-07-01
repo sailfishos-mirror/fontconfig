@@ -202,6 +202,11 @@ scanDirs (FcStrList *list, FcConfig *config, FcBool force, FcBool really_force, 
 	    fprintf (stderr, _("\"%s\": not a directory, skipping\n"), dir);
 	    continue;
 	}
+
+	if (!FcConfigAcceptFilename (config, dir)) {
+	    fprintf (stderr, _("\"%s\": rejected by request. skipping\n"), dir);
+	    continue;
+	}
 	was_processed = FcTrue;
 
 	if (really_force) {
