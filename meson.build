@@ -153,6 +153,7 @@ check_funcs = [
   ['gettext'],
   ['localtime_r'],
   ['strdup'],
+  ['uselocale'],
 ]
 
 check_freetype_funcs = [

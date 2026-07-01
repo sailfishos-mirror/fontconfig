@@ -375,7 +375,14 @@ FcLocaleCreate (FcLocaleMask mask, const char *locale)
 FcLocale
 FcLocaleSetCurrent (FcLocale loc)
 {
+#  if HAVE_VASPRINTF_L || HAVE__VSNPRINTF_L
+    /* This function won't be used */
+    return NULL;
+#  elif HAVE_USELOCALE
     return uselocale (loc);
+#  else
+#    error No thread-safe locale switching implemented
+#  endif
 }
 #endif
 
