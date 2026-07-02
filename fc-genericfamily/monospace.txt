@@ -76,6 +76,7 @@ Cascadia Mono PL
 Clean
 Console
 Cousine
+Dank Mono
 Droid Sans Mono
 Fangsong ti  # FIXME: fangsong
 Fira Code
@@ -85,6 +86,7 @@ Hack
 IBM 3270
 Inconsolata Bold
 Inconsolata Regular
+Input Mono
 Intel One Mono
 Khmer OS Battambang
 Khmer OS Bokor
@@ -95,21 +97,28 @@ Khmer OS Muol Pali
 Khmer OS Siemreap
 Khmer OS System
 Linux Libertine Mono
+Lucida Console
 LucidaTypewriter
+Menlo
 Mint Mono
+Monaco
 Mint Mono 35
+MonoLisa
 MotoyaLCedar
 MotoyaLMaru
 NanumGothic_Coding
 NotCourierSans
+Operator Mono
 Overpass Mono
 Oxygen Mono
+PragmataPro
 PT Mono
 Padauk  # FIXME: sans-serif
 ProggySquareTTSZ
 ProggyTinyTTSZ
 Red Hat Mono
 Roboto Mono
+SF Mono
 Source Code Pro
 Source Code VF
 Source Han Code JP
