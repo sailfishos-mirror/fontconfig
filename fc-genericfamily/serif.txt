@@ -87,6 +87,7 @@ Thorndale AMT
 Times
 Times New Roman
 Titr
+Traditional Arabic
 Urdu Nastaliq Unicode
 WenQuanYi Bitmap Song
 Zar
@@ -113,11 +114,22 @@ Arundina Serif
 Asana Math
 Asea
 Avdira
+Baskerville
+Bauer Bodoni
 BIZ UDMincho
 BIZ UDPMincho
 Baekmuk Batang
+Batang
+BiauKai
+Bitter
+Bodoni
+Book Antiqua
 Caladea
+Cardo
+Caslon
 Crete Round
+Crimson Pro
+Crimson Text
 David CLM
 Droid Arabic Naskh
 Droid Serif
@@ -142,18 +154,28 @@ LPfont
 Lateef
 Libertinus
 Linux Libertine
+Lucida Bright
+Minion Pro
+Mrs Eaves
 Mukta Devanagari
 Mukta Mahee
 Mukta Malar
 Mukta Vaani
 Musica
 New Athena Unicode
+New York
 Old Standard SFD
+Palatino
+Plantin
 PT Serif
 PT Serif Caption
+Perpetua
+Playfair Display
 Prociono
 Roboto Slab
+Rockwell
 Saab
+Sabon
 Scheherazade New
 Shofar
 Source Han Serif CN
@@ -162,6 +184,8 @@ Source Han Serif KR
 Source Han Serif TW
 Source Serif 4
 Stam Ashkenaz CLM
+STKaiti
+STSong
 Stam Sefarad CLM
 Symbola
 Tinos
@@ -175,16 +199,24 @@ Zilla Slab
 Zilla Slab Highlight
 conakry
 Accanthis ADF Std
+Adobe Caslon Pro
+Adobe Garamond Pro
 Alkalami
 Annapurna SIL
 Apparatus SIL
 Awami Nastaliq
 Charis SIL
 Charis SIL Compact
+Charter
+Clarendon
 Cormorant
 Dai Banna SIL
+Didot
+EB Garamond
+Eczar
 Ethiopic WashRa
 Ezra SIL
+FF Scala
 GFS Artemisia
 GFS Bodoni
 GFS Didot
@@ -196,8 +228,20 @@ GFS Orpheus Classic
 GFS Philostratos
 Gentium Plus
 Gentium Plus Compact
+Goudy Old Style
+Hoefler Text
+IBM Plex Serif
+ITC Bodoni
+ITC Bookman
+ITC Stone Serif
+KaiTi
 Khmer Mondulkiri
+Kokila
+Libre Baskerville
+Libre Caslon Text
 Literata
+Lora
+Markazi Text
 Merriweather
 Namdhinggo SIL
 Noto Serif CJK HK
@@ -211,6 +255,8 @@ Tagmukay
 Tai Heritage Pro
 Tribun ADF Std
 Uniol
+Vollkorn
+Yu Mincho
 C059
 David CLM
 Jomolhari

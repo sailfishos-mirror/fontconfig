@@ -14,23 +14,29 @@ Bitstream Vera Sans
 BPG Glaho International
 BPG UTF8 M
 Britannic
+Cairo
 Calibri
 Candara
 Century Gothic
 Corbel
+Cordia New
 DejaVu Sans
 Elham
 Farnaz
 FreeSans
 Garuda
+Gautami
+Geeza Pro
 GF Zemen Unicode
 Haettenschweiler
 Hapax Berbère
 Helvetica
 Helvetica LT Std
+Helvetica Neue
 Hiragino Sans
 Hiragino Sans CNS
 Hiragino Sans GB
+Hiragino Kaku Gothic
 IPAGothic
 IPAMonaGothic
 JG Lao Old Arial
@@ -103,27 +109,43 @@ Yudit Unicode
 ＭＳ ゴシック
 Adwaita Sans
 AharoniCLM
+Akzidenz Grotesk
+Al Bayan
 Anorexia
 Aqui
+Arabic Typesetting
+Archivo
+Arial Hebrew
 Arimo
 Aroania
 Arundina Sans
+Avenir
+Avenir Next
+Avenir Next Condensed
 B612
+Brandon Grotesque
 BIZ UDGothic
 BIZ UDPGothic
 Baekmuk Dotum
+Barlow
+Be Vietnam Pro
 BonvenoCF
 BravuraText
 Carlito
 Comfortaa
 Comic Neue
 Comic Neue Angular
+Commissioner
 Cure
 D-DIN
 D-DIN Condensed
 D-DIN Exp
+DIN Next
+DIN Pro
+DM Sans
 Drift
 Droid Arabic Kufi
+Dubai
 Droid Sans
 Droid Sans Armenian
 Droid Sans Devanagari
@@ -134,9 +156,12 @@ Droid Sans Hebrew
 Droid Sans Japanese
 Droid Sans Tamil
 Droid Sans Thai
+Dotum
 Dustismo
 Edges
 Ektype Baloo 2
+FF DIN
+FF Meta
 Ektype Baloo Bhai 2
 Ektype Baloo Bhaina 2
 Ektype Baloo Chettan 2
@@ -146,10 +171,19 @@ Ektype Baloo Tamma 2
 Ektype Baloo Tammudu 2
 Ektype Baloo Thambi 2
 ElliniaCLM
+Epilogue
+Figtree
+Fira Sans
 Fkp
+Franklin Gothic
+Frutiger
+Futura
 Geist
 Gelly
+Gill Sans
 Glisp
+Gotham
+Gulim
 IPAPGothic
 IPAexGothic
 IPAexゴシック
@@ -158,6 +192,8 @@ Infofont Z
 Inter
 Inter Display
 Inter Variable
+ITC Stone Sans
+IBM Plex Sans
 KacstBook
 KacstDigital
 KacstFarsi
@@ -181,11 +217,19 @@ Lime
 Linux Biolinum
 Lohit Assamese
 Madan
+Malgun Gothic
 Manchu2005
+Mangal
+Manrope
+Meiryo
+Microsoft JhengHei
+Microsoft YaHei
 Mingzat
 Mints Mild
 Mints Strong
 Miriam CLM
+Museo Sans
+Myriad Pro
 Molot
 Montserrat
 Montserrat Alternates
@@ -193,11 +237,14 @@ Montserrat Underline
 Mukti
 Nachlieli CLM
 Navilu
+New Peninim MT
 News Cycle
+News Gothic
 Nu
 Nuosu SIL
 Open Sans
 OpenDyslexic
+Optima
 Overpass
 Oxygen-Sans
 PCfont
@@ -207,7 +254,13 @@ Padauk Book
 PakType Naqsh
 PakType Tehreer
 PetalumaText
+Poppins
+Proxima Nova
+Quicksand
+Raanana
+Raavi
 Red Hat Display
+Reem Kufi
 Red Hat Text
 Roboto
 Roboto Condensed
@@ -239,8 +292,10 @@ Sparks Dot Large
 Sparks Dot Medium
 Sparks Dot Small
 Titillium
+Trade Gothic
 UKIJ Tuz
 Ume Gothic
+Univers
 Ume Gothic C4
 Ume Gothic C5
 Ume Gothic O5
@@ -283,8 +338,17 @@ GFS Orpheus Sans
 Gillius ADF
 Harmattan
 Jura
+Kalinga
+Karla
+Kartika
+Krungthep
+Lalezar
+Lexend
+Leelawadee
+LiSu
 Lohit Gurmukhi
 M Yuppy GB
+Manrope
 Merriweather Sans
 Muli
 Noto Sans CJK HK
@@ -292,7 +356,9 @@ Noto Sans CJK JP
 Noto Sans CJK SC
 Noto Sans CJK TC
 Nunito
+Nunito Sans
 Oswald
+Outfit
 PT Sans
 Pothana2000
 Public Sans
@@ -301,10 +367,30 @@ RIT Meera New
 RIT TN Joy
 Raleway
 Rubik
+San Francisco
+Segoe UI
+SF Pro
+SF Pro Display
+SF Pro Rounded
+SF Pro Text
+Shruti
 Shimenkan
+Simplified Arabic
+SimHei
 Sophia Nubian
+Sora
+Space Grotesk
+STHeiti
+Sathu
+Sakkal Majalla
+Tajawal
+Thonburi
+Tunga
 Vemana2000
+Vrinda
 Work Sans
+YouYuan
+Yu Gothic
 Yudit
 Edwin  # FIXME: serif
 TeX Gyre Adventor
