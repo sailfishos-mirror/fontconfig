@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # fontconfig/new-version.sh
 #
 # Copyright © 2000 Keith Packard
@@ -36,10 +36,22 @@ case "$version" in
 	;;
 esac
 
-eval `echo $version | 
+eval `echo $version |
 	awk -F. '{ printf ("major=%d\nminor=%d\nrevision=%d\n",
 			   $1, $2, $3); }'`
-			   
+
+cachever=$(grep cacheversion meson.build | sed -E "s/cacheversion\s*=\s*([0-9]*)/\1/")
+cachesnap=$(grep cachesnapversion meson.build | sed -E "s/cachesnapversion\s*=\s*([0-9]*)/\1/")
+if [ "$cachesnap" -gt 0 ]; then
+    ((cachever++))
+    cachesnap=0
+    # Update cache version
+    sed -i configure.ac -e "/^CACHE_VERSION/s/[0-9]\+/$cachever/" \
+        -e "/^CACHE_SNAP_VERSION/s/[0-9]\+/$cachesnap/"
+    sed -i meson.build -e "/^cacheversion/s/[0-9]\+/$cachever/" \
+        -e "/^cachesnapversion/s/[0-9]\+/$cachesnap/"
+fi
+
 # Update the version numbers
 
 sed -i configure.ac -e "/^AC_INIT(/s/2\.[0-9.]*/$version/"
