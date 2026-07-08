@@ -22,6 +22,35 @@ bail:
     return c;
 }
 
+// Ensures a pattern round-trips through FcNameUnparse -> FcNameParse.
+static int
+test_roundtrip (const FcPattern *expect)
+{
+    FcChar8   *unparsed;
+    FcPattern *pat = NULL;
+    int        c = 0;
+
+    c++;
+    unparsed = FcNameUnparse ((FcPattern *)expect);
+    if (!unparsed)
+	goto bail;
+    c++;
+    pat = FcNameParse (unparsed);
+    if (!pat)
+	goto bail;
+    c++;
+    if (!FcPatternEqual (pat, expect))
+	goto bail;
+    c = 0;
+bail:
+    if (pat)
+	FcPatternDestroy (pat);
+    if (unparsed)
+	FcStrFree (unparsed);
+
+    return c;
+}
+
 #define BEGIN(x)             \
     (x) = FcPatternCreate(); \
     c++;
@@ -104,6 +133,24 @@ main (void)
 	    goto bail;
     }
     END (expect);
+
+    {
+	static const char *families[] = {
+	    "FOT-PopJoy Std",
+	    "Foo,Bar",
+	    "Foo:Bar",
+	    NULL
+	};
+	for (int i = 0; families[i]; i++) {
+	    BEGIN (expect)
+	    {
+		FcPatternAddString (expect, FC_FAMILY, (const FcChar8 *)families[i]);
+		if ((ret = test_roundtrip (expect)) != 0)
+		    goto bail;
+	    }
+	    END (expect);
+	}
+    }
 
 bail:
     if (expect)

@@ -557,8 +557,7 @@ FcNameUnparseValue (FcStrBuf *buf,
 	s = (const FcChar8 *)p;
 	break;
     case FcTypeString:
-	s = v.u.s;
-	break;
+	return FcNameUnparseString (buf, v.u.s, escape);
     case FcTypeBool:
 	return FcNameUnparseString (buf,
 	                            v.u.b == FcTrue ? (FcChar8 *)"True" : v.u.b == FcFalse ? (FcChar8 *)"False"
