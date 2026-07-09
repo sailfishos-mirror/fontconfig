@@ -1,5 +1,5 @@
 project('fontconfig', 'c',
-  version: '2.18.1',
+  version: '2.18.2',
   meson_version : '>= 1.11.0',
   default_options: [
     'c_std=c11,c99',
@@ -25,8 +25,8 @@ curversion = fc_version_minor - 1
 libversion = '@0@.@1@.0'.format(soversion, curversion)
 defversion = '@0@.@1@'.format(curversion, fc_version_micro)
 osxversion = curversion + 1
-cacheversion = 11
-cachesnapversion = 1
+cacheversion = 12
+cachesnapversion = 0
 if cachesnapversion > 0
   nextcacheversion = cacheversion + 1
 else

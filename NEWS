@@ -1,11 +1,44 @@
                               Fontconfig
              Font configuration and customization library
-                            Version 2.18.1
-                              2026-06-02
+                            Version 2.18.2
+                              2026-07-09
 
 
 Check INSTALL for compilation and installation instructions.
 Report bugs to https://gitlab.freedesktop.org/fontconfig/fontconfig/issues/new.
+
+2.18.2
+
+Akira TAGOH (26):
+      test: fix unexpected error when something went wrong in pytest
+      test: Fix a regression for sysroot in test framework
+      test: Fix a test case failure when BUILDDIR is under /tmp
+      test: cleanup
+      Add .gitignore
+      meson: Add tests-external-fonts option to disable network-dependent tests
+      Add .editorconfig
+      test: improve marker handling
+      test: Fix a fail on subproject build
+      test: Do not assume all-files-installed before testing
+      ci: set SOURCE_DATE_EPOCH to the build script
+      test: unset SOURCE_DATE_EPOCH for some test cases
+      Use genericfamily for the search of monospace against :spacing=100
+      conf.d: Add OpenMoji Color and OpenMoji Black
+      test: Fix a KeyError
+      Add a hash table for fonts to generate expected genericfamily
+      Add Nerd Fonts to the table
+      doc: Fallback to wkhtmltopdf if no docbook2pdf available
+      fc-genericfamily: Add Noto fonts
+      fc-cache: do not generate cache when target directory is in deny list
+      conf.d/Makefile.am: install 05-macos.conf for macOS only
+      Add more conditional code for FcLocaleSetCurrent()
+      Do not ship unnecessary files in archive
+      fc-genericfamily: Add major missing fonts across multiple categories
+      Use Special FC_CACHE_VERSION for snapshot
+      new-version.sh: fix an error
+
+Emilio Cobos Álvarez (1):
+      Fix FcNameUnparse regression.
 
 2.18.1
 
