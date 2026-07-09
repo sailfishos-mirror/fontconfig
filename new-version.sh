@@ -40,8 +40,8 @@ eval `echo $version |
 	awk -F. '{ printf ("major=%d\nminor=%d\nrevision=%d\n",
 			   $1, $2, $3); }'`
 
-cachever=$(grep cacheversion meson.build | sed -E "s/cacheversion\s*=\s*([0-9]*)/\1/")
-cachesnap=$(grep cachesnapversion meson.build | sed -E "s/cachesnapversion\s*=\s*([0-9]*)/\1/")
+cachever=$(grep -e "^cacheversion" meson.build | sed -E "s/cacheversion\s*=\s*([0-9]*)/\1/")
+cachesnap=$(grep -e "^cachesnapversion" meson.build | sed -E "s/cachesnapversion\s*=\s*([0-9]*)/\1/")
 if [ "$cachesnap" -gt 0 ]; then
     ((cachever++))
     cachesnap=0
