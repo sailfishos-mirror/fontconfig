@@ -362,6 +362,8 @@ class BuildMeson(Build):
             self._run_distro_script('cross')
 
         self.buildopt.append(f"--default-library={self.args.buildtype}")
+        if self.args.werror:
+            self.buildopt.extend(["--werror"])
 
         if self.args.sanitize:
             self.buildopt.extend([
@@ -523,6 +525,7 @@ Environment variables:
     parser.add_argument("-C", "--no-test", action="store_true", help="Do not run unit tests")
     parser.add_argument("-e", "--enable-feature", action="append",
                        help="Enable specific features (can be used multiple times)")
+    parser.add_argument("-E", "--werror", action="store_true", help="Deal with warnings as errors")
     parser.add_argument("-d", "--disable-feature", action="append",
                        help="Disable specific features (can be used multiple times)")
     parser.add_argument("-I", "--no-install", action="store_true", help="Do not run installation")
