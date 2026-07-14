@@ -1717,10 +1717,10 @@ FcFreeTypeQueryFaceInternal (const FT_Face   face,
     /* Qt6 seems using :-prefixing to take care of some special case.
      * Do not call FcStrCanonFilename not to break that
      */
-    if (file[0] != ':')
+    if (file && file[0] != ':')
 	canon_file = FcStrCanonFilename (file);
     else
-	canon_file = file;
+	canon_file = (FcChar8 *)file;
     if (canon_file && *canon_file && !FcPatternObjectAddString (pat, FC_FILE_OBJECT, canon_file))
 	goto bail1;
 
