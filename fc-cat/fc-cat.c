@@ -383,5 +383,5 @@ main (int argc, char **argv)
     FcStrListDone (arglist);
 
     FcFini();
-    return 0;
+    return ret;
 }
