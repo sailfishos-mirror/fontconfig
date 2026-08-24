@@ -8,17 +8,26 @@ from collections import OrderedDict
 
 # cat fontconfig/fontconfig.h | grep '^Fc[^ ]* *(' | sed -e 's/ *(.*$//'
 
-def extract(fname):
+def extract(fname, excluded = ['FcCacheDir', 'FcCacheSubdir']):
     with open(fname, 'r', encoding='utf-8') as f:
         for l in f.readlines():
             l = l.rstrip()
             m = re.match(r'^(Fc[^ ]*)[\s\w]*\(.*', l)
 
-            if m and m.group(1) not in ['FcCacheDir', 'FcCacheSubdir']:
+            if m and m.group(1) not in excluded:
                 yield m.group(1)
+
+def make_export_file(input_headers, output_file):
+    with open(output_file, 'w') as export_file:
+        names = []
+        for header in input_headers:
+            names.extend([name for name in extract(header, excluded = [])])
+
+        print(*sorted(set(names)), sep='\n', file=export_file) # set to remove potential duplicates
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--make-export-file', required=False, action='store_true')
     parser.add_argument('srcdir')
     parser.add_argument('head')
     parser.add_argument('tail')
@@ -37,6 +46,10 @@ if __name__=='__main__':
 
         for definition in extract(os.path.join(args.srcdir, fname)):
             definitions[definition] = define_name
+
+    if args.make_export_file:
+        make_export_file([args.tail, *args.headers], args.head)
+        sys.exit(0)
 
     declarations = OrderedDict()
 
