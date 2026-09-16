@@ -588,6 +588,20 @@ if get_option('fontations').enabled()
     'link_with' : lib_fontconfig_kwargs['link_with'] + [fc_fontations, fontations_query_lib]}
 endif
 
+link_depends = []
+link_args = []
+# Needs to create an export file on IBM i and AIX
+if host_machine.system() in ['os400', 'aix']
+  export_file = custom_target('make_export_file',
+                              output: ['fontconfig.exp'],
+                              input: alias_input_headers + ['fontconfig/fcfreetype.h'],
+                              command: [python3, makealias, '--make-export-file', join_paths(meson.current_source_dir(), 'src'), '@OUTPUT@', '@INPUT@']
+                            )
+
+  link_args = ['-Wl,-bE:' + export_file.full_path()]
+  link_depends = [export_file]
+endif
+
 libfontconfig = library('fontconfig',
   lib_fontconfig_sources,
   c_shared_args: win_export_args,
@@ -595,6 +609,8 @@ libfontconfig = library('fontconfig',
   version: libversion,
   darwin_versions: osxversion,
   install: true,
+  link_args: link_args,
+  link_depends: link_depends,
   kwargs: lib_fontconfig_kwargs)
 
 if get_option('default_library') == 'both'
