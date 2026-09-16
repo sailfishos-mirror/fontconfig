@@ -99,8 +99,20 @@ lint-changelog-trailer:
   before_script:
     - apk add --no-cache git
   script:
-    - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-    - COMMIT_SHAs=$(git log origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME..HEAD --format="%H")
+    # Use the GitLab-provided merge base so the range is correct even for
+    # fork pipelines and regardless of how the source branch is named.
+    - BASE_SHA=$CI_MERGE_REQUEST_DIFF_BASE_SHA
+    # With GIT_DEPTH:0 the base is already present; fetch is a best-effort
+    # fallback and must not fail the job if the server rejects a SHA fetch.
+    - git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null || git fetch origin $BASE_SHA || true
+    - COMMIT_SHAs=$(git log $BASE_SHA..HEAD --format="%H")
+    - |
+      if [ -z "$COMMIT_SHAs" ]; then
+        echo "❌ ERROR: Empty commit range ($BASE_SHA..HEAD)."
+        echo "The changelog trailer check could not inspect any commit."
+        echo "This usually means the merge base could not be resolved; please report it."
+        exit 1
+      fi
     - ALL_SKIPPED=true
     - TRAILER_FOUND=false
     - |
