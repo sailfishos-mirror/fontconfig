@@ -22,6 +22,8 @@ Requires FC_BASELINE_BUILDDIR (pre-built baseline) or FC_BASELINE_TAG
 
 import os
 import re
+import shutil
+import struct
 import subprocess
 import sys
 from pathlib import Path
@@ -168,6 +170,27 @@ def _snapshot_cache_inodes(cachedir):
     }
 
 
+# FcCache on-disk header begins with: unsigned int magic; int version; ...
+_FC_CACHE_MAGIC_MMAP = 0xFC02FC04
+
+
+def _read_cache_version_field(path):
+    """Read the ``version`` field written into a real .cache-* file.
+
+    Guards against baseline binaries silently loading the wrong
+    libfontconfig: a v9 baseline must actually stamp version == 9 on
+    disk, otherwise a same-version contamination would make the
+    backward-compat test meaningless.
+    """
+    with open(path, "rb") as f:
+        header = f.read(8)
+    magic, version = struct.unpack("<Ii", header)
+    assert magic == _FC_CACHE_MAGIC_MMAP, (
+        f"{path}: not an mmap cache (magic={magic:#x})"
+    )
+    return version
+
+
 def _parse_verbose_output(text):
     """Parse fc-list -v output into a dict keyed by file path.
 
@@ -281,20 +304,38 @@ def test_discovery_backward_compat(
     baseline_builddir, baseline_cache_version, current_cache_version,
     fctest, fcfont,
 ):
-    """Old cache must be discoverable by new fc-list without renaming."""
+    """Old cache written by baseline must be reused by current fc-list.
+
+    This is the issue #562 repro (Silverblue host v9 cache read by a
+    v12 sandbox reader).  The baseline (old) fontconfig writes a
+    ``.cache-<old_cv>`` file; the current fontconfig must then discover
+    and REUSE it rather than regenerating a ``.cache-<new_cv>``.
+
+    The discriminator is cache REUSE (inode/mtime snapshot), not font
+    visibility: current fontconfig rescans in-memory when it rejects a
+    cache, so fonts are listed either way -- only the snapshot reveals
+    whether the old cache was actually read.
+    """
     old_cv = baseline_cache_version
     new_cv = current_cache_version
-    if old_cv != new_cv:
-        pytest.xfail(
-            f"Discovery mismatch: baseline .cache-{old_cv} vs "
-            f"current .cache-{new_cv}"
-        )
 
     baseline = _setup_and_share(fctest, fcfont, baseline_builddir)
     cachedir = fctest.cachedir.name
 
     for ret, _, stderr in baseline.run_cache([fctest.fontdir.name]):
         assert ret == 0, f"Baseline fc-cache failed: {stderr}"
+
+    # Guard against same-version contamination: the baseline must have
+    # actually stamped its own version on disk, otherwise "backward"
+    # compat is not being exercised at all.
+    old_caches = _cache_files_with_suffix(cachedir, _cache_suffix(old_cv))
+    old_caches = [c for c in old_caches if not c.is_symlink()]
+    assert old_caches, f"Baseline did not write a .cache-{old_cv} file"
+    for c in old_caches:
+        assert _read_cache_version_field(c) == old_cv, (
+            f"{c.name}: on-disk version != baseline cache version "
+            f"{old_cv} (baseline loaded the wrong libfontconfig?)"
+        )
 
     snap = _snapshot_cache_inodes(cachedir)
 
@@ -304,7 +345,242 @@ def test_discovery_backward_compat(
 
     snap_after = _snapshot_cache_inodes(cachedir)
     assert snap == snap_after, (
-        "Current fc-list regenerated cache -- discovery failed"
+        "Current fc-list regenerated cache instead of reusing the "
+        f"baseline's .cache-{old_cv} -- backward-compat discovery failed"
+    )
+
+
+@pytest.mark.skipif(os.getenv("EXEEXT", "") != "", reason="not working on Win32")
+def test_shadow_cache_precedence_562(
+    request, baseline_builddir, baseline_cache_version, current_cache_version,
+    fcfont,
+):
+    """Faithful issue #562 repro: a stale shadow cache hides host fonts.
+
+    Reproduces the Silverblue-inside-Flatpak layout that makes
+    /run/host/fonts vanish:
+
+      * the queried dir D carries mtime 0 (OSTree), so
+        FcCacheTimeValid short-circuits and trusts any same-key cache
+        without checksum comparison;
+      * a SHADOW cachedir searched FIRST holds a current-version cache
+        for D built from *different* content (mtime 0) -- standing in
+        for the runtime's stale ``/usr/lib/.../<key>.cache-<new>``;
+      * a HOST cachedir searched LAST holds the real cache for D
+        written by the OLD baseline as ``.cache-<old>`` (mtime 0) --
+        standing in for ``/run/host/fonts-cache``.
+
+    Because both caches share one MD5 key (D's path is identical) and
+    D has mtime 0, the OSTree branch of the cache selector prefers the
+    last-enumerated zero-mtime cache: the host cache -- *provided the
+    reader can read it*.  Before the read-side backward-compat fix, the
+    current reader rejects the old-version host cache, is left with
+    only the shadow, and the host font disappears -- exactly #562.
+
+    This test mechanically settles the open ordering caveat: it passes
+    only if backward reading is sufficient for the current cachedir
+    ordering, and keeps failing if the shadow still wins.
+    """
+    old_cv = baseline_cache_version
+    new_cv = current_cache_version
+    if old_cv == new_cv:
+        pytest.skip(
+            "baseline shares the current cache version; "
+            "no cross-version shadow scenario to reproduce"
+        )
+
+    shadow_font = Path(fcfont.fonts[0])   # 4x6.pcf  -> shadow (wrong) content
+    host_font = Path(fcfont.fonts[1])     # 8x16.pcf -> real host content
+
+    td = TemporaryDirectory(prefix="fc562.")
+    request.addfinalizer(td.cleanup)
+    base = Path(td.name)
+    fontdir = base / "fonts"        # queried dir D (== /run/host/fonts)
+    shadow_cd = base / "shadow"     # searched first (== /usr/lib/.../cache)
+    host_cd = base / "host"         # searched last  (== /run/host/fonts-cache)
+    for d in (fontdir, shadow_cd, host_cd):
+        d.mkdir()
+
+    cur = FcTest()
+    baseline = _make_fctest(baseline_builddir)
+
+    def write_conf(name, cachedirs):
+        p = base / name
+        cds = "".join(f"<cachedir>{c}</cachedir>" for c in cachedirs)
+        p.write_text(f"<fontconfig><dir>{fontdir}</dir>{cds}</fontconfig>")
+        return str(p)
+
+    # 1. SHADOW cache: current version, wrong content.
+    shutil.copy(shadow_font, fontdir / shadow_font.name)
+    cur._env["FONTCONFIG_FILE"] = write_conf("shadow.conf", [shadow_cd])
+    for ret, _, stderr in cur.run_cache([str(fontdir)]):
+        assert ret == 0, f"current fc-cache (shadow) failed: {stderr}"
+    (fontdir / shadow_font.name).unlink()
+
+    shadow_caches = _cache_files_with_suffix(shadow_cd, _cache_suffix(new_cv))
+    shadow_caches = [c for c in shadow_caches if not c.is_symlink()]
+    assert shadow_caches, f"no shadow .cache-{new_cv} written"
+
+    # 2. HOST cache: old baseline version, real content.
+    shutil.copy(host_font, fontdir / host_font.name)
+    baseline._env["FONTCONFIG_FILE"] = write_conf("host.conf", [host_cd])
+    for ret, _, stderr in baseline.run_cache([str(fontdir)]):
+        assert ret == 0, f"baseline fc-cache (host) failed: {stderr}"
+
+    host_caches = [
+        c for c in _cache_files_with_suffix(host_cd, _cache_suffix(old_cv))
+        if not c.is_symlink()
+    ]
+    assert host_caches, f"no host .cache-{old_cv} written"
+    for c in host_caches:
+        assert _read_cache_version_field(c) == old_cv, (
+            f"{c.name}: baseline wrote version != {old_cv} "
+            f"(baseline loaded the wrong libfontconfig?)"
+        )
+
+    # Both caches must share one MD5 key (same dir path, differing only
+    # by suffix); otherwise there is no shadowing to reproduce.
+    shadow_key = shadow_caches[0].name.rsplit(".cache-", 1)[0]
+    host_key = host_caches[0].name.rsplit(".cache-", 1)[0]
+    assert shadow_key == host_key, (
+        f"cache keys differ ({shadow_key} vs {host_key}); no collision"
+    )
+
+    # 3. OSTree layout: dir and both caches carry mtime 0.
+    for p in [fontdir, *shadow_cd.glob("*"), *host_cd.glob("*")]:
+        os.utime(p, (0, 0))
+
+    # 4. Query with the current tools; shadow first, host last.
+    cur._env["FONTCONFIG_FILE"] = write_conf("query.conf", [shadow_cd, host_cd])
+    snap = _snapshot_cache_inodes(shadow_cd) | _snapshot_cache_inodes(host_cd)
+    files = []
+    for ret, stdout, stderr in cur.run_list(["-f", "%{file}\n"]):
+        assert ret == 0, f"current fc-list failed: {stderr}"
+        files = [
+            Path(line).name for line in stdout.splitlines() if line.strip()
+        ]
+    snap_after = (
+        _snapshot_cache_inodes(shadow_cd) | _snapshot_cache_inodes(host_cd)
+    )
+
+    assert snap == snap_after, (
+        "fc-list regenerated a cache; the result would reflect a rescan, "
+        "not cache precedence"
+    )
+    assert host_font.name in files, (
+        f"host font {host_font.name} hidden by the shadow cache; "
+        f"fc-list saw {files} (issue #562)"
+    )
+
+
+@pytest.mark.skipif(os.getenv("EXEEXT", "") != "", reason="not working on Win32")
+def test_match_equivalence_backward_compat(
+    request, baseline_builddir, baseline_cache_version, current_cache_version,
+    fcfont,
+):
+    """Matching via an old (v9) cache must equal matching via a v12 cache.
+
+    Guards the genericfamily backfill.  Caches older than v11 lack the
+    genericfamily object; once the reader is allowed to *use* such a
+    cache, a generic query (serif / monospace / ...) mis-scores an
+    old-cache font -- the merge-join skips the missing object and leaves
+    an unearned perfect (0.0) score -- so the match can diverge from the
+    current-cache result.  Deriving genericfamily from the font's family
+    at match time (backfill) must make the two identical.
+
+    The 'monospace' query is decisive here: 'Fixed' (the .pcf fonts) is
+    a curated monospace family, while no_family_name is unclassifiable,
+    so a v9 cache without the backfill mis-ranks them.
+
+    NOTE: this only exercises the regression once the read-side version
+    relax is in place -- before that, current fontconfig rejects the v9
+    cache and rescans, which recomputes genericfamily and masks the
+    difference.
+    """
+    old_cv = baseline_cache_version
+    new_cv = current_cache_version
+    if old_cv == new_cv:
+        pytest.skip(
+            "baseline shares the current cache version; "
+            "no cross-version matching to compare"
+        )
+
+    srcdir = os.environ.get("srcdir", str(Path(__file__).parents[1]))
+    # 'Fixed' (the .pcf fonts) is in the curated monospace list, so it is
+    # classified reliably; no_family_name is not classifiable (and has no
+    # substring hint), so it is FC_FAMILY_UNKNOWN in both a v12 scan and
+    # the backfill.  Together the 'monospace' query is decided purely by
+    # the reliable classification path -- no dependence on the scanner's
+    # substring guess (which the backfill deliberately omits).
+    other = Path(srcdir) / "test" / "no_family_name.ttf"
+    assert other.exists(), f"missing test font {other}"
+    # genericfamily only participates in matching when the query pattern
+    # carries it, which 48-guessfamily.conf populates from the family
+    # name.  Without this include the whole dimension is inert and the
+    # test would be vacuous.
+    guessfamily = Path(srcdir) / "conf.d" / "48-guessfamily.conf"
+    assert guessfamily.exists(), f"missing {guessfamily}"
+
+    td = TemporaryDirectory(prefix="fc562match.")
+    request.addfinalizer(td.cleanup)
+    base = Path(td.name)
+    fontdir = base / "fonts"
+    cd_old = base / "cache_old"   # v9, written by baseline
+    cd_new = base / "cache_new"   # v12, written by current
+    for d in (fontdir, cd_old, cd_new):
+        d.mkdir()
+    for f in list(fcfont.fonts) + [other]:
+        shutil.copy(f, fontdir / Path(f).name)
+
+    cur = FcTest()
+    baseline = _make_fctest(baseline_builddir)
+
+    def write_conf(name, cachedir):
+        p = base / name
+        p.write_text(
+            f"<fontconfig>"
+            f'<include ignore_missing="no">{guessfamily}</include>'
+            f"<dir>{fontdir}</dir>"
+            f"<cachedir>{cachedir}</cachedir></fontconfig>"
+        )
+        return str(p)
+
+    # v9 cache from the OLD baseline, v12 cache from the current build.
+    baseline._env["FONTCONFIG_FILE"] = write_conf("old.conf", cd_old)
+    for ret, _, stderr in baseline.run_cache([str(fontdir)]):
+        assert ret == 0, f"baseline fc-cache failed: {stderr}"
+    cur._env["FONTCONFIG_FILE"] = write_conf("new.conf", cd_new)
+    for ret, _, stderr in cur.run_cache([str(fontdir)]):
+        assert ret == 0, f"current fc-cache failed: {stderr}"
+
+    old_caches = [
+        c for c in _cache_files_with_suffix(cd_old, _cache_suffix(old_cv))
+        if not c.is_symlink()
+    ]
+    assert old_caches, f"baseline wrote no .cache-{old_cv}"
+    assert _read_cache_version_field(old_caches[0]) == old_cv
+
+    def match(cachedir, query):
+        conf = write_conf(f"q_{Path(cachedir).name}.conf", cachedir)
+        cur._env["FONTCONFIG_FILE"] = conf
+        out = None
+        for ret, stdout, stderr in cur.run_match(["-f", "%{file}", query]):
+            assert ret == 0, f"fc-match {query!r} failed: {stderr}"
+            out = Path(stdout.strip()).name if stdout.strip() else ""
+        return out
+
+    # Compare current-via-v9 against current-via-v12 for generic queries
+    # where genericfamily is the deciding factor.
+    diffs = {}
+    for query in ("serif", "monospace", "sans-serif"):
+        via_old = match(cd_old, query)
+        via_new = match(cd_new, query)
+        if via_old != via_new:
+            diffs[query] = (via_old, via_new)
+
+    assert not diffs, (
+        "matching via v9 cache differs from v12 cache "
+        f"(genericfamily lost): {diffs}"
     )
 
 
