@@ -413,6 +413,23 @@ class FcBrokenFont:
         return self._fonts
 
 
+class FcType1TestFont:
+    def __init__(self, srcdir=None):
+        if srcdir is None:
+            srcdir = os.environ.get("srcdir", ".")
+        p = Path(srcdir)
+        if (p / "test").exists():
+            p = p / "test"
+        self._fonts = [
+            str(fn)
+            for fn in sorted(p.glob("*.pfb")) + sorted(p.glob("*.pfa"))
+        ]
+
+    @property
+    def fonts(self):
+        return self._fonts
+
+
 class FcExternalTestFont:
 
     def __init__(self):
