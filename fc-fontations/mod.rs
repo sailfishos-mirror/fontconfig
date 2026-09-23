@@ -32,6 +32,7 @@ mod lang;
 mod name_records;
 mod names;
 mod pattern_bindings;
+mod style_consts;
 
 use attributes::append_style_elements;
 use bitmap::add_pixel_size;
