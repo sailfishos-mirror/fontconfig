@@ -32,6 +32,8 @@ mod lang;
 mod name_records;
 mod names;
 mod pattern_bindings;
+#[allow(dead_code)]
+mod postscript;
 mod style_consts;
 
 use attributes::append_style_elements;
