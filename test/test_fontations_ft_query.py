@@ -74,13 +74,13 @@ type1_fonts = FcType1TestFont().fonts
     else [
         pytest.param(
             None,
-            marks=pytest.mark.skip(reason="No Type 1 test fonts found in repo"),
+            marks=pytest.mark.skip(reason="No Type 1 test fonts found"),
         )
     ],
 )
 def test_fontations_freetype_fcquery_equal_type1(fctest, font_file):
     if not font_file:
-        pytest.skip("No Type 1 test fonts found in repo")
+        pytest.skip("No Type 1 test fonts found")
     fctest.logger.info(
         f'Testing for FreeType equivalence with Type 1 font: {font_file}')
     compare_fontations_freetype(fctest, font_file, RetCodeBehavior.MUST_BE_ZERO)
