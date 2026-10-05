@@ -13,8 +13,17 @@ data path.  The test compares fc-list output between current and
 baseline: any difference in font properties indicates the baseline
 is misinterpreting the cache data.
 
-Discovery tests (xfail) check whether filename suffix differences
-(.cache-9 vs .cache-12) are handled without renaming.
+The backward direction (old writer → new reader) covers issue #562:
+discovery/reuse of an older ``.cache-<N>``, precedence against a stale
+shadow cache, and genericfamily backfill at match time.
+
+These tests assume the baseline is within the supported range
+(cachemincompat <= cv < current).  The CI driver
+(.gitlab-ci/test-cache-compat.sh) selects baselines accordingly; a
+baseline below cachemincompat fails loudly rather than silently, and a
+cachemincompat that reaches GENERICFAMILY_GUARANTEED_VERSION trips
+test_genericfamily_backfill_contract to force the now-dead backfill to
+be removed.
 
 Requires FC_BASELINE_BUILDDIR (pre-built baseline) or FC_BASELINE_TAG
 (git tag to build from).  Skips if neither is set.
@@ -42,6 +51,25 @@ def _read_cache_version_from_meson_build(path):
             if m:
                 return int(m.group(1))
     return None
+
+
+def _read_cachemincompat_from_meson_build(path):
+    """Extract cachemincompat integer from a meson.build file."""
+    with open(path) as f:
+        for line in f:
+            m = re.match(r"\s*cachemincompat\s*=\s*['\"]?(\d+)", line)
+            if m:
+                return int(m.group(1))
+    return None
+
+
+# The genericfamily object became a guaranteed part of every cache at
+# this cache version: the v10->v11 bump forced regeneration specifically
+# to populate it.  Caches older than this lack the object and depend on
+# the match-time backfill (FcCompareGenericFamilyBackfill).  Once
+# cachemincompat reaches this version, no supported cache can lack it and
+# the backfill is dead code -- see test_genericfamily_backfill_contract.
+GENERICFAMILY_GUARANTEED_VERSION = 11
 
 
 def _make_fctest(builddir):
@@ -134,6 +162,39 @@ def current_cache_version():
         return int(cv)
     srcdir = os.environ.get("srcdir", str(Path(__file__).parents[1]))
     return _read_cache_version_from_meson_build(Path(srcdir) / "meson.build")
+
+
+@pytest.fixture
+def current_cache_mincompat():
+    """Oldest cache version the current reader promises to accept."""
+    mc = os.environ.get("FC_CACHE_MINCOMPAT")
+    if mc:
+        return int(mc)
+    srcdir = os.environ.get("srcdir", str(Path(__file__).parents[1]))
+    mc = _read_cachemincompat_from_meson_build(Path(srcdir) / "meson.build")
+    assert mc is not None, "cannot determine cachemincompat from meson.build"
+    return mc
+
+
+def _require_supported_baseline(old_cv, mincompat):
+    """Fail loudly when the baseline predates the supported range.
+
+    A format break that raises cachemincompat is *expected* to make the
+    backward-compat reuse scenario invalid -- the reader now rejects such
+    caches on purpose.  Turn that into a clear, intentional failure that
+    names what to revisit, rather than a confusing low-level assertion
+    (e.g. "cache was regenerated") that looks like a real regression.
+    """
+    if old_cv < mincompat:
+        pytest.fail(
+            f"baseline cache version {old_cv} is below cachemincompat="
+            f"{mincompat}: reading such caches is no longer part of the "
+            "contract, so these reuse tests cannot pass. If a format break "
+            "raised cachemincompat, update the baseline selection in "
+            ".gitlab-ci/test-cache-compat.sh to target the new boundary and "
+            "review whether the backward-compat tests should now assert "
+            "rejection instead of reuse."
+        )
 
 
 @pytest.fixture
@@ -302,7 +363,7 @@ def test_binary_format_forward_compat(
 @pytest.mark.skipif(os.getenv("EXEEXT", "") != "", reason="not working on Win32")
 def test_discovery_backward_compat(
     baseline_builddir, baseline_cache_version, current_cache_version,
-    fctest, fcfont,
+    current_cache_mincompat, fctest, fcfont,
 ):
     """Old cache written by baseline must be reused by current fc-list.
 
@@ -318,6 +379,7 @@ def test_discovery_backward_compat(
     """
     old_cv = baseline_cache_version
     new_cv = current_cache_version
+    _require_supported_baseline(old_cv, current_cache_mincompat)
 
     baseline = _setup_and_share(fctest, fcfont, baseline_builddir)
     cachedir = fctest.cachedir.name
@@ -353,7 +415,7 @@ def test_discovery_backward_compat(
 @pytest.mark.skipif(os.getenv("EXEEXT", "") != "", reason="not working on Win32")
 def test_shadow_cache_precedence_562(
     request, baseline_builddir, baseline_cache_version, current_cache_version,
-    fcfont,
+    current_cache_mincompat, fcfont,
 ):
     """Faithful issue #562 repro: a stale shadow cache hides host fonts.
 
@@ -388,6 +450,7 @@ def test_shadow_cache_precedence_562(
             "baseline shares the current cache version; "
             "no cross-version shadow scenario to reproduce"
         )
+    _require_supported_baseline(old_cv, current_cache_mincompat)
 
     shadow_font = Path(fcfont.fonts[0])   # 4x6.pcf  -> shadow (wrong) content
     host_font = Path(fcfont.fonts[1])     # 8x16.pcf -> real host content
@@ -473,10 +536,36 @@ def test_shadow_cache_precedence_562(
     )
 
 
+def test_genericfamily_backfill_contract(current_cache_mincompat):
+    """Tripwire: retire the genericfamily backfill once no supported cache
+    can lack the object.
+
+    The match-time backfill (FcCompareGenericFamilyBackfill in fcmatch.c,
+    FcGenericFamilyGetValues in fcgenericalias.c + fcint.h) exists solely
+    to serve caches written before genericfamily became guaranteed
+    (cache version GENERICFAMILY_GUARANTEED_VERSION).  Once cachemincompat
+    reaches that version every supported cache already carries the object,
+    the backfill is unreachable dead code, and this assertion fails ON
+    PURPOSE to force its removal -- together with
+    test_match_equivalence_backward_compat.
+
+    This runs without a baseline, so it guards the invariant in the normal
+    test suite, not only in the cross-version CI job.
+    """
+    assert current_cache_mincompat < GENERICFAMILY_GUARANTEED_VERSION, (
+        f"cachemincompat={current_cache_mincompat} >= "
+        f"{GENERICFAMILY_GUARANTEED_VERSION}: every supported cache now "
+        "carries the genericfamily object, so the match-time backfill is "
+        "dead code. Remove FcCompareGenericFamilyBackfill (fcmatch.c), "
+        "FcGenericFamilyGetValues (fcgenericalias.c + fcint.h), and "
+        "test_match_equivalence_backward_compat."
+    )
+
+
 @pytest.mark.skipif(os.getenv("EXEEXT", "") != "", reason="not working on Win32")
 def test_match_equivalence_backward_compat(
     request, baseline_builddir, baseline_cache_version, current_cache_version,
-    fcfont,
+    current_cache_mincompat, fcfont,
 ):
     """Matching via an old (v9) cache must equal matching via a v12 cache.
 
@@ -503,6 +592,14 @@ def test_match_equivalence_backward_compat(
         pytest.skip(
             "baseline shares the current cache version; "
             "no cross-version matching to compare"
+        )
+    _require_supported_baseline(old_cv, current_cache_mincompat)
+    if old_cv >= GENERICFAMILY_GUARANTEED_VERSION:
+        pytest.skip(
+            f"baseline cache v{old_cv} already carries the genericfamily "
+            "object; the backfill is only exercised by a pre-v"
+            f"{GENERICFAMILY_GUARANTEED_VERSION} baseline (the "
+            "cachemincompat-boundary run covers it)"
         )
 
     srcdir = os.environ.get("srcdir", str(Path(__file__).parents[1]))
