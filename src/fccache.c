@@ -1717,12 +1717,41 @@ FcDirCacheWrite (FcCache *cache, FcConfig *config)
 	for (v = FC_CACHE_MIN_COMPAT_VERSION; v < FC_CACHE_VERSION_NUMBER; v++) {
 	    FcChar8  compat_base[CACHEBASE_LEN];
 	    FcChar8 *compat_path;
+	    int      compat_fd;
 
 	    if (!FcDirCacheReplaceVersion (cache_base, compat_base, v))
 		continue;
 	    compat_path = FcStrBuildFilename (cache_dir, compat_base, NULL);
 	    if (!compat_path)
 		continue;
+	    /*
+	     * Only (re)create the compat link when it is missing or stale.
+	     * A compat file that already represents the same directory state
+	     * as the cache we just wrote -- whether it is our own symlink or
+	     * a real cache file written by another fontconfig -- must be left
+	     * alone.  Otherwise a newer library embedded in an application
+	     * (e.g. a browser) would clobber the host's valid cache whenever
+	     * it writes its own, which is what triggered the cache-9/12
+	     * breakage.  We compare against the just-written cache's own
+	     * checksum, which already encodes the current directory state, so
+	     * matching checksums mean the compat file is up to date.
+	     */
+	    compat_fd = FcOpen ((char *)compat_path, O_RDONLY | O_BINARY);
+	    if (compat_fd >= 0) {
+		FcCache c;
+		FcBool  up_to_date;
+
+		up_to_date = (read (compat_fd, &c, sizeof (c)) == sizeof (c) &&
+		              c.magic == FC_CACHE_MAGIC_MMAP &&
+		              c.version >= FC_CACHE_MIN_COMPAT_VERSION &&
+		              FcCacheGetChecksum (&c) == FcCacheGetChecksum (cache) &&
+		              c.checksum_nano == cache->checksum_nano);
+		close (compat_fd);
+		if (up_to_date) {
+		    FcStrFree (compat_path);
+		    continue;
+		}
+	    }
 	    (void)unlink ((char *)compat_path);
 	    if (symlink ((char *)cache_base, (char *)compat_path) < 0) {
 		if (FcDebug() & FC_DBG_CACHE)

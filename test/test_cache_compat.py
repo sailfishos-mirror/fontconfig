@@ -91,6 +91,11 @@ def _generate_cache(fctest, fcfont):
     return cache_files[0]
 
 
+def _cache_version_from_name(path):
+    m = re.search(r"\.cache-(\d+)$", path.name)
+    return int(m.group(1)) if m else None
+
+
 @pytest.mark.skipif(not not os.getenv("EXEEXT"), reason="not working on Win32")
 def test_cache_newer_version_loadable(fctest, fcfont):
     """A cache with a higher header version must still be loadable.
@@ -120,6 +125,48 @@ def test_cache_newer_version_loadable(fctest, fcfont):
 
     assert cache_file.stat().st_mtime_ns == mtime_before, (
         "Cache was regenerated instead of using the patched file"
+    )
+
+
+@pytest.mark.skipif(not not os.getenv("EXEEXT"), reason="not working on Win32")
+def test_compat_symlink_preserves_valid_regular_cache(fctest, fcfont):
+    """A valid regular compat cache file must not be clobbered.
+
+    FcDirCacheWrite creates backward-compat symlinks (.cache-{MIN_COMPAT}
+    ... .cache-{VERSION-1}) pointing at the cache it just wrote.  If one of
+    those paths already holds a *regular* cache file that is valid for the
+    same, unchanged font directory -- as written by an older host
+    fontconfig -- it must be left alone.  Otherwise a newer fontconfig
+    embedded in an application (e.g. a browser) would replace the host's
+    valid cache with a symlink to its own, which is what triggered the
+    cache-9/cache-12 breakage.
+    """
+    cache_file = _generate_cache(fctest, fcfont)
+    cachedir = Path(fctest.cachedir.name)
+
+    symlinks = [p for p in cachedir.glob("*cache*") if p.is_symlink()]
+    assert symlinks, "no backward-compat symlinks were created"
+
+    # Turn the lowest-version compat path into a regular cache file, as an
+    # older host fontconfig would have written it.  It is a byte copy of the
+    # freshly written cache (so its checksum matches the directory state)
+    # with the version field patched down to the compat version.
+    target = min(symlinks, key=_cache_version_from_name)
+    compat_version = _cache_version_from_name(target)
+    target.unlink()
+    data = bytearray(cache_file.read_bytes())
+    struct.pack_into("<i", data, FC_CACHE_VERSION_OFFSET, compat_version)
+    target.write_bytes(data)
+    assert not target.is_symlink()
+
+    # Force a cache rewrite for the same, unchanged font directory.
+    for ret, stdout, stderr in fctest.run_cache(["-f", fctest.fontdir.name]):
+        assert ret == 0, stderr
+
+    assert target.exists(), f"{target.name} was removed"
+    assert not target.is_symlink(), (
+        f"{target.name} was clobbered into a symlink despite being a "
+        f"valid cache for the unchanged directory"
     )
 
 
