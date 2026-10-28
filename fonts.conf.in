@@ -27,8 +27,6 @@
 @FC_DEFAULT_FONTS@
 	@FC_FONTPATH@
 	<dir prefix="xdg">fonts</dir>
-	<!-- the following element will be removed in the future -->
-	<dir>~/.fonts</dir>
 
 <!--
   Accept deprecated 'mono' alias, replacing it with 'monospace'
@@ -86,8 +84,6 @@
 
 	<cachedir>@FC_CACHEDIR@</cachedir>
 	<cachedir prefix="xdg">fontconfig</cachedir>
-	<!-- the following element will be removed in the future -->
-	<cachedir>~/.fontconfig</cachedir>
 
 	<config>
 <!--

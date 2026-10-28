@@ -6,7 +6,7 @@ common:
   packages:
     - meson>=1.11.0
     - tomli
-    - pytest
+    - pytest<=9.1.1
     - pytest-tap
     - requests
     - certifi
