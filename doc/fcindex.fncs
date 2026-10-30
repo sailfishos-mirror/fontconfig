@@ -1,0 +1,31 @@
+/* Copyright (C) 2026 fontconfig Authors
+ * SPDX-License-Identifier: HPND
+ */
+
+@RET@           FcPattern *
+@FUNC@          FcIndexerQuery
+@TYPE1@         const FcChar8 *                 @ARG1@          file
+@TYPE2@         int%                            @ARG2@          id
+@TYPE3@         int *                           @ARG3@          count
+@PURPOSE@       compute pattern from font file (and index)
+@DESC@
+Constructs a pattern representing the 'id'th face in 'file'.  The number
+of faces in 'file' is returned in 'count'.
+@SINCE@         2.19.0
+@@
+
+@RET@           unsigned int
+@FUNC@          FcIndexerQueryAll
+@TYPE1@         const FcChar8 *                 @ARG1@          file
+@TYPE2@         int%                            @ARG2@          id
+@TYPE3@         int *                           @ARG3@          count
+@TYPE4@         FcFontSet *                     @ARG4@          set
+@PURPOSE@       compute all patterns from font file (and index)
+@DESC@
+Constructs patterns found in 'file'.
+If id is -1, then all patterns found in 'file' are added to 'set'.
+Otherwise, this function works exactly like FcIndexerQuery().
+The number of faces in 'file' is returned in 'count'.
+The number of patterns added to 'set' is returned.
+@SINCE@         2.19.0
+@@

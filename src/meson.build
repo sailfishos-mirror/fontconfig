@@ -40,6 +40,7 @@ fc_sources = files(
   'fcgenericalias.c',
   'fcptrlist.c',
   'fchash.c',
+  'fcindex.c',
   'fcinit.c',
   'fclang.c',
   'fclist.c',

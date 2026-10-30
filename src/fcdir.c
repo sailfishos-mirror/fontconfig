@@ -28,14 +28,6 @@
 #  include <dirent.h>
 #endif
 
-#if ENABLE_FONTATIONS
-#  include "fontconfig/fcfontations.h"
-#endif
-
-#if ENABLE_FREETYPE
-#include "fontconfig/fcfreetype.h"
-#endif
-
 FcBool
 FcFileIsDir (const FcChar8 *file)
 {
@@ -85,19 +77,7 @@ FcFileScanFontFile (FcFontSet     *set,
 	fflush (stdout);
     }
 
-    unsigned int (*query_function) (const FcChar8 *, unsigned int, FcBlanks *, int *, FcFontSet *) =
-#if ENABLE_FONTATIONS && !defined(ENABLE_FREETYPE)
-    FcFontationsQueryAll;
-#elif ENABLE_FREETYPE
-    FcFreeTypeQueryAll;
-#endif
-
-#if ENABLE_FONTATIONS
-    if (getenv ("FC_FONTATIONS")) {
-	query_function = FcFontationsQueryAll;
-    }
-#endif
-    if (!query_function (file, -1, NULL, NULL, set))
+    if (!FcIndexerQueryAll (file, -1, NULL, set))
 	return FcFalse;
 
     if (FcDebug() & FC_DBG_SCAN)
