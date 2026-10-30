@@ -738,11 +738,21 @@ FcConfigMessage (FcConfigParse *parse, FcConfigSeverity severe, const char *fmt,
     }
     if (parse) {
 	if (parse->name)
+#if HAVE_XML_GETCURRENTLINENUMBER64
+	    fprintf (stderr, "Fontconfig %s: \"%s\", line %ld: ", s,
+	             parse->name, XML_GetCurrentLineNumber64 (parse->parser));
+#else
 	    fprintf (stderr, "Fontconfig %s: \"%s\", line %d: ", s,
 	             parse->name, (int)XML_GetCurrentLineNumber (parse->parser));
+#endif
 	else
+#if HAVE_XML_GETCURRENTLINENUMBER64
+	    fprintf (stderr, "Fontconfig %s: line %ld: ", s,
+	             XML_GetCurrentLineNumber64 (parse->parser));
+#else
 	    fprintf (stderr, "Fontconfig %s: line %d: ", s,
 	             (int)XML_GetCurrentLineNumber (parse->parser));
+#endif
 	if (severe >= FcSevereError)
 	    parse->error = FcTrue;
     } else
