@@ -6,7 +6,7 @@
  * Tag, so this also exercises the NUL-termination boundary of the
  * fixed-size foundry buffer in FcFreeTypeQueryFace(). */
 #include <fontconfig/fontconfig.h>
-#include <fontconfig/fcfreetype.h>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -18,7 +18,7 @@ main (void)
     int        count = 0;
     int        ret = 0;
 
-    pat = FcFreeTypeQuery ((const FcChar8 *)FONTFILE, 0, NULL, &count);
+    pat = FcIndexerQuery ((const FcChar8 *)FONTFILE, 0, &count);
     if (!pat) {
 	fprintf (stderr, "failed to query %s\n", FONTFILE);
 	return 1;
@@ -31,7 +31,7 @@ main (void)
 	ret = 1;
     }
     FcPatternDestroy (pat);
-    FcFini ();
+    FcFini();
 
     return ret;
 }

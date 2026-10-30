@@ -33,6 +33,7 @@ doc_funcs_fncs = [
   'fcfontations',
   'fcformat',
   'fcfreetype',
+  'fcindex',
   'fcinit',
   'fclangset',
   'fcmatrix',

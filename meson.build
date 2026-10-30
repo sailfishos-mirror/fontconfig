@@ -187,6 +187,10 @@ check_funcs = [
   ['uselocale'],
 ]
 
+check_expat_funcs = [
+  ['XML_GetCurrentLineNumber64', {'prefix': '#include <expat.h>', 'dependencies': xml_dep}],
+]
+
 check_freetype_funcs = [
   ['FT_Get_BDF_Property', {'dependencies': freetype_dep}],
   ['FT_Get_PS_Font_Info', {'dependencies': freetype_dep}],
@@ -286,6 +290,15 @@ conf.set('USE_ICONV', found_iconv)
 deps += [iconv_dep]
 
 # We cannot try compiling against an internal dependency
+if xml_dep.type_name() == 'internal'
+  foreach func: check_expat_funcs
+    name = func[0]
+    conf.set('HAVE_@0@'.format(name.to_upper()), 0)
+  endforeach
+else
+  check_funcs += check_expat_funcs
+endif
+
 if freetype_dep.type_name() == 'internal'
   foreach func: check_freetype_funcs
     name = func[0]

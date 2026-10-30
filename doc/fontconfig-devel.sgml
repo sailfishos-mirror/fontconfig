@@ -12,6 +12,7 @@
 <!ENTITY fcfontset SYSTEM "fcfontset.sgml">
 <!ENTITY fcformat SYSTEM "fcformat.sgml">
 <!ENTITY fcfreetype SYSTEM "fcfreetype.sgml">
+<!ENTITY fcindex SYSTEM "fcindex.sgml">
 <!ENTITY fcinit SYSTEM "fcinit.sgml">
 <!ENTITY fclangset SYSTEM "fclangset.sgml">
 <!ENTITY fcmatrix SYSTEM "fcmatrix.sgml">
@@ -493,6 +494,14 @@ indicate which properties are to be returned in the patterns from
 FcFontList.
     </para>
     &fcobjectset;
+  </sect2>
+  <sect2><title>Indexer functions</title>
+    <para>
+      The portal function sets indexing font metadata. It would be recommended
+      rather than directly accessing through FreeType/Fontations specific
+      functions.
+    </para>
+    &fcindex;
   </sect2>
   <sect2><title>FreeType specific functions</title>
     <para>

@@ -34,11 +34,6 @@
 #endif
 
 #include <fontconfig/fontconfig.h>
-#include <fontconfig/fcfreetype.h>
-
-#if ENABLE_FONTATIONS
-#  include <fontconfig/fcfontations.h>
-#endif
 
 #include <locale.h>
 #include <stdio.h>
@@ -161,15 +156,8 @@ main (int argc, char **argv)
 
     fs = FcFontSetCreate();
 
-    unsigned int (*query_function) (const FcChar8 *, unsigned int, FcBlanks *, int *, FcFontSet *) = FcFreeTypeQueryAll;
-#if ENABLE_FONTATIONS
-    if (getenv ("FC_FONTATIONS") != NULL) {
-	query_function = FcFontationsQueryAll;
-    }
-#endif
-
     for (; i < argc; i++) {
-	if (!query_function ((FcChar8 *)argv[i], id, NULL, NULL, fs)) {
+	if (!FcIndexerQueryAll ((FcChar8 *)argv[i], id, NULL, fs)) {
 	    fprintf (stderr, _("Can't query face %u of font file %s\n"), id, argv[i]);
 	    err = 1;
 	}
